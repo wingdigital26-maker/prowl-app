@@ -971,3 +971,10 @@ body[data-mode="urbex"] .leaflet-tile { filter: contrast(1.06) saturate(1.12) hu
 .guide-input input { flex: 1; border: 1px solid var(--border); background: var(--bg-3); color: var(--text); border-radius: 999px; padding: 10px 14px; font-family: var(--font); font-size: 13px; outline: none; }
 .guide-input button { border: none; background: var(--accent); color: #fff; border-radius: 50%; width: 38px; height: 38px; cursor: pointer; display: grid; place-items: center; flex-shrink: 0; }
 .guide-input button .ico { width: 18px; height: 18px; fill: #fff; stroke: none; }
+
+/* Dropped-pin popup (share a pin) */
+.pin-pop { display: flex; flex-direction: column; gap: 8px; font-family: var(--font); padding: 2px; }
+.pin-pop b { font-size: 13px; }
+.pin-pop .pill-btn { text-align: center; text-decoration: none; font-size: 12.5px; padding: 8px 14px; }
+.leaflet-popup-content-wrapper { background: var(--bg-2); color: var(--text); border-radius: 14px; }
+.leaflet-popup-tip { background: var(--bg-2); }

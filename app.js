@@ -813,6 +813,63 @@ function renderAll() {
   renderProfile();
 }
 
+// ===== Pin sharing (deep links) =====
+// A shared pin is a URL that auto-loads the app straight to the spot (or raw
+// map point) with Directions available. No account needed on the receiving end.
+function spotUrl(s) { return location.origin + location.pathname + "?s=" + s.id; }
+function pinUrl(lat, lng) { return location.origin + location.pathname + "?pin=" + lat.toFixed(5) + "," + lng.toFixed(5); }
+async function sharePin(url, title) {
+  if (navigator.share) {
+    try { await navigator.share({ title: title || "Check this spot", url }); return; } catch (e) { if (e.name === "AbortError") return; }
+  }
+  try { await navigator.clipboard.writeText(url); toast("Pin copied, paste it to a friend 📍"); }
+  catch (e) { window.prompt("Copy this pin link", url); }
+}
+window.sharePinAt = function (lat, lng) {
+  sharePin(pinUrl(lat, lng), "Meet here");
+  map.closePopup();
+};
+// Long-press (or right-click) anywhere on the map -> drop a pin -> send it
+map.on("contextmenu", e => {
+  const { lat, lng } = e.latlng;
+  L.popup({ closeButton: false, offset: [0, -6] })
+    .setLatLng(e.latlng)
+    .setContent(`<div class="pin-pop"><b>Dropped pin</b>
+      <button class="pill-btn primary" onclick="sharePinAt(${lat},${lng})">Send this pin</button>
+      <a class="pill-btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}">Directions</a></div>`)
+    .openOn(map);
+});
+// Handle incoming shared pins on load
+function handleDeepLink() {
+  const p = new URLSearchParams(location.search);
+  const skipSplash = () => { localStorage.setItem("moth.seen", "1"); document.getElementById("splash").classList.remove("open"); };
+  if (p.get("s")) {
+    const sp = state.spots.find(x => x.id === +p.get("s"));
+    if (sp) {
+      skipSplash();
+      if (spotMode(sp.cat) !== state.mode) setMode(spotMode(sp.cat));
+      showView("map");
+      openSheet(sp.id);
+      return true;
+    }
+  } else if (p.get("pin")) {
+    const [la, ln] = p.get("pin").split(",").map(Number);
+    if (isFinite(la) && isFinite(ln)) {
+      skipSplash();
+      showView("map");
+      map.setView([la, ln], 16);
+      L.popup({ closeButton: true })
+        .setLatLng([la, ln])
+        .setContent(`<div class="pin-pop"><b>Your friend pinned this spot</b>
+          <a class="pill-btn primary" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${la},${ln}">Get directions</a></div>`)
+        .openOn(map);
+      return true;
+    }
+  }
+  return false;
+}
+window.handleDeepLink = handleDeepLink;
+
 // ===== Share card =====
 document.getElementById("shareBtn").onclick = () => {
   const s = state.spots.find(x => x.id === state.openSpotId);
@@ -821,7 +878,7 @@ document.getElementById("shareBtn").onclick = () => {
   if (s.photos && s.photos.length) { ph.style.background = `url('${s.photos[0]}') center/cover`; ph.textContent = ""; }
   else { ph.style.background = CAT_META[s.cat].grad; ph.textContent = CAT_META[s.cat].emoji; }
   document.getElementById("scName").textContent = s.name;
-  document.getElementById("scMeta").textContent = `★ ${avgStars(s).toFixed(1)} · ZIP ${s.zip} · ${SKETCH_WORDS[s.danger]} · prowl.app/s/${s.id}`;
+  document.getElementById("scMeta").textContent = `★ ${avgStars(s).toFixed(1)} · ZIP ${s.zip} · ${SKETCH_WORDS[s.danger]}`;
   document.getElementById("shareCard").classList.add("open");
   document.getElementById("shareBackdrop").classList.add("open");
 };
@@ -832,9 +889,8 @@ function closeShare() {
 document.getElementById("shareBackdrop").onclick = closeShare;
 document.getElementById("scCopy").onclick = () => {
   const s = state.spots.find(x => x.id === state.openSpotId);
-  navigator.clipboard && navigator.clipboard.writeText(`prowl.app/s/${s.id}`).catch(() => {});
   closeShare();
-  toast("Link copied 🔗");
+  sharePin(spotUrl(s), s.name);
 };
 
 // ===== Notifications =====

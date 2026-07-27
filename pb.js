@@ -207,6 +207,7 @@ async function initMoth() {
   renderFeed();
   renderStories();
   renderAll();
+  if (window.handleDeepLink) handleDeepLink();  // shared pins: ?s=<id> or ?pin=lat,lng
 }
 
 function setBackendBadge(online) {
