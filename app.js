@@ -259,7 +259,7 @@ const SVG = {
   sketchy: '<svg class="ico" viewBox="0 0 24 24"><path d="M10.3 4l-8 14a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3l-8-14a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4M12 17h.01"/></svg>',
   comment: '<svg class="ico" viewBox="0 0 24 24"><path d="M20.5 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 20.5 12z"/></svg>',
   share: '<svg class="ico" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 15V3.5"/><path d="M8 7l4-4 4 4"/></svg>',
-  fox: '<svg class="em-fox" viewBox="0 0 64 64"><path d="M18 12 26 22M46 12 38 22" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/><path fill="currentColor" d="M32 14C21 14 14 23 14 34 14 47 22 54 32 54 42 54 50 47 50 34 50 23 43 14 32 14Z"/><circle cx="24" cy="32" r="7" fill="#7fdbff"/><circle cx="40" cy="32" r="7" fill="#7fdbff"/><circle cx="24" cy="32" r="2.6" fill="currentColor"/><circle cx="40" cy="32" r="2.6" fill="currentColor"/><path d="M28 40 32 46 36 40Z" fill="#7fdbff"/></svg>',
+  fox: '<svg class="em-fox" viewBox="0 0 64 64"><text x="32" y="48" text-anchor="middle" font-family="Outfit, system-ui, sans-serif" font-weight="900" font-size="48" fill="currentColor">?</text></svg>',
 };
 
 // ===== Mode (Cool Stuff / Abandoned) + dynamic category chips =====
