@@ -39,8 +39,10 @@ function photosForCat(cat) {
   const i = (_catIdx[cat] = (_catIdx[cat] || 0) + 1) - 1;
   return spotPhotos(pool[i % pool.length]);
 }
-const SEED_SPOTS = (typeof REAL_SPOTS !== "undefined" ? REAL_SPOTS : [])
-  .map(s => ({ ...s, photos: photosForCat(s.cat) }));
+const SEED_SPOTS = [
+  ...(typeof REAL_SPOTS !== "undefined" ? REAL_SPOTS : []),   // Dallas core (101+)
+  ...(typeof PLANO_SPOTS !== "undefined" ? PLANO_SPOTS : []), // Plano 75025 area (201+)
+].map(s => ({ ...s, photos: photosForCat(s.cat) }));
 
 // Feature one spot for the sponsored / revenue demo
 (function () {
