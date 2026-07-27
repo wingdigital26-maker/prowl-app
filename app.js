@@ -259,7 +259,7 @@ const SVG = {
   sketchy: '<svg class="ico" viewBox="0 0 24 24"><path d="M10.3 4l-8 14a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3l-8-14a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4M12 17h.01"/></svg>',
   comment: '<svg class="ico" viewBox="0 0 24 24"><path d="M20.5 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 20.5 12z"/></svg>',
   share: '<svg class="ico" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 15V3.5"/><path d="M8 7l4-4 4 4"/></svg>',
-  fox: '<svg class="em-fox" viewBox="0 0 64 64"><path fill-rule="evenodd" fill="currentColor" d="M9 9 L27 21 H37 L55 9 L51 31 C51 43 43 53 32 57 C21 53 13 43 13 31 Z M23 29 l7 3.5 -7 3.5 z M41 29 l-7 3.5 7 3.5 z M32 43 l3.5 5 -7 0 z"/></svg>',
+  fox: '<svg class="em-fox" viewBox="0 0 64 64"><path d="M18 12 26 22M46 12 38 22" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/><path fill="currentColor" d="M32 14C21 14 14 23 14 34 14 47 22 54 32 54 42 54 50 47 50 34 50 23 43 14 32 14Z"/><circle cx="24" cy="32" r="7" fill="#7fdbff"/><circle cx="40" cy="32" r="7" fill="#7fdbff"/><circle cx="24" cy="32" r="2.6" fill="currentColor"/><circle cx="40" cy="32" r="2.6" fill="currentColor"/><path d="M28 40 32 46 36 40Z" fill="#7fdbff"/></svg>',
 };
 
 // ===== Mode (Cool Stuff / Abandoned) + dynamic category chips =====
@@ -573,6 +573,7 @@ function openSheet(id) {
     `<span class="hero-pill">${CAT_META[s.cat].emoji} ${CAT_META[s.cat].label}</span>` +
     (hereCount(s) ? `<span class="hero-pill live">🟢 ${hereCount(s)} here now</span>` : "");
   document.getElementById("sheetMeta").innerHTML = `ZIP ${s.zip} · ${s.reviews.length} review${s.reviews.length === 1 ? "" : "s"}`;
+  document.getElementById("dirBtn").href = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`;
   document.getElementById("sponsorBox").innerHTML = s.sponsored ? `
     <div class="sponsor-banner">
       <div class="sponsor-top"><span class="sponsor-pill">★ Featured</span> <b>${s.sponsorName}</b></div>

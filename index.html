@@ -24,7 +24,7 @@
   <button class="round-btn avatar-btn" id="profileBtn" title="Profile">J</button>
   <div class="search-pill">
     <svg class="logo-mini" viewBox="0 0 64 64">
-      <path fill-rule="evenodd" fill="currentColor" d="M9 9 L27 21 H37 L55 9 L51 31 C51 43 43 53 32 57 C21 53 13 43 13 31 Z M23 29 l7 3.5 -7 3.5 z M41 29 l-7 3.5 7 3.5 z M32 43 l3.5 5 -7 0 z"/>
+      <path d="M18 12 26 22M46 12 38 22" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/><path fill="currentColor" d="M32 14C21 14 14 23 14 34 14 47 22 54 32 54 42 54 50 47 50 34 50 23 43 14 32 14Z"/><circle cx="24" cy="32" r="7" fill="#7fdbff"/><circle cx="40" cy="32" r="7" fill="#7fdbff"/><circle cx="24" cy="32" r="2.6" fill="currentColor"/><circle cx="40" cy="32" r="2.6" fill="currentColor"/><path d="M28 40 32 46 36 40Z" fill="#7fdbff"/>
     </svg>
     <input id="search" type="text" placeholder="Search spots, tags, or ZIP…" autocomplete="off">
   </div>
@@ -146,7 +146,10 @@
     </div>
   </div>
   <div class="sheet-body">
-    <button class="pill-btn share-btn" id="shareBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 15V3.5"/><path d="M8 7l4-4 4 4"/></svg>Share spot</button>
+    <div class="sheet-actions">
+      <a class="pill-btn primary" id="dirBtn" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Directions</a>
+      <button class="pill-btn share-btn" id="shareBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 15V3.5"/><path d="M8 7l4-4 4 4"/></svg>Share</button>
+    </div>
     <div id="sponsorBox"></div>
     <div class="sheet-meta" id="sheetMeta"></div>
     <p class="sheet-desc" id="sheetDesc"></p>
@@ -219,7 +222,7 @@
   <div class="sc-photo" id="scPhoto"></div>
   <div class="sc-body">
     <svg class="logo-mini" viewBox="0 0 64 64" style="width:30px;height:30px">
-      <path fill-rule="evenodd" fill="currentColor" d="M9 9 L27 21 H37 L55 9 L51 31 C51 43 43 53 32 57 C21 53 13 43 13 31 Z M23 29 l7 3.5 -7 3.5 z M41 29 l-7 3.5 7 3.5 z M32 43 l3.5 5 -7 0 z"/>
+      <path d="M18 12 26 22M46 12 38 22" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/><path fill="currentColor" d="M32 14C21 14 14 23 14 34 14 47 22 54 32 54 42 54 50 47 50 34 50 23 43 14 32 14Z"/><circle cx="24" cy="32" r="7" fill="#7fdbff"/><circle cx="40" cy="32" r="7" fill="#7fdbff"/><circle cx="24" cy="32" r="2.6" fill="currentColor"/><circle cx="40" cy="32" r="2.6" fill="currentColor"/><path d="M28 40 32 46 36 40Z" fill="#7fdbff"/>
     </svg>
     <div>
       <b id="scName"></b>
@@ -260,7 +263,7 @@
 <!-- ===== SPLASH ===== -->
 <div class="splash" id="splash">
   <svg class="splash-logo" viewBox="0 0 64 64">
-    <path fill-rule="evenodd" fill="currentColor" d="M9 9 L27 21 H37 L55 9 L51 31 C51 43 43 53 32 57 C21 53 13 43 13 31 Z M23 29 l7 3.5 -7 3.5 z M41 29 l-7 3.5 7 3.5 z M32 43 l3.5 5 -7 0 z"/>
+    <path d="M18 12 26 22M46 12 38 22" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/><path fill="currentColor" d="M32 14C21 14 14 23 14 34 14 47 22 54 32 54 42 54 50 47 50 34 50 23 43 14 32 14Z"/><circle cx="24" cy="32" r="7" fill="#7fdbff"/><circle cx="40" cy="32" r="7" fill="#7fdbff"/><circle cx="24" cy="32" r="2.6" fill="currentColor"/><circle cx="40" cy="32" r="2.6" fill="currentColor"/><path d="M28 40 32 46 36 40Z" fill="#7fdbff"/>
   </svg>
   <h1>Prowl</h1>
   <p>off the map</p>

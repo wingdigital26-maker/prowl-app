@@ -921,3 +921,8 @@ body[data-mode="urbex"] .leaflet-tile { filter: contrast(1.06) saturate(1.12) hu
 
 /* The primary action stays the one bright thing */
 .drop-circle { box-shadow: 0 6px 18px rgba(53,189,247,.42); }
+
+/* Sheet action row: Directions + Share side by side */
+.sheet-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+.sheet-actions .pill-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
+.sheet-actions .ico { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
