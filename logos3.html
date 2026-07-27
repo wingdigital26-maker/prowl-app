@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prowl — animal app-icons</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  [data-theme="night"]{ --bg:#0a0e14; --card:#141b26; --text:#eaf6ff; --dim:#8fa6bb; --border:rgba(127,219,255,.12); }
+  [data-theme="day"]{ --bg:#f4f9fd; --card:#ffffff; --text:#10222f; --dim:#5c7891; --border:rgba(26,167,236,.18); }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);padding:0 0 60px}
+  header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 20px 12px}
+  h1{font-size:23px;font-weight:900;letter-spacing:-.5px}
+  .sub{color:var(--dim);font-size:13px;margin-top:2px}
+  .bar{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  .btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:999px;padding:8px 16px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
+  .liked-box{flex:1;min-width:220px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 14px;font-size:13px;font-weight:600}
+  .liked-box b{color:#35bdf7}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:14px;padding:18px 20px}
+  .tile{position:relative;cursor:pointer;text-align:center}
+  .icon{aspect-ratio:1;border-radius:22px;overflow:hidden;transition:transform .12s;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+  .tile:hover .icon{transform:translateY(-3px)}
+  .tile.liked .icon{outline:3px solid #35bdf7;outline-offset:2px}
+  .icon svg{width:100%;height:100%;display:block}
+  .num{position:absolute;top:5px;left:8px;font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5);z-index:2}
+  .fam{margin-top:6px;font-size:11px;font-weight:700;color:var(--text)}
+  .heart{position:absolute;top:5px;right:8px;font-size:14px;opacity:0;z-index:2}
+  .tile.liked .heart{opacity:1;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Animal app-icons 🐾</h1>
+  <div class="sub">Snapchat-ghost style: a finder animal on a solid light-blue square. Tap the animals you like, numbers collect below. (We can swap the background color after.)</div>
+  <div class="bar">
+    <button class="btn" id="themeBtn">Toggle theme</button>
+    <div class="liked-box">Liked: <b id="likedList">none yet</b></div>
+  </div>
+</header>
+<div class="grid" id="grid"></div>
+<script>
+const A="#35bdf7", D="#0b1a2b", W="#fff", CY="#8be6ff";
+// each: [name, animalPathsWhite, bg]  (bg default A). animal drawn white on the square.
+function ic(inner,bg){return `<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="${bg||A}"/>${inner}</svg>`;}
+const L=[
+["Owl", ic(`<path fill="#fff" d="M18 12 26 22M46 12 38 22" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path fill="#fff" d="M32 14C21 14 14 23 14 34 14 47 22 54 32 54 42 54 50 47 50 34 50 23 43 14 32 14Z"/><circle cx="24" cy="32" r="7" fill="${A}"/><circle cx="40" cy="32" r="7" fill="${A}"/><circle cx="24" cy="32" r="3" fill="#fff"/><circle cx="40" cy="32" r="3" fill="#fff"/><path d="M28 40 32 46 36 40Z" fill="${A}"/>`)],
+["Fox", ic(`<path fill="#fff" fill-rule="evenodd" d="M10 12 27 24H37L54 12 50 34C50 46 42 55 32 58 22 55 14 46 14 34Z M23 32l7 3-7 3z M41 32l-7 3 7 3z"/>`)],
+["Wolf", ic(`<path fill="#fff" d="M14 14 22 26 16 30 20 44 32 56 44 44 48 30 42 26 50 14 42 24 34 22H30L22 24Z"/><circle cx="26" cy="36" r="2.4" fill="${A}"/><circle cx="38" cy="36" r="2.4" fill="${A}"/><path d="M30 44 32 48 34 44Z" fill="${A}"/>`)],
+["Cat", ic(`<path fill="#fff" d="M16 14 24 26C28 24 36 24 40 26L48 14 46 42C46 52 40 56 32 56 24 56 18 52 18 42Z"/><circle cx="26" cy="34" r="2.6" fill="${A}"/><circle cx="38" cy="34" r="2.6" fill="${A}"/><path stroke="${A}" stroke-width="1.6" d="M12 40h8M12 44h8M44 40h8M44 44h8"/>`)],
+["Hound", ic(`<path fill="#fff" d="M22 16C16 18 12 26 14 36 10 40 12 48 18 48L20 40C24 46 30 48 34 48 42 48 48 42 48 34 48 22 40 14 32 14 28 14 24 15 22 16Z"/><path fill="#fff" d="M20 20C12 22 10 34 16 40Z"/><circle cx="34" cy="30" r="2.6" fill="${A}"/><ellipse cx="44" cy="34" rx="3.5" ry="2.6" fill="${A}"/>`)],
+["Bat", ic(`<path fill="#fff" d="M32 22C30 15 26 13 22 13 24 17 22 19 18 19 12 19 8 15 6 13 6 24 14 28 20 28 18 32 20 36 24 36 26 32 30 30 32 34 34 30 38 32 40 36 44 36 46 32 44 28 50 28 58 24 58 13 56 15 52 19 46 19 42 19 40 17 42 13 38 13 34 15 32 22Z"/><path fill="#fff" d="M28 10 30 14 26 14ZM36 10 34 14 38 14Z"/>`)],
+["Rabbit", ic(`<path fill="#fff" d="M24 8C20 8 18 22 22 30 18 32 16 40 20 46 24 52 40 52 44 46 48 40 46 32 42 30 46 22 44 8 40 8 36 8 34 20 32 24 30 20 28 8 24 8Z"/><circle cx="27" cy="38" r="2.4" fill="${A}"/><circle cx="37" cy="38" r="2.4" fill="${A}"/>`)],
+["Deer", ic(`<path fill="#fff" d="M18 10 22 20M18 10 12 14M22 20 26 16M46 10 42 20M46 10 52 14M42 20 38 16" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path fill="#fff" d="M32 20C24 20 20 28 20 38 20 50 26 56 32 56 38 56 44 50 44 38 44 28 40 20 32 20Z"/><circle cx="27" cy="34" r="2.4" fill="${A}"/><circle cx="37" cy="34" r="2.4" fill="${A}"/>`)],
+["Bear", ic(`<circle cx="18" cy="18" r="7" fill="#fff"/><circle cx="46" cy="18" r="7" fill="#fff"/><path fill="#fff" d="M32 16C20 16 14 25 14 36 14 48 22 55 32 55 42 55 50 48 50 36 50 25 44 16 32 16Z"/><circle cx="25" cy="34" r="2.6" fill="${A}"/><circle cx="39" cy="34" r="2.6" fill="${A}"/><ellipse cx="32" cy="42" rx="4" ry="3" fill="${A}"/>`)],
+["Raccoon", ic(`<path fill="#fff" d="M16 14 24 24M48 14 40 24" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path fill="#fff" d="M32 16C21 16 14 24 14 35 14 47 22 54 32 54 42 54 50 47 50 35 50 24 43 16 32 16Z"/><path fill="${A}" d="M20 30C22 27 28 27 30 30 30 34 26 36 24 36 21 36 19 33 20 30Z"/><path fill="${A}" d="M44 30C42 27 36 27 34 30 34 34 38 36 40 36 43 36 45 33 44 30Z"/><circle cx="25" cy="31" r="2" fill="#fff"/><circle cx="39" cy="31" r="2" fill="#fff"/><path d="M29 40 32 45 35 40Z" fill="${A}"/>`)],
+["Hawk", ic(`<path fill="#fff" d="M32 10C26 10 20 15 20 24 20 28 22 31 24 33L20 52H44L40 33C42 31 44 28 44 24 44 15 38 10 32 10Z"/><path fill="${A}" d="M32 20 40 24 34 26H30L24 24Z"/><circle cx="28" cy="22" r="2.2" fill="${A}"/><circle cx="36" cy="22" r="2.2" fill="${A}"/>`)],
+["Raven", ic(`<path fill="#fff" d="M12 22C20 18 34 18 40 26L54 22 44 32C46 40 42 48 34 50 22 53 12 46 12 36 12 30 12 24 12 22Z"/><path fill="#fff" d="M40 26 54 22 44 32Z"/><circle cx="24" cy="30" r="2.4" fill="${A}"/>`)],
+["Panther", ic(`<path fill="#fff" d="M6 34 12 30 16 34 20 30C28 28 42 30 48 40L56 34 54 44C58 46 58 50 54 52H22C12 52 8 46 8 40Z"/><circle cx="14" cy="34" r="2" fill="${A}"/>`)],
+["Squirrel", ic(`<path fill="#fff" d="M40 16C34 16 30 22 30 30 30 40 36 46 44 46 46 46 48 45 50 44L46 52H24C16 52 14 44 18 40 10 38 8 26 16 22 24 18 30 20 34 16 36 14 38 14 40 16Z"/><path fill="#fff" d="M50 8C60 12 62 30 50 40 52 30 48 22 44 22 48 18 48 10 50 8Z"/><circle cx="38" cy="28" r="2.4" fill="${A}"/>`)],
+["Hedgehog", ic(`<path fill="#fff" d="M8 30 16 24 18 32 24 22 28 32 34 20 38 32 46 22 48 32 56 26 52 44C50 50 44 52 34 52 20 52 10 46 8 38Z"/><ellipse cx="16" cy="42" rx="9" ry="6" fill="#fff"/><circle cx="12" cy="40" r="2" fill="${A}"/>`)],
+["Meerkat", ic(`<path fill="#fff" d="M32 8C26 8 22 14 22 22 22 26 24 30 26 32L22 56H42L38 32C40 30 42 26 42 22 42 14 38 8 32 8Z"/><circle cx="27" cy="20" r="2.4" fill="${A}"/><circle cx="37" cy="20" r="2.4" fill="${A}"/><ellipse cx="32" cy="26" rx="3" ry="2" fill="${A}"/>`)],
+["Ferret", ic(`<path fill="#fff" d="M10 40C10 34 14 30 20 30 24 30 26 26 26 22 26 15 32 10 40 10 50 10 56 18 54 28 52 40 42 46 30 46 18 46 10 46 10 40Z"/><path fill="#fff" d="M38 8 42 12 36 13ZM46 8 50 12 44 13Z"/><circle cx="44" cy="20" r="2.4" fill="${A}"/><ellipse cx="52" cy="22" rx="3" ry="2.2" fill="${A}"/>`)],
+["Possum", ic(`<path fill="#fff" d="M20 14 26 22M44 14 38 22" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path fill="#fff" d="M14 30C14 22 22 16 32 16 40 16 46 20 48 26L60 30 48 34C46 44 40 50 32 50 22 50 14 42 14 34Z"/><circle cx="26" cy="30" r="2.4" fill="${A}"/><circle cx="38" cy="30" r="2.4" fill="${A}"/><circle cx="52" cy="32" r="3" fill="${A}"/>`)],
+["Coyote", ic(`<path fill="#fff" d="M14 12 22 24 18 28 22 44 32 54 42 44 46 28 42 24 50 12 42 22 34 20H30L22 22Z"/><circle cx="27" cy="34" r="2.2" fill="${A}"/><circle cx="37" cy="34" r="2.2" fill="${A}"/>`)],
+["Lynx", ic(`<path fill="#fff" d="M14 12 20 20 24 24M50 12 44 20 40 24" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><path fill="#fff" d="M16 20 24 28C28 26 36 26 40 28L48 20 46 44C46 52 40 56 32 56 24 56 18 52 18 44Z"/><circle cx="26" cy="34" r="2.6" fill="${A}"/><circle cx="38" cy="34" r="2.6" fill="${A}"/>`)],
+["Mouse", ic(`<circle cx="18" cy="20" r="10" fill="#fff"/><circle cx="46" cy="20" r="10" fill="#fff"/><path fill="#fff" d="M32 22C22 22 16 30 16 40 16 50 24 56 32 56 40 56 48 50 48 40 48 30 42 22 32 22Z"/><circle cx="26" cy="38" r="2.4" fill="${A}"/><circle cx="38" cy="38" r="2.4" fill="${A}"/><circle cx="32" cy="45" r="2.6" fill="${A}"/>`)],
+["Snake", ic(`<path fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" d="M18 50C18 40 40 42 40 32 40 22 22 24 22 16 22 12 26 10 32 10"/><circle cx="18" cy="50" r="6" fill="#fff"/><circle cx="17" cy="49" r="1.6" fill="${A}"/>`)],
+["Paw", ic(`<circle cx="32" cy="40" r="11" fill="#fff"/><circle cx="17" cy="27" r="5" fill="#fff"/><circle cx="26" cy="19" r="5" fill="#fff"/><circle cx="38" cy="19" r="5" fill="#fff"/><circle cx="47" cy="27" r="5" fill="#fff"/>`)],
+["Nose (sniff)", ic(`<path fill="#fff" d="M20 24C20 18 26 14 32 14 38 14 44 18 44 24 44 30 40 34 40 40 40 46 36 50 32 50 28 50 24 46 24 40 24 34 20 30 20 24Z"/><ellipse cx="27" cy="28" rx="3" ry="4" fill="${A}"/><ellipse cx="37" cy="28" rx="3" ry="4" fill="${A}"/>`)],
+["Owl: glowing eyes", ic(`<path fill="#fff" d="M18 14 26 22M46 14 38 22" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path fill="#fff" d="M32 14C21 14 14 23 14 34 14 47 22 54 32 54 42 54 50 47 50 34 50 23 43 14 32 14Z"/><circle cx="24" cy="32" r="7" fill="${CY}"/><circle cx="40" cy="32" r="7" fill="${CY}"/><circle cx="24" cy="32" r="2.5" fill="${D}"/><circle cx="40" cy="32" r="2.5" fill="${D}"/><path d="M28 40 32 46 36 40Z" fill="${D}"/>`, D)],
+["Cat: glowing eyes", ic(`<path fill="#fff" d="M16 14 24 26C28 24 36 24 40 26L48 14 46 42C46 52 40 56 32 56 24 56 18 52 18 42Z"/><path fill="${CY}" d="M25 30 28 38 22 38Z"/><path fill="${CY}" d="M39 30 42 38 36 38Z"/>`, D)],
+["Fox: glowing eyes", ic(`<path fill="#fff" d="M10 12 27 24H37L54 12 50 34C50 46 42 55 32 58 22 55 14 46 14 34Z"/><path fill="${CY}" d="M23 32 30 35 23 38Z"/><path fill="${CY}" d="M41 32 34 35 41 38Z"/>`, D)],
+["Owl: front face", ic(`<circle cx="32" cy="34" r="21" fill="#fff"/><path fill="#fff" d="M16 14 24 24M48 14 40 24" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="32" r="8" fill="${A}"/><circle cx="40" cy="32" r="8" fill="${A}"/><circle cx="24" cy="32" r="3.5" fill="#fff"/><circle cx="40" cy="32" r="3.5" fill="#fff"/><path d="M28 40 32 46 36 40Z" fill="${A}"/>`)],
+["Wolf howl", ic(`<path fill="#fff" d="M40 8C34 12 34 20 36 24 30 26 24 32 24 40 24 40 12 42 10 52 18 50 24 52 30 54 38 56 46 50 46 42 46 36 42 32 42 26 48 24 52 18 50 10 46 14 42 12 40 8Z"/><circle cx="34" cy="34" r="2.4" fill="${A}"/>`)],
+["Falcon head", ic(`<path fill="#fff" d="M20 16C16 22 16 30 22 34L18 52H46L42 34C48 30 48 22 44 16 40 10 24 10 20 16Z"/><path fill="${A}" d="M42 24 52 26 44 30Z"/><circle cx="30" cy="24" r="2.4" fill="${A}"/>`)],
+["Crow flying", ic(`<path fill="#fff" d="M8 30 24 28 30 20 34 28 40 20 44 28 58 30 44 34 40 44 34 34 30 44 24 34Z"/><circle cx="31" cy="27" r="2" fill="${A}"/>`)],
+];
+const grid=document.getElementById("grid");
+L.forEach((e,i)=>{const n=i+1;const t=document.createElement("div");t.className="tile";t.dataset.n=n;
+  t.innerHTML=`<span class="num">${n}</span><span class="heart">♥</span><div class="icon">${e[1]}</div><div class="fam">${e[0]}</div>`;
+  t.onclick=()=>{t.classList.toggle("liked");upd();};grid.appendChild(t);});
+function upd(){const l=[...document.querySelectorAll(".tile.liked")].map(t=>+t.dataset.n).sort((a,b)=>a-b);document.getElementById("likedList").textContent=l.length?l.join(", "):"none yet";}
+document.getElementById("themeBtn").onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==="night"?"day":"night";};
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prowl — Lantern + Owl ideas</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --acc:#35bdf7; --acc2:#7fdbff; --vio:#9b6dff; }
+  [data-theme="night"]{ --bg:#0a0e14; --card:#141b26; --text:#eaf6ff; --dim:#8fa6bb; --border:rgba(127,219,255,.12); }
+  [data-theme="day"]{ --bg:#f4f9fd; --card:#ffffff; --text:#10222f; --dim:#5c7891; --border:rgba(26,167,236,.18); }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);padding:0 0 60px}
+  header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 20px 12px}
+  h1{font-size:23px;font-weight:900;letter-spacing:-.5px}
+  .sub{color:var(--dim);font-size:13px;margin-top:2px}
+  .bar{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  .btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:999px;padding:8px 16px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
+  .liked-box{flex:1;min-width:220px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 14px;font-size:13px;font-weight:600}
+  .liked-box b{color:var(--acc)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;padding:18px 20px}
+  .tile{position:relative;aspect-ratio:1;border-radius:16px;background:var(--card);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;transition:transform .12s,border-color .12s;overflow:hidden}
+  .tile:hover{transform:translateY(-3px);border-color:var(--acc)}
+  .tile.liked{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
+  .tile svg{width:54%;height:54%;fill:var(--acc)}
+  .num{position:absolute;top:6px;left:8px;font-size:11px;font-weight:800;color:var(--dim)}
+  .fam{position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:8.5px;font-weight:600;color:var(--dim);opacity:.85;padding:0 4px}
+  .heart{position:absolute;top:5px;right:7px;font-size:13px;opacity:0;transition:opacity .12s}
+  .tile.liked .heart{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>Lantern + Owl ideas 🏮🦉</h1>
+  <div class="sub">More in the direction of your two picks (lantern #56, owl #94). Tap the ones you like, numbers collect below.</div>
+  <div class="bar">
+    <button class="btn" id="themeBtn">Toggle theme</button>
+    <div class="liked-box">Liked: <b id="likedList">none yet</b></div>
+  </div>
+</header>
+<div class="grid" id="grid"></div>
+<script>
+const L = [
+// LANTERNS / LIGHTS
+["Lantern: classic",`<path fill="none" stroke="var(--acc)" stroke-width="3" d="M26 11a6 6 0 0 1 12 0"/><rect x="23" y="15" width="18" height="7" rx="2"/><path d="M25 22h14l2 22a4 4 0 0 1-4 4H27a4 4 0 0 1-4-4Z"/><rect x="29" y="27" width="6" height="16" rx="2" fill="var(--card)"/>`],
+["Hurricane lantern",`<path fill="none" stroke="var(--acc)" stroke-width="3" d="M28 10a4 4 0 0 1 8 0"/><path d="M22 20h20v4H22zM24 46h16v5H24z"/><path fill="none" stroke="var(--acc)" stroke-width="3" d="M26 24v22M38 24v22"/><path d="M32 28 35 34 32 40 29 34Z"/>`],
+["Paper lantern",`<rect x="28" y="9" width="8" height="3"/><ellipse cx="32" cy="34" rx="15" ry="19"/><path stroke="var(--card)" stroke-width="2" fill="none" d="M22 28h20M20 34h24M22 40h20"/><rect x="28" y="52" width="8" height="4"/>`],
+["Camp lantern",`<path d="M28 8h8v4h-8Z"/><path d="M24 12h16l-2 8H26Z"/><rect x="24" y="20" width="16" height="22" rx="2"/><rect x="27" y="24" width="10" height="14" rx="2" fill="var(--card)"/><path d="M22 42h20v6H22Z"/>`],
+["Oil lamp",`<path d="M14 40C14 33 22 31 30 31 34 31 36 27 40 27 48 27 52 31 52 35 52 41 44 45 30 45 20 45 14 45 14 40Z"/><path d="M40 27 44 19 46 27Z"/><ellipse cx="30" cy="45" rx="16" ry="4"/>`],
+["Edison bulb",`<path fill="none" stroke="var(--acc)" stroke-width="3" d="M32 4v9"/><path d="M32 13a14 14 0 0 1 8 25l-1 8H25l-1-8A14 14 0 0 1 32 13Z"/><path fill="none" stroke="var(--card)" stroke-width="2" d="M28 30c2-5 6-5 8 0"/><rect x="26" y="48" width="12" height="6" rx="2"/>`],
+["Street lamp",`<path d="M30 20h4v34h-4Z"/><path d="M24 20 32 10 40 20Z"/><path fill="none" stroke="var(--acc)" stroke-width="3" d="M25 54h14"/><path fill="var(--acc2)" opacity=".45" d="M23 22 41 22 45 36 19 36Z"/>`],
+["Lighthouse",`<path d="M26 22h12l3 32H23Z"/><rect x="24" y="14" width="16" height="8" rx="2"/><rect x="27" y="6" width="10" height="8" rx="2"/><path fill="var(--acc2)" opacity=".5" d="M40 8 58 4 58 20Z"/><path stroke="var(--card)" stroke-width="2" d="M25 34h14M24 44h16"/>`],
+["Torch",`<path d="M30 30h4v24h-4Z"/><path d="M32 6C26 14 24 20 28 26 27 22 30 20 32 22 34 20 37 22 36 26 40 20 38 14 32 6Z"/><path fill="none" stroke="var(--acc)" stroke-width="2" opacity=".55" d="M20 16l-4-3M44 16l4-3M18 26h-5M46 26h5"/>`],
+["Candle glow",`<rect x="27" y="26" width="10" height="28" rx="2"/><path d="M32 8C28 14 29 20 32 22 35 20 36 14 32 8Z"/><circle cx="32" cy="18" r="10" fill="none" stroke="var(--acc)" stroke-width="1.5" opacity=".4"/>`],
+["Wisp orb",`<circle cx="34" cy="28" r="12"/><circle cx="34" cy="28" r="18" fill="none" stroke="var(--acc)" stroke-width="1.5" opacity=".4"/><path fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" d="M26 36C20 42 16 50 14 56"/><circle cx="20" cy="46" r="2.5"/>`],
+["Bold flame",`<path d="M32 4C24 16 20 24 26 34 24 28 28 26 30 28 30 20 34 18 36 24 40 16 40 26 40 30 44 26 44 20 42 16 48 24 46 38 38 46 30 46 22 40 20 32 20 24 26 14 32 4Z"/>`],
+["Glowing keyhole",`<circle cx="32" cy="26" r="9"/><path d="M28 32h8l3 16H25Z"/><path fill="none" stroke="var(--acc)" stroke-width="2" opacity=".4" d="M14 26h-6M50 26h6M18 14l-4-3M46 14l4-3"/>`],
+["Beacon rays",`<rect x="24" y="24" width="16" height="14" rx="3"/><rect x="28" y="27" width="8" height="8" rx="1" fill="var(--card)"/><path d="M22 20a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4Z"/><path fill="none" stroke="var(--acc)" stroke-width="2.5" stroke-linecap="round" d="M18 44l-6 6M46 44l6 6M32 46v8"/>`],
+["Lantern pin",`<path d="M32 4C21 4 12 13 12 24 12 40 32 60 32 60S52 40 52 24C52 13 43 4 32 4Z"/><rect x="26" y="13" width="12" height="20" rx="3" fill="var(--card)"/><rect x="29" y="17" width="6" height="12" rx="1" fill="var(--acc)"/>`],
+["Lantern + moon",`<path fill="var(--vio)" d="M46 8a18 18 0 1 0 0 36 14 14 0 1 1 0-36Z"/><rect x="16" y="20" width="16" height="22" rx="3"/><rect x="20" y="24" width="8" height="14" rx="1" fill="var(--card)"/><path fill="none" stroke="var(--acc)" stroke-width="2.5" d="M20 20a4 4 0 0 1 8 0"/>`],
+["Held lantern",`<path fill="none" stroke="var(--acc)" stroke-width="4" stroke-linecap="round" d="M12 18C12 29 20 33 26 33"/><path d="M27 22a5 5 0 0 1 10 0"/><rect x="26" y="26" width="12" height="22" rx="3"/><rect x="29" y="30" width="6" height="14" rx="1" fill="var(--card)"/>`],
+["Path to light",`<path fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 7" d="M10 54C20 48 24 40 40 38"/><rect x="40" y="24" width="14" height="20" rx="3"/><rect x="43" y="28" width="8" height="12" rx="1" fill="var(--card)"/>`],
+["Firefly trail",`<circle cx="16" cy="18" r="3"/><circle cx="26" cy="26" r="2.5"/><circle cx="34" cy="34" r="2.5"/><path d="M46 30C40 30 36 34 36 39 36 46 46 56 46 56S56 46 56 39C56 34 52 30 46 30Z"/><circle cx="46" cy="39" r="4" fill="var(--card)"/>`],
+["Crescent glow",`<path d="M40 8a24 24 0 1 0 0 48 18 18 0 1 1 0-48Z"/><circle cx="30" cy="32" r="26" fill="none" stroke="var(--acc)" stroke-width="1.5" opacity=".3"/>`],
+// OWLS
+["Owl: geometric",`<path d="M32 8C20 8 12 18 12 32 12 46 20 56 32 56 44 56 52 46 52 32 52 18 44 8 32 8Z"/><path d="M14 14 22 22M50 14 42 22" stroke="var(--acc)" stroke-width="3"/><circle cx="23" cy="30" r="8" fill="var(--card)"/><circle cx="41" cy="30" r="8" fill="var(--card)"/><circle cx="23" cy="30" r="3.5"/><circle cx="41" cy="30" r="3.5"/><path d="M28 38 32 44 36 38Z" fill="var(--card)"/>`],
+["Owl: line",`<path fill="none" stroke="var(--acc)" stroke-width="3" stroke-linejoin="round" d="M32 8C20 8 13 18 13 32 13 46 21 56 32 56 43 56 51 46 51 32 51 18 44 8 32 8Z"/><circle cx="24" cy="30" r="6" fill="none" stroke="var(--acc)" stroke-width="3"/><circle cx="40" cy="30" r="6" fill="none" stroke="var(--acc)" stroke-width="3"/><path fill="none" stroke="var(--acc)" stroke-width="3" d="M29 38 32 42 35 38"/>`],
+["Owl: round face",`<circle cx="32" cy="34" r="22"/><path d="M18 12 26 24M46 12 38 24" stroke="var(--acc)" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="32" r="8" fill="var(--card)"/><circle cx="40" cy="32" r="8" fill="var(--card)"/><circle cx="24" cy="32" r="3.5"/><circle cx="40" cy="32" r="3.5"/><path d="M29 40 32 46 35 40Z" fill="var(--card)"/>`],
+["Owl on branch",`<path d="M32 6C22 6 16 14 16 26 16 38 22 46 32 46 42 46 48 38 48 26 48 14 42 6 32 6Z"/><circle cx="25" cy="24" r="6" fill="var(--card)"/><circle cx="39" cy="24" r="6" fill="var(--card)"/><path d="M29 30 32 35 35 30Z" fill="var(--card)"/><path stroke="var(--acc)" stroke-width="4" stroke-linecap="round" d="M12 50h40"/><path d="M28 46v6M36 46v6" stroke="var(--acc)" stroke-width="3"/>`],
+["Owl + moon",`<path fill="var(--vio)" d="M50 10a20 20 0 1 0 0 40 15 15 0 1 1 0-40Z"/><path d="M24 20C16 20 11 27 11 36 11 46 16 52 24 52 32 52 37 46 37 36 37 27 32 20 24 20Z"/><circle cx="19" cy="34" r="4.5" fill="var(--card)"/><circle cx="29" cy="34" r="4.5" fill="var(--card)"/><path d="M22 40 24 44 26 40Z" fill="var(--card)"/>`],
+["Owl: eyes in dark",`<path d="M16 24C16 16 22 12 32 12 42 12 48 16 48 24V42C48 52 42 56 32 56 22 56 16 52 16 42Z"/><circle cx="24" cy="30" r="7" fill="var(--acc2)"/><circle cx="40" cy="30" r="7" fill="var(--acc2)"/><circle cx="24" cy="30" r="3" fill="var(--card)"/><circle cx="40" cy="30" r="3" fill="var(--card)"/>`],
+["Owl pin",`<path d="M32 4C21 4 12 13 12 24 12 40 32 60 32 60S52 40 52 24C52 13 43 4 32 4Z"/><circle cx="25" cy="22" r="5.5" fill="var(--card)"/><circle cx="39" cy="22" r="5.5" fill="var(--card)"/><circle cx="25" cy="22" r="2" fill="var(--acc)"/><circle cx="39" cy="22" r="2" fill="var(--acc)"/><path d="M29 28 32 33 35 28Z" fill="var(--card)"/>`],
+["Owl + lantern",`<path d="M40 12C32 12 27 18 27 28 27 38 32 44 40 44 48 44 53 38 53 28 53 18 48 12 40 12Z"/><circle cx="35" cy="26" r="4.5" fill="var(--card)"/><circle cx="45" cy="26" r="4.5" fill="var(--card)"/><path d="M38 32 40 36 42 32Z" fill="var(--card)"/><rect x="9" y="30" width="13" height="16" rx="2"/><rect x="12" y="33" width="7" height="10" rx="1" fill="var(--card)"/><path d="M12 30a3.5 3.5 0 0 1 7 0" fill="none" stroke="var(--acc)" stroke-width="2"/>`],
+["Owl in circle",`<circle cx="32" cy="32" r="24"/><path fill="var(--card)" d="M32 12C23 12 17 20 17 31 17 42 23 50 32 50 41 50 47 42 47 31 47 20 41 12 32 12Z"/><circle cx="26" cy="29" r="4" fill="var(--acc)"/><circle cx="38" cy="29" r="4" fill="var(--acc)"/><path fill="var(--acc)" d="M30 35 32 39 34 35Z"/>`],
+["Owl: low-poly",`<path d="M32 8 46 18 44 34 32 56 20 34 18 18Z"/><path fill="var(--card)" d="M25 26 31 30 25 34Z M39 26 33 30 39 34Z"/><path d="M14 14 20 20M50 14 44 20" stroke="var(--acc)" stroke-width="3"/>`],
+["Owl: ear tufts",`<path d="M16 14 24 24M48 14 40 24" stroke="var(--acc)" stroke-width="4" stroke-linecap="round"/><path d="M32 16C22 16 15 24 15 34 15 46 22 52 32 52 42 52 49 46 49 34 49 24 42 16 32 16Z"/><circle cx="24" cy="32" r="7" fill="var(--card)"/><circle cx="40" cy="32" r="7" fill="var(--card)"/><circle cx="24" cy="32" r="3"/><circle cx="40" cy="32" r="3"/><path d="M29 40 32 45 35 40Z" fill="var(--card)"/>`],
+["Owl: lens eyes",`<path d="M32 10C22 10 15 18 15 32 15 46 22 54 32 54 42 54 49 46 49 32 49 18 42 10 32 10Z"/><circle cx="24" cy="30" r="8" fill="var(--card)"/><circle cx="40" cy="30" r="8" fill="var(--card)"/><circle cx="24" cy="30" r="8" fill="none" stroke="var(--acc)" stroke-width="2"/><circle cx="40" cy="30" r="8" fill="none" stroke="var(--acc)" stroke-width="2"/><circle cx="24" cy="30" r="3.5"/><circle cx="40" cy="30" r="3.5"/>`],
+["Owl over moon",`<circle cx="32" cy="32" r="22" fill="var(--acc2)" opacity=".35"/><path d="M32 14C24 14 18 21 18 31 18 42 24 50 32 50 40 50 46 42 46 31 46 21 40 14 32 14Z"/><circle cx="26" cy="29" r="4" fill="var(--acc2)"/><circle cx="38" cy="29" r="4" fill="var(--acc2)"/><path d="M30 35 32 39 34 35Z" fill="var(--acc2)"/>`],
+["Owl: feather",`<path d="M44 12C44 12 20 20 16 44 16 44 14 50 18 52 22 54 24 48 24 48 30 46 42 40 46 24 48 16 44 12 44 12Z"/><path stroke="var(--card)" stroke-width="1.5" d="M40 18 22 48"/>`],
+["Owl + loc dot",`<path d="M32 8C22 8 16 16 16 28 16 38 22 44 32 44 42 44 48 38 48 28 48 16 42 8 32 8Z"/><circle cx="25" cy="26" r="5" fill="var(--card)"/><circle cx="39" cy="26" r="5" fill="var(--card)"/><path d="M29 32 32 36 35 32Z" fill="var(--card)"/><path d="M32 48 27 56 37 56Z"/><circle cx="32" cy="53" r="3.5"/>`],
+["Owlet (cute)",`<circle cx="32" cy="34" r="20"/><path d="M20 18 26 26M44 18 38 26" stroke="var(--acc)" stroke-width="3" stroke-linecap="round"/><circle cx="25" cy="32" r="8" fill="var(--card)"/><circle cx="39" cy="32" r="8" fill="var(--card)"/><circle cx="25" cy="33" r="4"/><circle cx="39" cy="33" r="4"/><path d="M30 40 32 44 34 40Z"/>`],
+["Owl carries pin",`<path d="M32 6C22 6 15 14 15 24 15 32 20 38 28 39 24 40 22 44 22 44H42S40 40 36 39C44 38 49 32 49 24 49 14 42 6 32 6Z"/><circle cx="25" cy="22" r="4.5" fill="var(--card)"/><circle cx="39" cy="22" r="4.5" fill="var(--card)"/><path d="M32 46C28 46 25 49 25 52 25 57 32 62 32 62S39 57 39 52C39 49 36 46 32 46Z"/><circle cx="32" cy="52" r="2.5" fill="var(--card)"/>`],
+// BLENDS
+["Glowing eyes",`<path d="M14 24C14 16 22 12 32 12 42 12 50 16 50 24V42C50 52 42 56 32 56 22 56 14 52 14 42Z"/><circle cx="24" cy="30" r="7" fill="var(--acc2)"/><circle cx="40" cy="30" r="7" fill="var(--acc2)"/><circle cx="24" cy="30" r="3" fill="var(--card)"/><circle cx="40" cy="30" r="3" fill="var(--card)"/>`],
+["Lantern + star",`<path d="M32 4 34 11 41 11 35 16 37 23 32 19 27 23 29 16 23 11 30 11Z"/><rect x="24" y="28" width="16" height="22" rx="3"/><rect x="28" y="32" width="8" height="14" rx="1" fill="var(--card)"/><path fill="none" stroke="var(--acc)" stroke-width="2.5" d="M28 28a4 4 0 0 1 8 0"/>`],
+["Owl-to-lantern",`<path d="M12 40C8 34 10 26 16 24 16 30 18 32 20 34 22 30 26 30 28 34 24 40 18 44 12 40Z"/><rect x="38" y="26" width="14" height="20" rx="3"/><rect x="41" y="30" width="8" height="12" rx="1" fill="var(--card)"/><path fill="none" stroke="var(--acc)" stroke-width="2.5" d="M42 26a3 3 0 0 1 6 0"/>`],
+];
+const grid=document.getElementById("grid");
+L.forEach((e,i)=>{const n=i+1;const t=document.createElement("div");t.className="tile";t.dataset.n=n;
+  t.innerHTML=`<span class="num">${n}</span><span class="heart">♥</span><svg viewBox="0 0 64 64">${e[1]}</svg><span class="fam">${e[0]}</span>`;
+  t.onclick=()=>{t.classList.toggle("liked");upd();};grid.appendChild(t);});
+function upd(){const l=[...document.querySelectorAll(".tile.liked")].map(t=>+t.dataset.n).sort((a,b)=>a-b);document.getElementById("likedList").textContent=l.length?l.join(", "):"none yet";}
+document.getElementById("themeBtn").onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==="night"?"day":"night";};
+</script>
+</body>
+</html>

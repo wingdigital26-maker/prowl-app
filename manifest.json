@@ -1,0 +1,11 @@
+{
+  "name": "Prowl — off the map",
+  "short_name": "Prowl",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0a0e14",
+  "theme_color": "#35bdf7",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

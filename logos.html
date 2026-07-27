@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prowl — 100 Logo Ideas</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --acc:#35bdf7; --acc2:#7fdbff; --vio:#9b6dff; }
+  [data-theme="night"]{ --bg:#0a0e14; --card:#141b26; --text:#eaf6ff; --dim:#8fa6bb; --border:rgba(127,219,255,.12); }
+  [data-theme="day"]{ --bg:#f4f9fd; --card:#ffffff; --text:#10222f; --dim:#5c7891; --border:rgba(26,167,236,.18); }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);padding:0 0 60px}
+  header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 20px 12px}
+  h1{font-size:23px;font-weight:900;letter-spacing:-.5px}
+  .sub{color:var(--dim);font-size:13px;margin-top:2px}
+  .bar{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  .btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:999px;padding:8px 16px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
+  .liked-box{flex:1;min-width:220px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 14px;font-size:13px;font-weight:600}
+  .liked-box b{color:var(--acc)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;padding:18px 20px}
+  .tile{position:relative;aspect-ratio:1;border-radius:16px;background:var(--card);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;transition:transform .12s,border-color .12s;overflow:hidden}
+  .tile:hover{transform:translateY(-3px);border-color:var(--acc)}
+  .tile.liked{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
+  .tile svg{width:54%;height:54%;fill:var(--acc)}
+  .num{position:absolute;top:6px;left:8px;font-size:11px;font-weight:800;color:var(--dim)}
+  .fam{position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:8.5px;font-weight:600;color:var(--dim);opacity:.8;padding:0 4px}
+  .heart{position:absolute;top:5px;right:7px;font-size:13px;opacity:0;transition:opacity .12s}
+  .tile.liked .heart{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>Prowl — 100 logo ideas 🦊</h1>
+  <div class="sub">100 different directions. Tap the ones you like, they collect below, then tell me the numbers and what you like (we can combine parts).</div>
+  <div class="bar">
+    <button class="btn" id="themeBtn">Toggle theme</button>
+    <div class="liked-box">Liked: <b id="likedList">none yet</b></div>
+  </div>
+</header>
+<div class="grid" id="grid"></div>
+
+<script>
+// Each entry: [label, innerSVG]. 100 distinct ideas. fill=var(--acc), holes=var(--card).
+const L = [
+// ---- FOXES (1-24) ----
+["Fox: angular",`<path fill-rule="evenodd" d="M10 10 27 22 37 22 54 10 50 32C50 44 42 53 32 57 22 53 14 44 14 32Z M23 30l7 3-7 3z M41 30l-7 3 7 3z"/>`],
+["Fox: low-poly",`<path d="M12 12 24 24 20 30Z"/><path d="M52 12 40 24 44 30Z"/><path d="M24 24H40l6 10-14 22-14-22Z"/>`],
+["Fox: line",`<path fill="none" stroke="var(--acc)" stroke-width="3" stroke-linejoin="round" d="M12 12 28 23H36L52 12 48 33C48 44 41 52 32 56 23 52 16 44 16 33Z"/><circle cx="25" cy="32" r="2"/><circle cx="39" cy="32" r="2"/>`],
+["Fox: in circle",`<circle cx="32" cy="32" r="24"/><path fill="var(--card)" fill-rule="evenodd" d="M20 20 30 28H34L44 20 41 36C41 44 37 49 32 52 27 49 23 44 23 36Z M28 33l4 2-4 2z M36 33l-4 2 4 2z"/>`],
+["Fox: sitting",`<path d="M20 54C14 54 12 46 16 42 12 30 16 16 24 12 26 22 30 30 32 34 34 30 38 22 40 12 48 16 52 30 48 42 52 46 50 54 44 54Z"/>`],
+["Fox: prowling",`<path d="M6 22 14 27 18 22 22 31C29 29 41 31 47 39L55 31 53 41C59 43 60 47 58 51H20C12 51 8 45 8 39Z"/>`],
+["Fox: curled",`<path fill="none" stroke="var(--acc)" stroke-width="5" stroke-linecap="round" d="M40 14C22 14 14 30 22 44 30 56 50 52 50 38 50 30 42 28 38 34"/>`],
+["Fox: tail swoosh",`<path d="M10 46C10 24 30 8 54 10 40 14 30 26 30 40 40 34 48 36 52 42 44 40 34 44 30 54 22 56 12 54 10 46Z"/>`],
+["Fox: ears peek",`<path d="M14 34C10 24 12 12 20 10 26 20 28 24 30 30Z"/><path d="M50 34C54 24 52 12 44 10 38 20 36 24 34 30Z"/><path d="M20 32H44L38 46H26Z"/>`],
+["Fox: round face",`<path fill-rule="evenodd" d="M14 14 24 24C28 22 36 22 40 24L50 14 48 34C48 46 41 54 32 56 23 54 16 46 16 34Z M25 32a2 2 0 1 0 0 .1z M39 32a2 2 0 1 0 0 .1z"/><circle cx="26" cy="32" r="2" fill="var(--card)"/><circle cx="38" cy="32" r="2" fill="var(--card)"/>`],
+["Fox: pin face",`<path d="M32 4C20 4 12 13 12 24 12 38 32 60 32 60S52 38 52 24C52 13 44 4 32 4Z"/><path fill="var(--card)" fill-rule="evenodd" d="M22 16 30 22H34L42 16 40 30C40 37 36 41 32 43 28 41 24 37 24 30Z"/>`],
+["Fox + moon",`<path d="M44 10a22 22 0 1 0 0 44 17 17 0 1 1 0-44Z"/><path d="M40 22 46 27 44 34H36L34 27Z"/>`],
+["Fox: diamond",`<path fill-rule="evenodd" d="M32 8 52 22 32 58 12 22Z M26 28l6 3-6 3z M38 28l-6 3 6 3z"/>`],
+["Fox + camera",`<path d="M8 12 22 22 20 28 30 34 28 40 12 40Z"/><rect x="34" y="26" width="22" height="16" rx="3"/><circle cx="45" cy="34" r="4" fill="var(--card)"/><path d="M38 26l2-3h6l2 3Z"/>`],
+["Fox: 2 triangles",`<path d="M14 16 26 26H38L50 16 44 34 32 52 20 34Z"/>`],
+["Fox: cheek fluff",`<path d="M12 12 28 22H36L52 12 50 30 44 34 50 40C48 50 40 56 32 56 24 56 16 50 14 40L20 34 14 30Z"/>`],
+["Fox: ping face",`<path fill-rule="evenodd" d="M18 18 28 26H36L46 18 44 34C44 44 38 50 32 52 26 50 20 44 20 34Z"/><path fill="none" stroke="var(--acc)" stroke-width="2.5" d="M12 14A26 26 0 0 0 12 50 M52 50A26 26 0 0 0 52 14"/>`],
+["Paw print",`<circle cx="32" cy="40" r="10"/><circle cx="18" cy="28" r="4.5"/><circle cx="26" cy="20" r="4.5"/><circle cx="38" cy="20" r="4.5"/><circle cx="46" cy="28" r="4.5"/>`],
+["Paw pin",`<path d="M32 4C21 4 12 13 12 24 12 40 32 60 32 60S52 40 52 24C52 13 43 4 32 4Z"/><circle cx="32" cy="26" r="6" fill="var(--card)"/><circle cx="24" cy="18" r="3" fill="var(--card)"/><circle cx="40" cy="18" r="3" fill="var(--card)"/>`],
+["Fox: wink",`<path fill-rule="evenodd" d="M12 12 28 23H36L52 12 48 34C48 45 41 53 32 56 23 53 16 45 16 34Z M40 31h6"/><circle cx="26" cy="32" r="2.4" fill="var(--card)"/><path stroke="var(--card)" stroke-width="2.5" d="M37 32h6"/>`],
+["Fox tail = P",`<path d="M20 12h14v34h-8V26C22 30 16 24 20 12Z"/><path d="M34 12c10 0 14 6 14 14s-4 14-14 14V30c4 0 6-2 6-4s-2-4-6-4Z"/>`],
+["Fox: 2-tone",`<path d="M10 10 28 22H36L54 10 50 32C50 44 42 53 32 57 22 53 14 44 14 32Z"/><path fill="var(--acc2)" d="M28 22H36L34 40 32 46 30 40Z"/>`],
+["Fox: hex badge",`<path d="M32 6 54 18V44L32 58 10 44V18Z"/><path fill="var(--card)" fill-rule="evenodd" d="M22 22 30 28H34L42 22 40 36C40 43 36 47 32 49 28 47 24 43 24 36Z"/>`],
+["Fox leaps pin",`<path d="M8 30C18 18 30 20 36 30 34 22 40 18 46 20 40 22 40 28 44 32 36 30 30 36 28 44 18 44 10 40 8 30Z"/><circle cx="50" cy="46" r="7"/>`],
+// ---- PINS / MAP (25-48) ----
+["Pin: classic",`<path d="M32 4C21 4 12 13 12 24 12 40 32 60 32 60S52 40 52 24C52 13 43 4 32 4Z"/><circle cx="32" cy="24" r="7" fill="var(--card)"/>`],
+["Pin: solid dot",`<path d="M32 6C22 6 14 14 14 24 14 38 32 58 32 58S50 38 50 24C50 14 42 6 32 6Z"/>`],
+["Pin: dropped",`<ellipse cx="32" cy="54" rx="12" ry="3.5" opacity=".4"/><path d="M32 4C22 4 14 12 14 22 14 34 32 48 32 48S50 34 50 22C50 12 42 4 32 4Z"/><circle cx="32" cy="22" r="6" fill="var(--card)"/>`],
+["Pin: cluster",`<path d="M22 8C14 8 8 14 8 22 8 32 22 44 22 44S36 32 36 22C36 14 30 8 22 8Z" opacity=".5"/><path d="M42 18C34 18 28 24 28 32 28 42 42 56 42 56S56 42 56 32C56 24 50 18 42 18Z"/><circle cx="42" cy="32" r="5" fill="var(--card)"/>`],
+["Pin + star",`<path d="M32 4C21 4 12 13 12 24 12 40 32 60 32 60S52 40 52 24C52 13 43 4 32 4Z"/><path fill="var(--card)" d="M32 14 35 22 43 22 37 27 39 35 32 30 25 35 27 27 21 22 29 22Z"/>`],
+["Pin: ping rings",`<circle cx="32" cy="30" r="7"/><path fill="none" stroke="var(--acc)" stroke-width="3" d="M20 18A17 17 0 0 0 20 42 M44 42A17 17 0 0 0 44 18"/>`],
+["Pin: keyhole",`<path d="M32 4C21 4 12 13 12 24 12 40 32 60 32 60S52 40 52 24C52 13 43 4 32 4Z"/><circle cx="32" cy="20" r="5" fill="var(--card)"/><path fill="var(--card)" d="M30 24h4l2 10h-8Z"/>`],
+["Folded map",`<path d="M8 16 24 10 40 16 56 10V48L40 54 24 48 8 54Z"/><path fill="var(--card)" d="M24 10V48M40 16V54"/>`],
+["Map + pin",`<path d="M8 18 22 12 42 18 56 12V46L42 52 22 46 8 52Z" opacity=".5"/><path d="M40 20C33 20 28 25 28 31 28 40 40 52 40 52S52 40 52 31C52 25 47 20 40 20Z"/><circle cx="40" cy="31" r="4.5" fill="var(--card)"/>`],
+["Route line",`<path fill="none" stroke="var(--acc)" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 8" d="M12 50C12 50 20 30 34 32 48 34 52 14 52 14"/><circle cx="12" cy="50" r="4"/><circle cx="52" cy="14" r="5"/>`],
+["A to B route",`<path fill="none" stroke="var(--acc)" stroke-width="3.5" d="M16 46C16 30 48 34 48 18"/><circle cx="16" cy="48" r="5"/><path d="M48 8 54 20H42Z"/>`],
+["X marks spot",`<path stroke="var(--acc)" stroke-width="6" stroke-linecap="round" d="M16 16 48 48M48 16 16 48"/>`],
+["Dotted trail",`<circle cx="14" cy="50" r="4"/><circle cx="26" cy="40" r="3.5"/><circle cx="36" cy="32" r="3"/><circle cx="44" cy="24" r="3"/><path d="M50 8C44 8 40 12 40 17 40 24 50 34 50 34S60 24 60 17C60 12 56 8 50 8Z" transform="translate(-2 -2) scale(.9)"/>`],
+["Crossroads",`<path stroke="var(--acc)" stroke-width="6" d="M32 8V56M8 32H56"/><circle cx="32" cy="32" r="6" fill="var(--card)" stroke="var(--acc)" stroke-width="3"/>`],
+["Waypoint diamond",`<path d="M32 6 44 22 32 38 20 22Z"/><path fill="none" stroke="var(--acc)" stroke-width="4" stroke-linecap="round" d="M32 38V56"/>`],
+["Chat pin",`<path d="M32 6C20 6 10 14 10 24 10 30 14 35 20 38L16 50 30 42C31 42 31 42 32 42 44 42 54 34 54 24 54 14 44 6 32 6Z"/><circle cx="32" cy="24" r="5" fill="var(--card)"/>`],
+["Ear pin",`<path fill="none" stroke="var(--acc)" stroke-width="3" d="M18 12 24 22M46 12 40 22"/><path d="M32 8C22 8 14 16 14 26 14 41 32 58 32 58S50 41 50 26C50 16 42 8 32 8Z"/><circle cx="32" cy="26" r="6" fill="var(--card)"/>`],
+["Heart pin",`<path d="M32 6C22 6 14 14 14 24 14 40 32 58 32 58S50 40 50 24C50 14 42 6 32 6Z"/><path fill="var(--card)" d="M32 30C28 26 22 27 22 22 22 19 25 18 27 20L32 24 37 20C39 18 42 19 42 22 42 27 36 26 32 30Z"/>`],
+["Map tiles",`<rect x="10" y="10" width="20" height="20" rx="3"/><rect x="34" y="10" width="20" height="20" rx="3" opacity=".55"/><rect x="10" y="34" width="20" height="20" rx="3" opacity=".55"/><rect x="34" y="34" width="20" height="20" rx="3"/>`],
+["Compass pin",`<path d="M32 4C21 4 12 13 12 24 12 40 32 60 32 60S52 40 52 24C52 13 43 4 32 4Z"/><path fill="var(--card)" d="M32 12 37 24 32 22 27 24Z"/><path fill="var(--card)" opacity=".7" d="M32 36 27 24 32 26 37 24Z"/>`],
+["Crosshair loc",`<circle cx="32" cy="32" r="14" fill="none" stroke="var(--acc)" stroke-width="4"/><circle cx="32" cy="32" r="4"/><path stroke="var(--acc)" stroke-width="4" stroke-linecap="round" d="M32 6v8M32 50v8M6 32h8M50 32h8"/>`],
+["Beacon waves",`<circle cx="32" cy="40" r="6"/><path fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" d="M22 30a14 14 0 0 1 20 0M17 24a22 22 0 0 1 30 0"/>`],
+["Split pin (2 modes)",`<path d="M32 4C21 4 12 13 12 24 12 40 32 60 32 60V4Z"/><path fill="var(--vio)" d="M32 4C43 4 52 13 52 24 52 40 32 60 32 60V4Z"/><circle cx="32" cy="24" r="6" fill="var(--card)"/>`],
+["Stacked layers",`<path d="M32 8 56 20 32 32 8 20Z"/><path fill="none" stroke="var(--acc)" stroke-width="3" d="M10 30 32 41 54 30M10 40 32 51 54 40"/>`],
+// ---- NIGHT / EXPLORE (49-68) ----
+["Crescent moon",`<path fill="var(--vio)" d="M40 6a26 26 0 1 0 0 52 20 20 0 1 1 0-52Z"/>`],
+["Moon + stars",`<path fill="var(--vio)" d="M38 10a22 22 0 1 0 0 44 17 17 0 1 1 0-44Z"/><path fill="var(--acc)" d="M50 12 52 18 58 20 52 22 50 28 48 22 42 20 48 18Z"/>`],
+["Spark 4pt",`<path d="M32 6 37 27 58 32 37 37 32 58 27 37 6 32 27 27Z"/>`],
+["Shooting star",`<path d="M46 14 49 22 57 25 49 28 46 36 43 28 35 25 43 22Z"/><path fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" d="M40 24 10 54"/>`],
+["Constellation",`<path fill="none" stroke="var(--acc)" stroke-width="2.5" d="M12 20 26 40 44 28 52 48"/><circle cx="12" cy="20" r="3"/><circle cx="26" cy="40" r="3"/><circle cx="44" cy="28" r="3"/><circle cx="52" cy="48" r="3"/>`],
+["Skyline night",`<path d="M6 54V34h6V24h6v10h6V18h8v16h6V28h6v10h8V54Z"/><circle cx="48" cy="16" r="5" fill="var(--vio)"/>`],
+["Flashlight beam",`<rect x="10" y="26" width="16" height="12" rx="3" transform="rotate(-20 18 32)"/><path fill="var(--acc)" opacity=".5" d="M28 22 58 12 58 44 28 40Z"/>`],
+["Lantern",`<rect x="22" y="18" width="20" height="26" rx="4"/><path d="M26 14h12M30 10h4" stroke="var(--acc)" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="28" y="24" width="8" height="14" rx="2" fill="var(--card)"/>`],
+["Compass rose",`<circle cx="32" cy="32" r="24" fill="none" stroke="var(--acc)" stroke-width="3"/><path d="M32 14 37 30 32 34 27 30Z"/><path opacity=".55" d="M32 50 27 34 32 30 37 34Z"/>`],
+["Binoculars",`<circle cx="20" cy="36" r="12"/><circle cx="44" cy="36" r="12"/><circle cx="20" cy="36" r="5" fill="var(--card)"/><circle cx="44" cy="36" r="5" fill="var(--card)"/><path d="M18 20h6l-2 8h-2ZM40 20h6l-2 8h-2Z"/>`],
+["Keyhole glow",`<circle cx="32" cy="26" r="9"/><path d="M28 32h8l3 18H25Z"/>`],
+["Doorway arch",`<path d="M16 56V28a16 16 0 0 1 32 0v28Z"/><path fill="var(--card)" d="M22 56V30a10 10 0 0 1 20 0v26Z"/><circle cx="38" cy="42" r="2"/>`],
+["Broken window",`<rect x="14" y="10" width="36" height="44" rx="2"/><path fill="var(--card)" stroke="var(--card)" stroke-width="1" d="M32 10 30 28 22 30 30 34 26 54 34 34 44 40 34 30 42 24 32 26Z"/>`],
+["Brick wall",`<rect x="10" y="14" width="20" height="10" rx="1"/><rect x="34" y="14" width="20" height="10" rx="1"/><rect x="22" y="27" width="20" height="10" rx="1"/><rect x="10" y="40" width="20" height="10" rx="1"/><rect x="34" y="40" width="20" height="10" rx="1"/>`],
+["Chain-link",`<path fill="none" stroke="var(--acc)" stroke-width="3" d="M12 12 32 32 12 52M32 12 52 32 32 52M12 32H52M32 12V52"/>`],
+["Ladder",`<path stroke="var(--acc)" stroke-width="5" stroke-linecap="round" d="M22 8V56M42 8V56M22 18H42M22 30H42M22 42H42"/>`],
+["Fire escape",`<path fill="none" stroke="var(--acc)" stroke-width="4" d="M14 10V54M50 10V54M14 22H32V34H50M14 40H32"/>`],
+["Traffic cone",`<path d="M28 12h8l10 40H18Z"/><path fill="var(--card)" d="M25 30h14l1.5 6H23.5Z"/><rect x="14" y="52" width="36" height="6" rx="2"/>`],
+["Padlock",`<rect x="14" y="28" width="36" height="28" rx="5"/><path fill="none" stroke="var(--acc)" stroke-width="5" d="M22 28v-6a10 10 0 0 1 20 0v6"/><circle cx="32" cy="40" r="4" fill="var(--card)"/>`],
+["Discovery arrow",`<circle cx="32" cy="32" r="24" fill="none" stroke="var(--acc)" stroke-width="4"/><path d="M24 40 40 24M40 24H28M40 24V36" stroke="var(--acc)" stroke-width="4" fill="none" stroke-linecap="round"/>`],
+// ---- PHOTO (69-80) ----
+["Camera",`<rect x="8" y="20" width="48" height="30" rx="5"/><circle cx="32" cy="35" r="9" fill="var(--card)"/><circle cx="32" cy="35" r="4"/><path d="M22 20l3-5h14l3 5Z"/>`],
+["Aperture",`<circle cx="32" cy="32" r="22" fill="none" stroke="var(--acc)" stroke-width="4"/><path d="M32 12 44 22 40 32H24L20 22Z"/><circle cx="32" cy="34" r="6" fill="var(--card)"/>`],
+["Lens rings",`<circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="15" fill="var(--card)"/><circle cx="32" cy="32" r="9"/><circle cx="27" cy="27" r="3" fill="var(--card)"/>`],
+["Viewfinder",`<path fill="none" stroke="var(--acc)" stroke-width="4" stroke-linecap="round" d="M12 20V12H20M44 12H52V20M52 44V52H44M20 52H12V44"/><circle cx="32" cy="32" r="5"/>`],
+["Film frame",`<rect x="12" y="12" width="40" height="40" rx="3"/><path fill="var(--card)" d="M12 18h6v4h-6ZM12 28h6v4h-6ZM12 38h6v4h-6ZM46 18h6v4h-6ZM46 28h6v4h-6ZM46 38h6v4h-6Z"/><rect x="22" y="20" width="20" height="24" rx="2" fill="var(--card)"/>`],
+["Shutter",`<circle cx="32" cy="32" r="22"/><path fill="var(--card)" d="M32 32 32 10A22 22 0 0 1 51 21ZM32 32 51 43A22 22 0 0 1 32 54ZM32 32 13 43A22 22 0 0 1 13 21Z"/>`],
+["Polaroid",`<rect x="14" y="12" width="36" height="40" rx="3"/><rect x="19" y="17" width="26" height="22" rx="1" fill="var(--card)"/><circle cx="32" cy="28" r="6" fill="var(--acc)"/>`],
+["Flash bolt",`<path d="M34 6 16 36H30L26 58 48 26H34Z"/>`],
+["Eye",`<path d="M6 32C14 20 26 16 32 16 38 16 50 20 58 32 50 44 38 48 32 48 26 48 14 44 6 32Z"/><circle cx="32" cy="32" r="8" fill="var(--card)"/><circle cx="32" cy="32" r="4"/>`],
+["Eye + pin",`<path d="M6 32C14 20 26 16 32 16 38 16 50 20 58 32 50 44 38 48 32 48 26 48 14 44 6 32Z"/><path fill="var(--card)" d="M32 22C27 22 23 26 23 31 23 38 32 46 32 46S41 38 41 31C41 26 37 22 32 22Z"/><circle cx="32" cy="31" r="3"/>`],
+["Radar",`<circle cx="32" cy="32" r="22" fill="none" stroke="var(--acc)" stroke-width="3"/><circle cx="32" cy="32" r="12" fill="none" stroke="var(--acc)" stroke-width="2" opacity=".6"/><path d="M32 32 32 10A22 22 0 0 1 50 24Z" opacity=".4"/><circle cx="32" cy="32" r="3"/>`],
+["Scope",`<circle cx="32" cy="32" r="20" fill="none" stroke="var(--acc)" stroke-width="4"/><path stroke="var(--acc)" stroke-width="2.5" d="M32 12v40M12 32h40"/><circle cx="32" cy="32" r="3"/>`],
+// ---- ABSTRACT / TYPE / ALT ANIMALS (81-100) ----
+["P: bold",`<path d="M18 10h20c11 0 17 6 17 16s-6 16-17 16H28V54H18Z M28 20v12h9c4 0 7-2 7-6s-3-6-7-6Z"/>`],
+["P: tail flick",`<path d="M18 12h16c9 0 14 5 14 13s-5 13-14 13h-6v14H18Z M28 22v8h5c3 0 5-1 5-4s-2-4-5-4Z"/><path fill="none" stroke="var(--acc)" stroke-width="4" stroke-linecap="round" d="M44 46c6 0 10-4 10-10"/>`],
+["PR ligature",`<path d="M12 12h14c8 0 12 4 12 11 0 5-2 8-6 10l7 21H36l-6-19h-4v19H12Z M26 22v9h6c2 0 4-2 4-4s-2-5-4-5Z"/>`],
+["Fox-ear P",`<path d="M14 8 20 18 24 14ZM20 20h16c9 0 13 5 13 12s-4 12-13 12h-6v12H20Z M30 30v8h5c3 0 5-1 5-4s-2-4-5-4Z"/>`],
+["Diamond gem",`<path d="M32 8 48 22 32 56 16 22Z"/><path fill="var(--card)" d="M16 22H48M32 8 24 22 32 56 40 22Z" opacity=".35"/>`],
+["Hex badge",`<path d="M32 6 54 18V44L32 58 10 44V18Z"/><path fill="var(--card)" d="M32 18 44 25V39L32 46 20 39V25Z"/>`],
+["Shield",`<path d="M32 6 52 14V30C52 44 42 52 32 58 22 52 12 44 12 30V14Z"/><circle cx="32" cy="30" r="7" fill="var(--card)"/>`],
+["Orbit",`<circle cx="32" cy="32" r="6"/><ellipse cx="32" cy="32" rx="24" ry="10" fill="none" stroke="var(--acc)" stroke-width="3" transform="rotate(-25 32 32)"/><circle cx="52" cy="22" r="4"/>`],
+["Signal waves",`<circle cx="32" cy="48" r="5"/><path fill="none" stroke="var(--acc)" stroke-width="4" stroke-linecap="round" d="M20 40a17 17 0 0 1 24 0M14 32a26 26 0 0 1 36 0"/>`],
+["Asterisk 6pt",`<path stroke="var(--acc)" stroke-width="6" stroke-linecap="round" d="M32 10V54M13 21 51 43M51 21 13 43"/>`],
+["Target",`<circle cx="32" cy="32" r="22" fill="none" stroke="var(--acc)" stroke-width="4"/><circle cx="32" cy="32" r="13" fill="none" stroke="var(--acc)" stroke-width="4"/><circle cx="32" cy="32" r="4"/>`],
+["Speech + pin",`<path d="M10 12h44v26H30l-10 10 2-10H10Z"/><path fill="var(--card)" d="M32 18C27 18 23 22 23 27 23 33 32 40 32 40S41 33 41 27C41 22 37 18 32 18Z"/><circle cx="32" cy="27" r="3"/>`],
+["Ghost (nod)",`<path d="M14 30a18 18 0 0 1 36 0v24l-6-5-6 5-6-5-6 5-6-5Z"/><circle cx="26" cy="28" r="2.5" fill="var(--card)"/><circle cx="38" cy="28" r="2.5" fill="var(--card)"/>`],
+["Night owl",`<path d="M32 10C20 10 12 20 12 34 12 46 20 54 32 54 44 54 52 46 52 34 52 20 44 10 32 10Z"/><circle cx="24" cy="30" r="7" fill="var(--card)"/><circle cx="40" cy="30" r="7" fill="var(--card)"/><circle cx="24" cy="30" r="3"/><circle cx="40" cy="30" r="3"/><path d="M30 38 34 38 32 43Z" fill="var(--card)"/>`],
+["Bat",`<path d="M32 20C30 14 26 12 22 12 24 16 22 18 18 18 12 18 8 14 6 12 6 22 14 26 20 26 18 30 20 34 24 34 26 30 30 28 32 32 34 28 38 30 40 34 44 34 46 30 44 26 50 26 58 22 58 12 56 14 52 18 46 18 42 18 40 16 42 12 38 12 34 14 32 20Z"/>`],
+["Cat",`<path d="M18 16 24 26C28 24 36 24 40 26L46 16 44 40C44 50 38 54 32 54 26 54 20 50 20 40Z"/><circle cx="26" cy="34" r="2.5" fill="var(--card)"/><circle cx="38" cy="34" r="2.5" fill="var(--card)"/>`],
+["Loc + heart",`<path d="M32 58S12 38 12 24a20 20 0 0 1 40 0C52 38 32 58 32 58Z"/><path fill="var(--card)" d="M32 32C28 28 22 29 22 24 22 21 25 20 27 22L32 26 37 22C39 20 42 21 42 24 42 29 36 28 32 32Z"/>`],
+["Map + ear",`<path d="M12 8 18 18 22 14Z"/><path d="M10 20 24 14 40 20 54 14V50L40 56 24 50 10 56Z"/><path fill="var(--card)" d="M24 14V50M40 20V56"/>`],
+["P in square",`<rect x="8" y="8" width="48" height="48" rx="14"/><path fill="var(--card)" d="M22 18h12c7 0 11 4 11 10s-4 10-11 10h-4v8h-8Z M30 26v6h4c2 0 3-1 3-3s-1-3-3-3Z"/>`],
+["Star in pin",`<path d="M32 4C21 4 12 13 12 24 12 40 32 60 32 60S52 40 52 24C52 13 43 4 32 4Z"/><path fill="var(--card)" d="M32 13 35 21 44 22 37 28 39 37 32 32 25 37 27 28 20 22 29 21Z"/>`],
+];
+
+const grid=document.getElementById("grid");
+L.forEach((entry,i)=>{
+  const n=i+1;
+  const tile=document.createElement("div");
+  tile.className="tile"; tile.dataset.n=n;
+  tile.innerHTML=`<span class="num">${n}</span><span class="heart">♥</span>
+    <svg viewBox="0 0 64 64">${entry[1]}</svg><span class="fam">${entry[0]}</span>`;
+  tile.onclick=()=>{ tile.classList.toggle("liked"); updateLiked(); };
+  grid.appendChild(tile);
+});
+function updateLiked(){
+  const liked=[...document.querySelectorAll(".tile.liked")].map(t=>+t.dataset.n).sort((a,b)=>a-b);
+  document.getElementById("likedList").textContent = liked.length? liked.join(", ") : "none yet";
+}
+document.getElementById("themeBtn").onclick=()=>{
+  const r=document.documentElement; r.dataset.theme = r.dataset.theme==="night"?"day":"night";
+};
+</script>
+</body>
+</html>
