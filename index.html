@@ -107,7 +107,7 @@
   <h2 class="view-sub">Your reviews</h2>
   <div id="myReviews"></div>
   <p style="margin-top:26px;font-size:11px;color:var(--text-dim);text-align:center">
-    Demo build · spot photos are licensed stock via <a href="https://www.pexels.com" style="color:var(--accent)">Pexels</a> (credits in img/credits.json) · all spots are fictional
+    Demo build · real Dallas spots · photos are representative licensed stock via <a href="https://www.pexels.com" style="color:var(--accent)">Pexels</a>
   </p>
 </section>
 
@@ -306,10 +306,29 @@
   </form>
 </div>
 
+<!-- ===== PROWL GUIDE (AI assistant, bottom-right) ===== -->
+<button class="guide-fab" id="guideFab" aria-label="Ask the Prowl guide">
+  <svg viewBox="0 0 24 24"><path d="M12 3l1.5 4.2L18 8.5l-4.5 1.3L12 14l-1.5-4.2L6 8.5l4.5-1.3z"/><circle cx="18.5" cy="16.5" r="1.5"/><circle cx="6.5" cy="15" r="1.1"/></svg>
+</button>
+<div class="sheet-backdrop" id="guideBackdrop"></div>
+<div class="guide-panel" id="guidePanel">
+  <div class="guide-head">
+    <div><b>Prowl Guide</b><small>ask what you're feeling</small></div>
+    <button class="guide-close" id="guideClose" aria-label="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="guide-msgs" id="guideMsgs"></div>
+  <div class="guide-quick" id="guideQuick"></div>
+  <form class="guide-input" id="guideForm">
+    <input id="guideText" placeholder="e.g. spicy tacos, chill coffee…" autocomplete="off">
+    <button type="submit" aria-label="Send"><svg class="ico" viewBox="0 0 24 24"><path d="M4 12l16-7-7 16-2-7z"/></svg></button>
+  </form>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="real-spots.js"></script>
 <script src="data.js"></script>
 <script src="app.js"></script>
 <script src="pb.js"></script>

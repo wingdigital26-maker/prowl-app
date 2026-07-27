@@ -858,6 +858,99 @@ document.getElementById("splash").onclick = () => {
   setTimeout(() => sp.classList.remove("open", "leaving"), 400);
 };
 
+// ===== Prowl Guide (assistant) =====
+const GUIDE_CATS = {
+  food: ["food","eat","eats","hungry","dinner","lunch","brunch","taco","tacos","ramen","pho","burger","pizza","bbq","barbecue","brisket","sushi","dessert","noodle","breakfast","spicy","cheap"],
+  coffee: ["coffee","cafe","latte","espresso","matcha","chai","study","wifi","work"],
+  bar: ["drink","drinks","bar","cocktail","cocktails","beer","wine","rooftop","speakeasy","date"],
+  hangout: ["chill","hang","hangout","relax","park","patio","sit","lowkey","people"],
+  nature: ["nature","trail","outside","walk","water","garden","stars","hike","lake","sunset"],
+  abandoned: ["abandoned","urbex","explore","creepy","graffiti","mural","murals","ruins","photo","photos","photogenic","gritty","history"],
+};
+const GUIDE_LEAD = {
+  food: "Hungry? Here's where I'd go",
+  coffee: "Coffee run. Try these",
+  bar: "For drinks, these are the move",
+  hangout: "To just chill, check out",
+  nature: "Get outside at",
+  abandoned: "For something gritty to explore",
+  "": "Here's what I'd hit",
+};
+function guideDetectCat(q) {
+  q = q.toLowerCase();
+  let best = "", bestN = 0;
+  for (const [cat, words] of Object.entries(GUIDE_CATS)) {
+    const n = words.filter(w => q.includes(w)).length;
+    if (n > bestN) { bestN = n; best = cat; }
+  }
+  return best;
+}
+function guideRecommend(q) {
+  const cat = guideDetectCat(q);
+  const words = q.toLowerCase().split(/[^a-z]+/).filter(w => w.length > 2);
+  let pool = state.spots.slice();
+  if (cat) pool = pool.filter(s => s.cat === cat);
+  if (!pool.length) pool = state.spots.slice();
+  pool.forEach(s => {
+    const hay = (s.name + " " + s.desc + " " + s.tags.join(" ")).toLowerCase();
+    s._score = words.reduce((a, w) => a + (hay.includes(w) ? 2 : 0), 0) + avgStars(s);
+  });
+  pool.sort((a, b) => b._score - a._score);
+  return { cat, spots: pool.slice(0, 3) };
+}
+function guideAddMsg(who, html) {
+  const el = document.createElement("div");
+  el.className = "g-msg " + who;
+  el.innerHTML = html;
+  document.getElementById("guideMsgs").appendChild(el);
+  scrollGuide();
+}
+function guideAddRec(s) {
+  const el = document.createElement("div");
+  el.className = "g-rec";
+  const bg = s.photos && s.photos.length ? `style="background-image:url('${s.photos[0]}')"` : `style="background:${CAT_META[s.cat].grad}"`;
+  el.innerHTML = `<div class="g-rec-thumb" ${bg}>${s.photos && s.photos.length ? "" : CAT_META[s.cat].emoji}</div>
+    <div class="g-rec-info"><b>${s.name}</b><small>${CAT_META[s.cat].label} · ${s.zip}</small><span class="g-stars">${starStr(avgStars(s))} ${avgStars(s).toFixed(1)}</span></div>`;
+  el.onclick = () => { if (spotMode(s.cat) !== state.mode) setMode(spotMode(s.cat)); closeGuide(); showView("map"); openSheet(s.id); };
+  document.getElementById("guideMsgs").appendChild(el);
+  scrollGuide();
+}
+function scrollGuide() { const m = document.getElementById("guideMsgs"); m.scrollTop = m.scrollHeight; }
+function guideAsk(q) {
+  guideAddMsg("user", q);
+  const { cat, spots } = guideRecommend(q);
+  setTimeout(() => {
+    if (!spots.length) { guideAddMsg("bot", "I couldn't find a match for that yet. Try tacos, coffee, rooftop drinks, or somewhere abandoned to shoot photos."); return; }
+    guideAddMsg("bot", GUIDE_LEAD[cat] + ":");
+    spots.forEach(guideAddRec);
+  }, 260);
+}
+let guideGreeted = false;
+function openGuide() {
+  document.getElementById("guidePanel").classList.add("open");
+  if (!guideGreeted) {
+    guideGreeted = true;
+    guideAddMsg("bot", "Hey, I'm your Prowl guide 🦉 Tell me what you're feeling and I'll point you at spots. Try something like \"spicy tacos\" or \"rooftop for drinks.\"");
+  }
+}
+function closeGuide() { document.getElementById("guidePanel").classList.remove("open"); }
+document.getElementById("guideFab").onclick = () => {
+  const p = document.getElementById("guidePanel");
+  p.classList.contains("open") ? closeGuide() : openGuide();
+};
+document.getElementById("guideClose").onclick = closeGuide;
+document.getElementById("guideForm").onsubmit = e => {
+  e.preventDefault();
+  const t = document.getElementById("guideText");
+  const q = t.value.trim();
+  if (!q) return;
+  t.value = "";
+  guideAsk(q);
+};
+const GUIDE_QUICK = ["🌮 Tacos", "☕ Coffee to work", "🍸 Rooftop drinks", "😌 Somewhere chill", "🌲 Get outside", "🏚 Abandoned + photos"];
+document.getElementById("guideQuick").innerHTML = GUIDE_QUICK.map(q => `<button class="g-quick">${q}</button>`).join("");
+document.querySelectorAll("#guideQuick .g-quick").forEach(b => b.onclick = () => guideAsk(b.textContent.replace(/^[^\w]+/, "").trim()));
+
 // Initialize mode UI (chips + toggle) before the backend load kicks in
 document.body.dataset.mode = state.mode;
 document.querySelectorAll(".mode-btn").forEach(b => b.classList.toggle("active", b.dataset.mode === state.mode));
