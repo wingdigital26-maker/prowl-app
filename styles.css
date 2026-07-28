@@ -1192,3 +1192,44 @@ button, a, .pill-btn, .chip, .tab, .mode-btn { -webkit-tap-highlight-color: tran
   background: var(--accent); opacity: .9;
 }
 .guide-fab:active { transform: scale(.9); }
+
+/* ==================================================================
+   CATEGORY LOGOS (replace fake stock photos) + video play cues
+   A spot's face = a clean monoline logo on its category gradient,
+   unless we hold a real licensed photo. Video plays on tap.
+   ================================================================== */
+.cat-logo { display: grid; place-items: center; color: #fff; line-height: 0; }
+.cat-logo svg { width: 44%; height: 44%; opacity: .95; filter: drop-shadow(0 1px 2px rgba(0,0,0,.22)); }
+
+/* Per-context sizing */
+.bubble-pin .cat-logo { position: absolute; inset: 0; }
+.bubble-pin .cat-logo svg { width: 24px; height: 24px; }
+.story-face .cat-logo { width: 100%; height: 100%; }
+.story-face .cat-logo svg { width: 22px; height: 22px; }
+.ec-emoji .cat-logo svg { width: 40px; height: 40px; opacity: .9; }
+.hero-emoji .cat-logo svg { width: 74px; height: 74px; opacity: .96; }
+.g-rec-thumb .cat-logo { width: 100%; height: 100%; }
+.g-rec-thumb .cat-logo svg { width: 26px; height: 26px; }
+.fc-logo-media { display: grid; place-items: center; min-height: 150px; }
+.fc-logo-media .cat-logo svg { width: 66px; height: 66px; opacity: .9; }
+
+/* Hero: stack the logo + a "watch" cue when there's a video */
+.sheet-hero.emoji-hero .hero-emoji { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.hero-play {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 15px; border-radius: 999px;
+  background: rgba(0,0,0,.34); backdrop-filter: blur(6px);
+  color: #fff; font-size: 13px; font-weight: 800; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.25);
+}
+.hero-play:active { transform: scale(.95); }
+
+/* Small "has video" badge on pins + cards */
+.play-badge {
+  position: absolute; top: 6px; right: 6px; z-index: 3;
+  width: 17px; height: 17px; border-radius: 50%;
+  background: rgba(0,0,0,.6); color: #fff;
+  font-size: 8px; display: grid; place-items: center; padding-left: 1px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.35);
+}
+.explore-card .play-badge, .fc-logo-media .play-badge { width: 26px; height: 26px; font-size: 11px; top: 10px; right: 10px; }

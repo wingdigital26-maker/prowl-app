@@ -15,7 +15,8 @@ const ABANDONED_SPOTS = [
     reviews: [
       { user: "spahotelsam", stars: 5, text: "Even from the street this thing is jaw dropping. Fourteen stories of old ghosts." },
       { user: "wellsroamer", stars: 4, text: "Fenced off and guarded now with the rebuild, but the outside alone is worth the drive." }
-    ]
+    ],
+    embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@thebakerhotelandspa/video/7267331459550137642" }]
   },
   {
     id: 502, name: "Kimbell Milling Grain Silos", cat: "abandoned",
@@ -76,7 +77,8 @@ const ABANDONED_SPOTS = [
     reviews: [
       { user: "smokestackscout", stars: 5, text: "That lone smokestack over an empty valley is haunting. Easy drive up off I-20." },
       { user: "graveyardgail", stars: 4, text: "The cemetery on the hill is the real draw. Whole town just vanished." }
-    ]
+    ],
+    embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@jsorsby/video/7466978101096959278" }]
   },
   {
     id: 507, name: "Stony Ghost Town", cat: "abandoned",
@@ -148,6 +150,29 @@ const ABANDONED_SPOTS = [
     reviews: [
       { user: "goatmangone", stars: 5, text: "Rusty old iron bridge deep in the trees. Creepy in the best way, super photogenic." },
       { user: "dentondayhiker", stars: 4, text: "Great in daylight. Gets genuinely eerie and dark out there at night, go with people." }
-    ]
+    ],
+    embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@kalanighosthunter/video/7143259558662720811" }]
+  },
+  {
+    // Community-discovered via TikTok. Exact location kept quiet by the urbex
+    // community (as they do), so the pin is approximate and it is flagged for review.
+    id: 513, name: "Dallas' Largest Abandoned Building", cat: "abandoned",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=abandoned%20building%20Dallas",
+    lat: 32.7935, lng: -96.8100, zip: "75201",
+    desc: "A massive abandoned complex that Dallas urban explorers call one of the biggest bandos in the city, cavernous empty floors with rooftop views over downtown. The exact spot is kept quiet by the urbex community, so this pin is approximate. It is private property, so treat it as a look and photograph from a distance spot, do not force your way in.",
+    tags: ["private", "urbex", "trespassing-risk", "loc-approx", "auto-ingested"], danger: 3, rating: null,
+    needs_review: true, legal_status: "unverified",
+    reviews: [],
+    embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@decaying.texas/video/7469547348864044331" }]
+  },
+  {
+    id: 514, name: "Dallas Hidden Gem (urbex)", cat: "abandoned",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=abandoned%20places%20Dallas",
+    lat: 32.7680, lng: -96.7850, zip: "75226",
+    desc: "A Dallas urbex hidden gem passed around by local explorers, the kind of quiet decayed spot people go to just to get away and shoot. The exact location is kept quiet, so this pin is approximate. Private and unofficial, so go in daylight with a friend and respect the property.",
+    tags: ["private", "urbex", "trespassing-risk", "loc-approx", "auto-ingested"], danger: 3, rating: null,
+    needs_review: true, legal_status: "unverified",
+    reviews: [],
+    embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@_mr.meraki/video/7235991442525556010" }]
   }
 ];

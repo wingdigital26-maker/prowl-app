@@ -107,17 +107,36 @@ if (window.visualViewport) window.visualViewport.addEventListener("resize", fixM
 const HERE = { 3: 4, 4: 3, 8: 6, 9: 2, 12: 1 };
 function hereCount(s) { return HERE[s.id] || 0; }
 
-function pinFace(s) {
-  if (s.photos && s.photos.length) return `style="background-image:url('${s.photos[0]}')"`;
-  return `style="background:${CAT_META[s.cat].grad}"`;
+// ===== Visual identity: real photo, else a clean category logo =====
+// Fake stock photos are intentionally ignored. A spot's face is its category
+// logo unless we hold a REAL licensed photo (photoCredit). Any video plays on tap.
+const CAT_ICON = {
+  abandoned: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6 8 6"/><path d="M6 10v9h12v-9"/><path d="M10 19v-4h4v4"/><path d="M9 8l1.6 1.8M14.5 12.5l1.5 1.5"/></svg>',
+  tunnel:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20v-6a8 8 0 0 1 16 0v6"/><path d="M9 20v-3a3 3 0 0 1 6 0v3"/></svg>',
+  rooftop:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M6 21V8l5-3v16"/><path d="M11 21V11l7-3v13"/></svg>',
+  bar:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14l-7 8z"/><path d="M12 12v6"/><path d="M8 21h8"/></svg>',
+  coffee:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13v4a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 9h2a2 2 0 0 1 0 4h-2"/><path d="M8 3v2.5M11 3v2.5M14 3v2.5"/></svg>',
+  food:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a8 4 0 0 1 16 0z"/><path d="M5 12h14"/><path d="M5 15h14a7 3 0 0 1-14 0z"/></svg>',
+  hangout:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V9a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2"/><path d="M3 11a2 2 0 0 1 2 2v3h14v-3a2 2 0 0 1 2-2"/><path d="M6 19v2M18 19v2"/></svg>',
+  nature:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l5 7h-3l3 5H7l3-5H7z"/><path d="M12 15v6"/></svg>',
+};
+function catLogo(cat) { return `<span class="cat-logo">${CAT_ICON[cat] || CAT_ICON.abandoned}</span>`; }
+function realPhoto(s) { return (s.photoCredit && s.photos && s.photos.length) ? s.photos[0] : null; }
+function hasVideo(s) { return (s.embeds || []).some(e => e.type === "tiktok" || e.type === "instagram"); }
+function faceStyle(s) {
+  const p = realPhoto(s);
+  return p ? `style="background-image:url('${p}')"` : `style="background:${CAT_META[s.cat].grad}"`;
 }
+function faceInner(s) { return realPhoto(s) ? "" : catLogo(s.cat); }
+function playBadge(s) { return hasVideo(s) ? `<span class="play-badge">▶</span>` : ""; }
+
+function pinFace(s) { return faceStyle(s); }
 function renderMarkers() {
   cluster.clearLayers();
   visibleSpots().forEach(s => {
-    const hasPhoto = s.photos && s.photos.length;
     const icon = L.divIcon({
       className: "",
-      html: `<div class="bubble-pin ${s.sponsored ? "sponsored" : ""} ${s.id === state.openSpotId ? "selected" : ""}" data-sid="${s.id}" ${pinFace(s)}>${hasPhoto ? "" : `<span>${CAT_META[s.cat].emoji}</span>`}${hereCount(s) ? `<span class="here-dot">${hereCount(s)}</span>` : ""}${s.sponsored ? `<span class="sponsor-tag">Featured</span>` : ""}</div>`,
+      html: `<div class="bubble-pin ${s.sponsored ? "sponsored" : ""} ${s.id === state.openSpotId ? "selected" : ""}" data-sid="${s.id}" ${pinFace(s)}>${faceInner(s)}${playBadge(s)}${hereCount(s) ? `<span class="here-dot">${hereCount(s)}</span>` : ""}${s.sponsored ? `<span class="sponsor-tag">Featured</span>` : ""}</div>`,
       iconSize: [48, 48], iconAnchor: [24, 24],
     });
     const m = L.marker([s.lat, s.lng], { icon });
@@ -142,13 +161,9 @@ function renderStories() {
     : (hereCount(b) + avgStars(b)) - (hereCount(a) + avgStars(a)));
   const hot = inMode.slice(0, 8);
   document.getElementById("storyStrip").innerHTML = hot.map(s => {
-    const hasPhoto = s.photos && s.photos.length;
-    const face = hasPhoto
-      ? `style="background-image:url('${s.photos[0]}')"`
-      : `style="background:${CAT_META[s.cat].grad}"`;
     const seen = (JSON.parse(localStorage.getItem("moth.seenStories") || "[]")).includes(s.id);
     return `<button class="story ${seen ? "seen" : ""}" data-id="${s.id}">
-      <span class="story-ring"><span class="story-face" ${face}>${hasPhoto ? "" : CAT_META[s.cat].emoji}</span></span>
+      <span class="story-ring"><span class="story-face" ${faceStyle(s)}>${faceInner(s)}${playBadge(s)}</span></span>
       <span class="story-name">${s.name.split(" ").slice(0, 2).join(" ")}</span>
     </button>`;
   }).join("");
@@ -162,7 +177,7 @@ const sv = {
 };
 function openStory(id) {
   const s = state.spots.find(x => x.id === id);
-  if (!s || !s.photos || !s.photos.length) { openSheet(id); return; }
+  if (!s || !realPhoto(s)) { openSheet(id); return; }  // no real photo -> straight to the sheet (which shows the video)
   sv.spot = s; sv.idx = 0;
   document.getElementById("svFace").style.background = CAT_META[s.cat].grad;
   document.getElementById("svFace").textContent = CAT_META[s.cat].emoji;
@@ -357,12 +372,11 @@ function renderExplore() {
   // Featured (sponsored) spots always rise to the top
   list.sort((a, b) => (b.sponsored ? 1 : 0) - (a.sponsored ? 1 : 0));
   el.innerHTML = list.map(s => {
-    const hasPhoto = s.photos && s.photos.length;
-    const bg = hasPhoto ? `style="background-image:url('${s.photos[0]}')"` : `style="background:${CAT_META[s.cat].grad}"`;
-    return `<div class="explore-card ${s.sponsored ? "sponsored" : ""}" data-id="${s.id}" tabindex="0" ${bg}>
-      ${hasPhoto ? "" : `<span class="ec-emoji">${CAT_META[s.cat].emoji}</span>`}
+    return `<div class="explore-card ${s.sponsored ? "sponsored" : ""}" data-id="${s.id}" tabindex="0" ${faceStyle(s)}>
+      ${realPhoto(s) ? "" : `<span class="ec-emoji">${catLogo(s.cat)}</span>`}
+      ${playBadge(s)}
       ${s.sponsored ? `<span class="ec-featured">★ Featured</span>` : ""}
-      <span class="ec-label">${s.name}<small>${starStr(rateOf(s))} ${rateOf(s).toFixed(1)} · ZIP ${s.zip} · <span class="sketch-badge sketch-${s.danger}">${SKETCH_WORDS[s.danger]}</span></small></span>
+      <span class="ec-label">${s.name}<small>${rateOf(s) ? `${starStr(rateOf(s))} ${rateOf(s).toFixed(1)}` : "★ new"} · ZIP ${s.zip} · <span class="sketch-badge sketch-${s.danger}">${SKETCH_WORDS[s.danger]}</span></small></span>
     </div>`;
   }).join("") || `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>Nothing out here yet</b><small>No spots match that. Try another filter, or go drop one yourself.</small></div>`;
   el.querySelectorAll(".explore-card").forEach(c => {
@@ -509,7 +523,7 @@ function renderZipBoard() {
     .sort((a, b) => b.heat - a.heat).slice(0, 6);
   document.getElementById("zipBoard").innerHTML = rows.map((r, i) => {
     const top = r.spots.slice().sort((a, b) => avgStars(b) - avgStars(a))[0];
-    const bg = top.photos && top.photos.length ? `style="background-image:url('${top.photos[0]}')"` : `style="background:${CAT_META[top.cat].grad}"`;
+    const bg = faceStyle(top);
     return `<div class="zip-card" data-zip="${r.zip}" ${bg}>
       <span class="zc-rank">#${i + 1}</span>
       <span class="zc-label"><b>${r.zip}</b><small>${r.spots.length} spot${r.spots.length === 1 ? "" : "s"} · ${r.spots.reduce((a, s) => a + hereCount(s), 0)} here now</small></span>
@@ -543,14 +557,12 @@ function renderFeed() {
   const all = [...userPosts(), ...SEED_FEED];
   document.getElementById("feed").innerHTML = all.map((f, i) => {
     const spot = state.spots.find(s => f.spotId === s.id);
-    const media = spot && spot.photos && spot.photos.length
-      ? `style="background-image:url('${spot.photos[0]}')"`
-      : spot ? `style="background:${CAT_META[spot.cat].grad}"` : `style="background:var(--bg-3)"`;
+    const media = spot ? faceStyle(spot) : `style="background:var(--bg-3)"`;
     const liked = state.likes["f" + i];
     const likeCount = (f.likes || 0) + (liked ? 1 : 0);
     return `<div class="feed-card">
       <div class="fc-head"><span class="fc-avatar">${f.user[0].toUpperCase()}</span><b>@${f.user}</b><span class="fc-time">${f.time}</span></div>
-      ${spot ? `<div class="fc-media" data-id="${spot.id}" data-i="${i}" ${media}>${spot.photos && spot.photos.length ? "" : CAT_META[spot.cat].emoji}<div class="fc-heart-burst"><span>❤️</span></div></div>` : ""}
+      ${spot ? `<div class="fc-media fc-logo-media" data-id="${spot.id}" data-i="${i}" ${media}>${realPhoto(spot) ? "" : catLogo(spot.cat)}${playBadge(spot)}<div class="fc-heart-burst"><span>❤️</span></div></div>` : ""}
       <div class="fc-body">${f.text}</div>
       <div class="fc-actions">
         <button class="like-btn ${liked ? "liked" : ""}" data-i="${i}">${liked ? "❤️" : "🤍"} ${likeCount}</button>
@@ -659,14 +671,18 @@ function openSheet(id) {
   if (!s) return;
   state.openSpotId = id;
   const hero = document.getElementById("sheetHero");
-  if (s.photos && s.photos.length) {
-    hero.style.background = `url('${s.photos[0]}') center/cover`;
+  const rp = realPhoto(s);
+  if (rp) {
+    hero.style.background = `url('${rp}') center/cover`;
     hero.classList.remove("emoji-hero");
+    document.getElementById("heroEmoji").innerHTML = "";
   } else {
     hero.style.background = CAT_META[s.cat].grad;
     hero.classList.add("emoji-hero");
+    // Category logo as the face; if there's a video, a play cue that jumps to it.
+    document.getElementById("heroEmoji").innerHTML =
+      catLogo(s.cat) + (hasVideo(s) ? `<span class="hero-play" onclick="document.getElementById('embedSlot').scrollIntoView({behavior:'smooth'})">▶ watch</span>` : "");
   }
-  document.getElementById("heroEmoji").textContent = (s.photos && s.photos.length) ? "" : CAT_META[s.cat].emoji;
   document.getElementById("sheetName").textContent = s.name;
   const rating = rateOf(s);
   document.getElementById("sheetHeroPills").innerHTML =
@@ -1134,8 +1150,7 @@ function guideAddMsg(who, html) {
 function guideAddRec(s) {
   const el = document.createElement("div");
   el.className = "g-rec";
-  const bg = s.photos && s.photos.length ? `style="background-image:url('${s.photos[0]}')"` : `style="background:${CAT_META[s.cat].grad}"`;
-  el.innerHTML = `<div class="g-rec-thumb" ${bg}>${s.photos && s.photos.length ? "" : CAT_META[s.cat].emoji}</div>
+  el.innerHTML = `<div class="g-rec-thumb" ${faceStyle(s)}>${realPhoto(s) ? "" : catLogo(s.cat)}${playBadge(s)}</div>
     <div class="g-rec-info"><b>${s.name}</b><small>${CAT_META[s.cat].label} · ${s.zip}</small><span class="g-stars">${starStr(rateOf(s))} ${rateOf(s).toFixed(1)}</span></div>`;
   el.onclick = () => { if (spotMode(s.cat) !== state.mode) setMode(spotMode(s.cat)); closeGuide(); showView("map"); openSheet(s.id); };
   document.getElementById("guideMsgs").appendChild(el);
