@@ -162,7 +162,7 @@ const ABANDONED_SPOTS = [
   {
     // Community-discovered via TikTok. Exact location kept quiet by the urbex
     // community (as they do), so the pin is approximate and it is flagged for review.
-    id: 513, name: "Dallas' Largest Abandoned Building", cat: "abandoned",
+    id: 513, name: "The Big Empty", cat: "abandoned",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=abandoned%20building%20Dallas",
     lat: 32.7935, lng: -96.8100, zip: "75201",
     desc: "A massive abandoned complex that Dallas urban explorers call one of the biggest bandos in the city, cavernous empty floors with rooftop views over downtown. The exact spot is kept quiet by the urbex community, so this pin is approximate. It is private property, so treat it as a look and photograph from a distance spot, do not force your way in.",
@@ -172,7 +172,7 @@ const ABANDONED_SPOTS = [
     embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@decaying.texas/video/7469547348864044331" }]
   },
   {
-    id: 514, name: "Dallas Hidden Gem (urbex)", cat: "abandoned",
+    id: 514, name: "The Hideaway (Deep Ellum edge)", cat: "abandoned",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=abandoned%20places%20Dallas",
     lat: 32.7680, lng: -96.7850, zip: "75226",
     desc: "A Dallas urbex hidden gem passed around by local explorers, the kind of quiet decayed spot people go to just to get away and shoot. The exact location is kept quiet, so this pin is approximate. Private and unofficial, so go in daylight with a friend and respect the property.",

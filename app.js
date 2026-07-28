@@ -134,13 +134,18 @@ const CAT_COLOR = {
 function catColor(cat) { return CAT_COLOR[cat] || "#5c6b7a"; }
 function catLogo(cat) { return `<span class="cat-logo">${CAT_ICON[cat] || CAT_ICON.abandoned}</span>`; }
 function realPhoto(s) { return (s.photoCredit && s.photos && s.photos.length) ? s.photos[0] : null; }
+// Video preview thumbnail (TikTok oEmbed frame) shown as a credited link-preview.
+function videoThumb(s) { return (window.VIDEO_THUMBS && window.VIDEO_THUMBS[s.id]) || null; }
+// The image to show as a spot's face: a real licensed photo wins, else a video
+// preview frame, else nothing (falls back to the category logo).
+function previewImg(s) { return realPhoto(s) || (videoThumb(s) ? videoThumb(s).thumb : null); }
 function hasVideo(s) { return (s.embeds || []).some(e => e.type === "tiktok" || e.type === "instagram"); }
 function firstVideoUrl(s) { const e = (s.embeds || []).find(e => e.type === "tiktok" || e.type === "instagram"); return e ? e.url : null; }
 function faceStyle(s) {
-  const p = realPhoto(s);
+  const p = previewImg(s);
   return p ? `style="background-image:url('${p}')"` : `style="background:${catColor(s.cat)}"`;
 }
-function faceInner(s) { return realPhoto(s) ? "" : catLogo(s.cat); }
+function faceInner(s) { return previewImg(s) ? "" : catLogo(s.cat); }
 function playBadge(s) { return hasVideo(s) ? `<span class="play-badge">▶</span>` : ""; }
 
 function pinFace(s) { return faceStyle(s); }
@@ -164,6 +169,50 @@ function highlightSelectedPin() {
     p.classList.toggle("selected", +p.dataset.sid === state.openSpotId);
   });
 }
+
+// ===== In-app directions: route ON our own map (OSRM), external maps as fallback =====
+function extMapsUrl(s) { return `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`; }
+function accentColor() { return (getComputedStyle(document.body).getPropertyValue("--accent") || "#35bdf7").trim(); }
+function clearRoute() {
+  if (state.routeLine) { map.removeLayer(state.routeLine); state.routeLine = null; }
+  if (state.routeMe) { map.removeLayer(state.routeMe); state.routeMe = null; }
+  document.getElementById("routeBanner").classList.remove("open");
+}
+function showRouteBanner(s, meters, seconds) {
+  const mi = (meters / 1609.34).toFixed(1);
+  const min = Math.max(1, Math.round(seconds / 60));
+  document.getElementById("rbName").textContent = s.name;
+  document.getElementById("rbMeta").textContent = `${mi} mi · about ${min} min drive`;
+  document.getElementById("rbExt").href = extMapsUrl(s);
+  document.getElementById("routeBanner").classList.add("open");
+}
+function routeToSpot(s) {
+  clearRoute();
+  if (!navigator.geolocation) { window.open(extMapsUrl(s), "_blank"); return; }
+  toast("Finding your location…");
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const lat = pos.coords.latitude, lng = pos.coords.longitude;
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/${lng},${lat};${s.lng},${s.lat}?overview=full&geometries=geojson`;
+      const j = await (await fetch(url)).json();
+      if (!j.routes || !j.routes.length) throw new Error("no route");
+      const route = j.routes[0];
+      const line = route.geometry.coordinates.map(c => [c[1], c[0]]);
+      state.routeLine = L.polyline(line, { color: accentColor(), weight: 5, opacity: .9, lineCap: "round", lineJoin: "round" }).addTo(map);
+      state.routeMe = L.circleMarker([lat, lng], { radius: 7, color: "#fff", weight: 2, fillColor: accentColor(), fillOpacity: 1 }).addTo(map);
+      closeSheet();
+      map.fitBounds(state.routeLine.getBounds(), { padding: [70, 70] });
+      showRouteBanner(s, route.distance, route.duration);
+    } catch (e) {
+      toast("Couldn't draw the route — opening Maps");
+      window.open(extMapsUrl(s), "_blank");
+    }
+  }, () => {
+    toast("Location off — opening Maps instead");
+    window.open(extMapsUrl(s), "_blank");
+  }, { enableHighAccuracy: true, timeout: 8000 });
+}
+document.getElementById("rbClose").onclick = clearRoute;
 
 // ===== Story strip =====
 function renderStories() {
@@ -684,18 +733,17 @@ function openSheet(id) {
   if (!s) return;
   state.openSpotId = id;
   const hero = document.getElementById("sheetHero");
-  const rp = realPhoto(s);
-  if (rp) {
-    hero.style.background = `url('${rp}') center/cover`;
+  const pv = previewImg(s);
+  const vurl = firstVideoUrl(s);
+  const watchLink = vurl ? `<a class="hero-play" href="${vurl}" target="_blank" rel="noopener">▶ watch the video</a>` : "";
+  if (pv) {
+    hero.style.background = `url('${pv}') center/cover`;
     hero.classList.remove("emoji-hero");
-    document.getElementById("heroEmoji").innerHTML = "";
+    document.getElementById("heroEmoji").innerHTML = watchLink;  // play cue over the preview frame
   } else {
     hero.style.background = catColor(s.cat);
     hero.classList.add("emoji-hero");
-    // Category logo as the face; if there's a video, a play cue that jumps to it.
-    const vurl = firstVideoUrl(s);
-    document.getElementById("heroEmoji").innerHTML =
-      catLogo(s.cat) + (vurl ? `<a class="hero-play" href="${vurl}" target="_blank" rel="noopener">▶ watch the video</a>` : "");
+    document.getElementById("heroEmoji").innerHTML = catLogo(s.cat) + watchLink;
   }
   document.getElementById("sheetName").textContent = s.name;
   const rating = rateOf(s);
@@ -704,7 +752,9 @@ function openSheet(id) {
     `<span class="hero-pill">${CAT_META[s.cat].emoji} ${CAT_META[s.cat].label}</span>` +
     (hereCount(s) ? `<span class="hero-pill live">🟢 ${hereCount(s)} here now</span>` : "");
   document.getElementById("sheetMeta").innerHTML = `ZIP ${s.zip} · ${s.reviews.length} review${s.reviews.length === 1 ? "" : "s"}`;
-  document.getElementById("dirBtn").href = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`;
+  const dirBtn = document.getElementById("dirBtn");
+  dirBtn.href = extMapsUrl(s);                 // fallback if in-app routing can't run
+  dirBtn.onclick = (e) => { e.preventDefault(); routeToSpot(s); };
   document.getElementById("sponsorBox").innerHTML = s.sponsored ? `
     <div class="sponsor-banner">
       <div class="sponsor-top"><span class="sponsor-pill">★ Featured</span> <b>${s.sponsorName}</b></div>
@@ -747,9 +797,12 @@ function openSheet(id) {
   }
   const credEl = document.getElementById("photoCredit");
   const cred = (window.SPOT_EXTRAS && window.SPOT_EXTRAS[s.id] && window.SPOT_EXTRAS[s.id].photoCredit) || s.photoCredit;
+  const vt = !realPhoto(s) && videoThumb(s);
   credEl.innerHTML = cred
     ? `Photo: <a href="${cred.url}" target="_blank" rel="noopener">${cred.by}</a> · ${cred.license}`
-    : "";
+    : vt
+      ? `Preview from <a href="${vt.video}" target="_blank" rel="noopener">@${vt.author}</a>'s video ↗`
+      : "";
   renderEmbeds(s);
   renderReviews(s);
   document.getElementById("sheet").classList.add("open");
