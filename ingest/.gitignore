@@ -1,0 +1,4 @@
+ingest/candidates.jsonl
+ingest/seen_ids.txt
+ingest/ingested-spots.js
+ingest/__pycache__/
