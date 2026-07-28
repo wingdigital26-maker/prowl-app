@@ -58,6 +58,7 @@ const SEED_SPOTS = [
   ...(typeof PLANO_SPOTS !== "undefined" ? PLANO_SPOTS : []),          // Plano 75025 area (201+)
   ...(typeof HANGOUT_NATURE_SPOTS !== "undefined" ? HANGOUT_NATURE_SPOTS : []), // hangouts + nature (301+)
   ...(typeof DALLAS_DEPTH_SPOTS !== "undefined" ? DALLAS_DEPTH_SPOTS : []),      // Dallas neighborhoods depth (401+)
+  ...(typeof ABANDONED_SPOTS !== "undefined" ? ABANDONED_SPOTS : []),            // DFW abandoned / urbex (501+)
 ].map(s => {
   if (s.photos && s.photos.length) {           // real photos win (Wikimedia Commons, see img/real/credits.md)
     s.photos.forEach(p => _usedHeroes.add(p)); // keep real heroes out of nothing, but mark for clarity
