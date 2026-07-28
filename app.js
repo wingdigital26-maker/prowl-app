@@ -170,30 +170,96 @@ function highlightSelectedPin() {
   });
 }
 
-// ===== In-app directions: route ON our own map (OSRM), external maps as fallback =====
+// ===== In-app directions: route ON our own map (OSRM) with a full nav readout =====
+// Destination-only link (fallback when we don't have the user's location yet).
 function extMapsUrl(s) { return `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`; }
+// Real turn-by-turn handoff: opens the phone's Maps app straight into navigation.
+function extNavUrl(s, from) {
+  const origin = from ? `&origin=${from.lat},${from.lng}` : "";
+  return `https://www.google.com/maps/dir/?api=1${origin}&destination=${s.lat},${s.lng}&travelmode=driving&dir_action=navigate`;
+}
 function accentColor() { return (getComputedStyle(document.body).getPropertyValue("--accent") || "#35bdf7").trim(); }
+
+function fmtDuration(seconds) {
+  const m = Math.max(1, Math.round(seconds / 60));
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60), r = m % 60;
+  return r ? `${h} hr ${r} min` : `${h} hr`;
+}
+function fmtEta(seconds) {
+  return new Date(Date.now() + seconds * 1000)
+    .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+// Arrow glyph for a maneuver, matched to how every maps app draws it.
+function maneuverArrow(m) {
+  if (!m) return "→";
+  if (m.type === "depart") return "●";
+  if (m.type === "arrive") return "◎";
+  if (m.type === "roundabout" || m.type === "rotary") return "↻";
+  const mod = m.modifier || "";
+  if (mod.includes("uturn")) return "↩";
+  if (mod === "sharp left" || mod === "slight left" || mod === "left") return "↰";
+  if (mod === "sharp right" || mod === "slight right" || mod === "right") return "↱";
+  return "↑";
+}
+// Human sentence for an OSRM step (OSRM gives type/modifier/road name, not prose).
+function maneuverText(step, destName) {
+  const m = step.maneuver || {}, road = step.name || "";
+  const onRoad = road ? ` onto ${road}` : "";
+  const onRoad2 = road ? ` on ${road}` : "";
+  switch (m.type) {
+    case "depart":   return `Head ${m.modifier || "out"}${onRoad2}`;
+    case "turn":     return `Turn ${m.modifier || ""}${onRoad}`.replace(/\s+/g, " ").trim();
+    case "merge":    return `Merge${m.modifier ? " " + m.modifier : ""}${onRoad}`;
+    case "on ramp":  return `Take the ramp${m.modifier ? " " + m.modifier : ""}${onRoad}`;
+    case "off ramp": return `Take the exit${m.modifier ? " " + m.modifier : ""}${onRoad}`;
+    case "fork":     return `Keep ${m.modifier || "straight"}${onRoad}`;
+    case "end of road": return `Turn ${m.modifier || ""}${onRoad}`.replace(/\s+/g, " ").trim();
+    case "roundabout":
+    case "rotary":   return `Enter the roundabout${m.exit ? `, take exit ${m.exit}` : ""}${onRoad}`;
+    case "continue":
+    case "new name": return `Continue${onRoad2}`;
+    case "arrive":   return `Arrive at ${destName || "your spot"}`;
+    default:         return `${m.type || "Continue"}${m.modifier ? " " + m.modifier : ""}${onRoad}`;
+  }
+}
+
 function clearRoute() {
   if (state.routeLine) { map.removeLayer(state.routeLine); state.routeLine = null; }
   if (state.routeMe) { map.removeLayer(state.routeMe); state.routeMe = null; }
   document.getElementById("routeBanner").classList.remove("open");
 }
-function showRouteBanner(s, meters, seconds) {
-  const mi = (meters / 1609.34).toFixed(1);
-  const min = Math.max(1, Math.round(seconds / 60));
+function showRouteBanner(s, route, from) {
+  const mi = (route.distance / 1609.34).toFixed(1);
   document.getElementById("rbName").textContent = s.name;
-  document.getElementById("rbMeta").textContent = `${mi} mi · about ${min} min drive`;
+  document.getElementById("rbMeta").innerHTML =
+    `<span class="rb-eta">${fmtEta(route.duration)}</span>` +
+    `<span class="rb-dot">·</span>${fmtDuration(route.duration)}` +
+    `<span class="rb-dot">·</span>${mi} mi`;
+  // Turn-by-turn steps (skip the trailing zero-distance duplicates OSRM emits).
+  const steps = (route.legs && route.legs[0] && route.legs[0].steps) || [];
+  document.getElementById("rbSteps").innerHTML = steps.map((st, i) => {
+    const last = i === steps.length - 1;
+    const dist = st.distance >= 1609.34 ? `${(st.distance / 1609.34).toFixed(1)} mi`
+               : st.distance > 0 ? `${Math.round(st.distance / 0.3048)} ft` : "";
+    return `<li class="rb-step">
+      <span class="rb-arrow">${maneuverArrow(st.maneuver)}</span>
+      <span class="rb-instr">${maneuverText(st, s.name)}</span>
+      ${dist && !last ? `<small>${dist}</small>` : ""}
+    </li>`;
+  }).join("");
+  document.getElementById("rbStart").href = extNavUrl(s, from);
   document.getElementById("rbExt").href = extMapsUrl(s);
   document.getElementById("routeBanner").classList.add("open");
 }
 function routeToSpot(s) {
   clearRoute();
-  if (!navigator.geolocation) { window.open(extMapsUrl(s), "_blank"); return; }
+  if (!navigator.geolocation) { window.open(extNavUrl(s), "_blank"); return; }
   toast("Finding your location…");
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const lat = pos.coords.latitude, lng = pos.coords.longitude;
     try {
-      const url = `https://router.project-osrm.org/route/v1/driving/${lng},${lat};${s.lng},${s.lat}?overview=full&geometries=geojson`;
+      const url = `https://router.project-osrm.org/route/v1/driving/${lng},${lat};${s.lng},${s.lat}?overview=full&geometries=geojson&steps=true`;
       const j = await (await fetch(url)).json();
       if (!j.routes || !j.routes.length) throw new Error("no route");
       const route = j.routes[0];
@@ -202,14 +268,14 @@ function routeToSpot(s) {
       state.routeMe = L.circleMarker([lat, lng], { radius: 7, color: "#fff", weight: 2, fillColor: accentColor(), fillOpacity: 1 }).addTo(map);
       closeSheet();
       map.fitBounds(state.routeLine.getBounds(), { padding: [70, 70] });
-      showRouteBanner(s, route.distance, route.duration);
+      showRouteBanner(s, route, { lat, lng });
     } catch (e) {
       toast("Couldn't draw the route — opening Maps");
-      window.open(extMapsUrl(s), "_blank");
+      window.open(extNavUrl(s), "_blank");
     }
   }, () => {
     toast("Location off — opening Maps instead");
-    window.open(extMapsUrl(s), "_blank");
+    window.open(extNavUrl(s), "_blank");
   }, { enableHighAccuracy: true, timeout: 8000 });
 }
 document.getElementById("rbClose").onclick = clearRoute;

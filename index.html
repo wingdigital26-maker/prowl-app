@@ -63,9 +63,15 @@
 
 <!-- In-app route banner (drawn on our own map) -->
 <div class="route-banner" id="routeBanner">
-  <div class="rb-info"><b id="rbName">Route</b><small id="rbMeta"></small></div>
-  <a class="rb-ext" id="rbExt" target="_blank" rel="noopener" title="Open in Maps">Maps ↗</a>
-  <button class="rb-close" id="rbClose" aria-label="Clear route">✕</button>
+  <div class="rb-top">
+    <div class="rb-info"><b id="rbName">Route</b><small id="rbMeta"></small></div>
+    <button class="rb-close" id="rbClose" aria-label="Clear route">✕</button>
+  </div>
+  <ol class="rb-steps" id="rbSteps"></ol>
+  <div class="rb-actions">
+    <a class="rb-start" id="rbStart" target="_blank" rel="noopener">▶ Start</a>
+    <a class="rb-ext" id="rbExt" target="_blank" rel="noopener" title="Open in Maps">Maps ↗</a>
+  </div>
 </div>
 
 <!-- Recenter on DFW (Snap Map style) -->
