@@ -32,17 +32,17 @@ function spotPhotos(id) { return [1, 2, 3].map(j => `img/spot-${id}-${j}.jpg`); 
 // Candidate heroes are individual images "N-M" (img/spot-N-M.jpg), ordered by
 // how well they fit the category; overflow borrows from visually-adjacent pools.
 const CAT_HERO_POOL = {
-  food:      ["17-1","17-2","17-3","18-1","18-2","18-3","19-1","19-2","19-3","20-1","20-2","20-3","15-3","15-2"],
-  coffee:    ["15-1","15-2","15-3","16-1","16-2","16-3","18-3","18-2","20-3"],
-  bar:       ["13-1","13-2","13-3","14-1","14-2","14-3","19-3","3-1","3-2","3-3","4-3","20-1","20-2"],
-  hangout:   ["20-1","20-2","8-1","8-2","8-3","12-1","12-2","12-3","3-3","20-3"],
+  food:      ["17-1","17-2","17-3","18-1","18-2","18-3","19-1","19-2","19-3","23-1","23-2","23-3","20-1","20-2"],
+  coffee:    ["15-1","15-2","15-3","16-1","16-2","16-3","24-1","24-2","24-3","27-1","27-2","27-3"],
+  bar:       ["13-1","13-2","13-3","14-1","14-2","14-3","22-1","22-2","22-3","25-1","25-2","26-1","26-2"],
+  hangout:   ["20-3","8-1","8-2","8-3","12-1","12-2","12-3","26-3","25-3","3-3"],
   nature:    ["6-1","6-2","6-3","10-1","10-2","10-3","21-1","21-2","21-3"],
   abandoned: ["1-1","1-2","1-3","2-1","2-2","2-3","7-1","7-2","7-3","11-1","11-2","11-3","5-1","9-1"],
   rooftop:   ["4-1","4-2","4-3","3-1","3-2","3-3","14-1","14-2"],
   tunnel:    ["5-1","5-2","5-3","9-1","9-2","9-3","12-1","12-2"],
 };
 const ALL_STOCK = [];
-for (let n = 1; n <= 21; n++) for (let m = 1; m <= 3; m++) ALL_STOCK.push(n + "-" + m);
+for (let n = 1; n <= 27; n++) for (let m = 1; m <= 3; m++) ALL_STOCK.push(n + "-" + m);
 const _usedHeroes = new Set();
 function uniquePhotosForCat(cat) {
   const pool = (CAT_HERO_POOL[cat] || CAT_HERO_POOL.hangout).concat(ALL_STOCK);
@@ -57,6 +57,7 @@ const SEED_SPOTS = [
   ...(typeof REAL_SPOTS !== "undefined" ? REAL_SPOTS : []),            // Dallas core (101+)
   ...(typeof PLANO_SPOTS !== "undefined" ? PLANO_SPOTS : []),          // Plano 75025 area (201+)
   ...(typeof HANGOUT_NATURE_SPOTS !== "undefined" ? HANGOUT_NATURE_SPOTS : []), // hangouts + nature (301+)
+  ...(typeof DALLAS_DEPTH_SPOTS !== "undefined" ? DALLAS_DEPTH_SPOTS : []),      // Dallas neighborhoods depth (401+)
 ].map(s => {
   if (s.photos && s.photos.length) {           // real photos win (Wikimedia Commons, see img/real/credits.md)
     s.photos.forEach(p => _usedHeroes.add(p)); // keep real heroes out of nothing, but mark for clarity
