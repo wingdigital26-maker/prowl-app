@@ -26,6 +26,13 @@ function avgStars(s) {
   if (!s.reviews.length) return 0;
   return s.reviews.reduce((a, r) => a + r.stars, 0) / s.reviews.length;
 }
+// Prefer the real Google/Yelp rating when we have it; fall back to review average.
+function rateOf(s) {
+  const ex = (window.SPOT_EXTRAS && window.SPOT_EXTRAS[s.id]) || {};
+  const real = (typeof s.rating === "number" && s.rating > 0) ? s.rating
+    : (typeof ex.rating === "number" && ex.rating > 0) ? ex.rating : 0;
+  return real || avgStars(s);
+}
 function starStr(n) {
   const full = Math.round(n);
   return "★".repeat(full) + "☆".repeat(5 - full);
@@ -348,7 +355,7 @@ function renderExplore() {
     return `<div class="explore-card ${s.sponsored ? "sponsored" : ""}" data-id="${s.id}" tabindex="0" ${bg}>
       ${hasPhoto ? "" : `<span class="ec-emoji">${CAT_META[s.cat].emoji}</span>`}
       ${s.sponsored ? `<span class="ec-featured">★ Featured</span>` : ""}
-      <span class="ec-label">${s.name}<small>${starStr(avgStars(s))} · ZIP ${s.zip} · <span class="sketch-badge sketch-${s.danger}">${SKETCH_WORDS[s.danger]}</span></small></span>
+      <span class="ec-label">${s.name}<small>${starStr(rateOf(s))} ${rateOf(s).toFixed(1)} · ZIP ${s.zip} · <span class="sketch-badge sketch-${s.danger}">${SKETCH_WORDS[s.danger]}</span></small></span>
     </div>`;
   }).join("") || `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>Nothing out here yet</b><small>No spots match that. Try another filter, or go drop one yourself.</small></div>`;
   el.querySelectorAll(".explore-card").forEach(c => {
@@ -654,7 +661,7 @@ function openSheet(id) {
   }
   document.getElementById("heroEmoji").textContent = (s.photos && s.photos.length) ? "" : CAT_META[s.cat].emoji;
   document.getElementById("sheetName").textContent = s.name;
-  const rating = avgStars(s);
+  const rating = rateOf(s);
   document.getElementById("sheetHeroPills").innerHTML =
     `${rating ? `<span class="hero-pill star">★ ${rating.toFixed(1)}</span>` : `<span class="hero-pill">★ new</span>`}` +
     `<span class="hero-pill">${CAT_META[s.cat].emoji} ${CAT_META[s.cat].label}</span>` +
@@ -969,7 +976,7 @@ document.getElementById("shareBtn").onclick = () => {
   if (s.photos && s.photos.length) { ph.style.background = `url('${s.photos[0]}') center/cover`; ph.textContent = ""; }
   else { ph.style.background = CAT_META[s.cat].grad; ph.textContent = CAT_META[s.cat].emoji; }
   document.getElementById("scName").textContent = s.name;
-  document.getElementById("scMeta").textContent = `★ ${avgStars(s).toFixed(1)} · ZIP ${s.zip} · ${SKETCH_WORDS[s.danger]}`;
+  document.getElementById("scMeta").textContent = `★ ${rateOf(s).toFixed(1)} · ZIP ${s.zip} · ${SKETCH_WORDS[s.danger]}`;
   document.getElementById("shareCard").classList.add("open");
   document.getElementById("shareBackdrop").classList.add("open");
 };
@@ -1057,7 +1064,7 @@ function guideAddRec(s) {
   el.className = "g-rec";
   const bg = s.photos && s.photos.length ? `style="background-image:url('${s.photos[0]}')"` : `style="background:${CAT_META[s.cat].grad}"`;
   el.innerHTML = `<div class="g-rec-thumb" ${bg}>${s.photos && s.photos.length ? "" : CAT_META[s.cat].emoji}</div>
-    <div class="g-rec-info"><b>${s.name}</b><small>${CAT_META[s.cat].label} · ${s.zip}</small><span class="g-stars">${starStr(avgStars(s))} ${avgStars(s).toFixed(1)}</span></div>`;
+    <div class="g-rec-info"><b>${s.name}</b><small>${CAT_META[s.cat].label} · ${s.zip}</small><span class="g-stars">${starStr(rateOf(s))} ${rateOf(s).toFixed(1)}</span></div>`;
   el.onclick = () => { if (spotMode(s.cat) !== state.mode) setMode(spotMode(s.cat)); closeGuide(); showView("map"); openSheet(s.id); };
   document.getElementById("guideMsgs").appendChild(el);
   scrollGuide();

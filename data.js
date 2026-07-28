@@ -69,7 +69,7 @@ const SEED_SPOTS = [
 // do not carry these fields (pb schema has no photos/reviewUrl columns).
 window.SPOT_EXTRAS = {};
 SEED_SPOTS.forEach(s => {
-  window.SPOT_EXTRAS[s.id] = { photos: s.photos, reviewUrl: s.reviewUrl };
+  window.SPOT_EXTRAS[s.id] = { photos: s.photos, reviewUrl: s.reviewUrl, rating: s.rating };
 });
 
 // Feature one spot for the sponsored / revenue demo
