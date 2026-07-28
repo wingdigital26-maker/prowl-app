@@ -817,10 +817,28 @@ function openSheet(id) {
     `${rating ? `<span class="hero-pill star">★ ${rating.toFixed(1)}</span>` : `<span class="hero-pill">★ new</span>`}` +
     `<span class="hero-pill">${CAT_META[s.cat].emoji} ${CAT_META[s.cat].label}</span>` +
     (hereCount(s) ? `<span class="hero-pill live">🟢 ${hereCount(s)} here now</span>` : "");
-  document.getElementById("sheetMeta").innerHTML = `ZIP ${s.zip} · ${s.reviews.length} review${s.reviews.length === 1 ? "" : "s"}`;
+  document.getElementById("sheetMeta").innerHTML = `ZIP ${s.zip}` +
+    (s.reviewUrl ? ` · <a class="meta-link" href="${s.reviewUrl}" target="_blank" rel="noopener">Read reviews ↗</a>` : "");
   const dirBtn = document.getElementById("dirBtn");
   dirBtn.href = extMapsUrl(s);                 // fallback if in-app routing can't run
   dirBtn.onclick = (e) => { e.preventDefault(); routeToSpot(s); };
+  // Share this spot (native share sheet on phones, copy-link fallback on desktop).
+  const shareBtn = document.getElementById("shareBtn");
+  if (shareBtn) {
+    const shareUrl = `${location.origin}${location.pathname}#spot=${s.id}`;
+    shareBtn.onclick = async () => {
+      const data = { title: s.name, text: `${s.name} — a spot on Prowl`, url: shareUrl };
+      try {
+        if (navigator.share) { await navigator.share(data); }
+        else { await navigator.clipboard.writeText(shareUrl); toast("Link copied 🔗"); }
+      } catch (e) { /* user cancelled */ }
+    };
+  }
+  // Sketch/verify/safety only matter for abandoned + urbex spots. Hide that whole
+  // block for food/coffee/bars/nature so the common case reads clean and simple.
+  const isUrbex = spotMode(s.cat) === "urbex";
+  document.getElementById("dangerMeter").style.display = isUrbex ? "" : "none";
+  document.getElementById("verifyBox").style.display = isUrbex ? "" : "none";
   document.getElementById("sponsorBox").innerHTML = s.sponsored ? `
     <div class="sponsor-banner">
       <div class="sponsor-top"><span class="sponsor-pill">★ Featured</span> <b>${s.sponsorName}</b></div>
@@ -1337,3 +1355,19 @@ renderChips();
 
 // Boot: initMoth() (in pb.js, loaded after this) loads spots from the
 // PocketBase backend, or falls back to offline demo mode, then renders.
+
+// ===== Shared-link deep open: /#spot=<id> opens that spot once spots load =====
+function openSpotFromHash() {
+  const m = location.hash.match(/spot=(\d+)/);
+  if (!m) return;
+  const id = +m[1];
+  let tries = 0;
+  const t = setInterval(() => {
+    if (state.spots && state.spots.length) {
+      clearInterval(t);
+      if (state.spots.find(x => x.id === id)) openSheet(id);
+    } else if (++tries > 40) { clearInterval(t); }
+  }, 150);
+}
+window.addEventListener("hashchange", openSpotFromHash);
+openSpotFromHash();
