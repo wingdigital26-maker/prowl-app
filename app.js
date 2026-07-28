@@ -364,21 +364,19 @@ document.querySelectorAll("#exploreSeg .seg-btn").forEach(b => b.onclick = () =>
   renderExplore();
 });
 
-// ===== Crew layer (friends on the map) =====
-const CREW = [
-  { name: "kayla", lat: 32.744, lng: -96.828, hue: "#a78bfa" },
-  { name: "leo", lat: 32.783, lng: -96.799, hue: "#f472b6" },
-  { name: "sam", lat: 32.758, lng: -96.757, hue: "#34d399" },
-  { name: "mena", lat: 32.948, lng: -96.772, hue: "#fbbf24" },
-];
+// ===== Live 360: real crew presence on the map =====
 const crewLayer = L.layerGroup().addTo(map);
+const CREW_HUES = ["#a78bfa", "#f472b6", "#34d399", "#fbbf24", "#38bdf8", "#fb7185", "#4ade80"];
+function hueFor(str) { let h = 0; for (const c of (str || "?")) h = (h * 31 + c.charCodeAt(0)) % CREW_HUES.length; return CREW_HUES[h]; }
+let crewMembers = [];
 function renderCrew() {
   crewLayer.clearLayers();
-  CREW.forEach(f => {
+  crewMembers.forEach(f => {
+    const nm = f.name || "friend";
     const icon = L.divIcon({
       className: "",
-      html: `<div class="crew-pin" style="--hue:${f.hue}"><span>${f.name[0].toUpperCase()}</span><i>${f.name}</i></div>`,
-      iconSize: [40, 52], iconAnchor: [20, 26],
+      html: `<div class="crew-pin live" style="--hue:${hueFor(f.uid || nm)}"><span>${(f.emoji || nm[0]).toUpperCase()}</span><i>${nm}</i></div>`,
+      iconSize: [40, 54], iconAnchor: [20, 27],
     });
     crewLayer.addLayer(L.marker([f.lat, f.lng], { icon, zIndexOffset: -100 }));
   });
@@ -393,11 +391,100 @@ if (recenterBtn) recenterBtn.onclick = () => {
   closeSheet();
 };
 
-// gentle wander so the map feels alive
-setInterval(() => {
-  CREW.forEach(f => { f.lat += (Math.random() - 0.5) * 0.002; f.lng += (Math.random() - 0.5) * 0.002; });
-  renderCrew();
-}, 6000);
+// ===== Live 360 controls =====
+const live = {
+  crew: localStorage.getItem("moth.crew") || "",
+  on: false, watchId: null, pollTimer: null,
+  presenceId: localStorage.getItem("moth.presenceId") || null,
+  lastPos: null,
+};
+function myUid() { return (window.currentUser && currentUser()) ? currentUser().id : ("guest-" + (localStorage.moth_guest || (localStorage.moth_guest = Math.random().toString(36).slice(2, 9)))); }
+
+async function pushPresence(lat, lng) {
+  const body = { uid: myUid(), crew: live.crew, name: (window.myName ? myName() : "you"),
+    lat, lng, live: live.on, emoji: ((window.currentUser && currentUser()) ? (currentUser().name || "?")[0] : "?") };
+  try {
+    if (live.presenceId) {
+      const r = await fetch(PB_PRESENCE + "/" + live.presenceId, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (r.status === 404) live.presenceId = null;  // record gone, recreate
+    }
+    if (!live.presenceId) {
+      const r = await fetch(PB_PRESENCE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (r.ok) { const rec = await r.json(); live.presenceId = rec.id; localStorage.setItem("moth.presenceId", rec.id); }
+    }
+  } catch (e) {}
+}
+async function pollCrew() {
+  if (!live.crew || !state.online) { crewMembers = []; renderCrew(); return; }
+  try {
+    const filter = encodeURIComponent(`crew='${live.crew}' && live=true`);
+    const r = await fetch(PB_PRESENCE + "?perPage=50&filter=" + filter);
+    if (!r.ok) return;
+    const j = await r.json();
+    crewMembers = j.items.filter(m => m.uid !== myUid());
+    renderCrew();
+    const cnt = document.getElementById("crewCount");
+    if (cnt) cnt.textContent = crewMembers.length;
+  } catch (e) {}
+}
+function startCrewPoll() { clearInterval(live.pollTimer); pollCrew(); live.pollTimer = setInterval(pollCrew, 4000); }
+
+function goLive() {
+  if (!live.crew) { toast("Join or make a crew first 👥"); return; }
+  live.on = true;
+  localStorage.setItem("moth.live", "1");
+  updateLiveUI();
+  const onPos = (lat, lng) => { live.lastPos = [lat, lng]; pushPresence(lat, lng); };
+  if (navigator.geolocation) {
+    live.watchId = navigator.geolocation.watchPosition(
+      p => onPos(p.coords.latitude, p.coords.longitude),
+      () => { const c = map.getCenter(); onPos(c.lat, c.lng); toast("Using map center (no GPS permission)"); },
+      { enableHighAccuracy: true, maximumAge: 5000 }
+    );
+  } else { const c = map.getCenter(); onPos(c.lat, c.lng); }
+  startCrewPoll();
+  toast("You're live to your crew 🟢");
+}
+function stopLive() {
+  live.on = false;
+  localStorage.removeItem("moth.live");
+  if (live.watchId != null) { navigator.geolocation.clearWatch(live.watchId); live.watchId = null; }
+  if (live.lastPos) pushPresence(live.lastPos[0], live.lastPos[1]);  // flip live=false server-side
+  updateLiveUI();
+  toast("You went off the grid");
+}
+function updateLiveUI() {
+  const t = document.getElementById("liveToggle");
+  if (t) { t.classList.toggle("on", live.on); t.textContent = live.on ? "🟢 You're live" : "Go live"; }
+  const cc = document.getElementById("crewCodeLabel");
+  if (cc) cc.textContent = live.crew ? live.crew : "no crew yet";
+}
+function makeCrew() {
+  const code = (Math.random().toString(36).slice(2, 7)).toUpperCase();
+  joinCrew(code);
+  toast("Crew created: " + code + " — share it 📋");
+  if (navigator.clipboard) navigator.clipboard.writeText(code).catch(() => {});
+}
+function joinCrew(code) {
+  live.crew = (code || "").trim().toUpperCase();
+  localStorage.setItem("moth.crew", live.crew);
+  updateLiveUI();
+  startCrewPoll();
+  if (live.on && live.lastPos) pushPresence(live.lastPos[0], live.lastPos[1]);
+}
+// wire crew UI (rendered in the profile view)
+function wireLiveUI() {
+  const mk = document.getElementById("crewMake"); if (mk) mk.onclick = makeCrew;
+  const jn = document.getElementById("crewJoin"); if (jn) jn.onclick = () => {
+    const v = document.getElementById("crewCodeInput").value;
+    if (v.trim()) { joinCrew(v); toast("Joined crew " + live.crew + " 👥"); }
+  };
+  const tg = document.getElementById("liveToggle"); if (tg) tg.onclick = () => live.on ? stopLive() : goLive();
+  updateLiveUI();
+}
+// resume a crew on load; auto-start poll so you see friends even before going live
+wireLiveUI();
+if (live.crew) startCrewPoll();
 
 // ===== ZIP leaderboard (Explore) =====
 function renderZipBoard() {

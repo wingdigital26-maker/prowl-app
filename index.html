@@ -102,6 +102,23 @@
     <div id="authCta"></div>
     <div class="profile-stats" id="profileStats"></div>
   </div>
+  <h2 class="view-sub">Live 360 · Crew</h2>
+  <div class="crew-card">
+    <div class="crew-row">
+      <div>
+        <b>Your crew: <span id="crewCodeLabel">no crew yet</span></b>
+        <small><span id="crewCount">0</span> live now</small>
+      </div>
+      <button class="pill-btn live-toggle" id="liveToggle">Go live</button>
+    </div>
+    <div class="crew-join">
+      <input id="crewCodeInput" placeholder="Enter a crew code" maxlength="8" autocomplete="off">
+      <button class="pill-btn" id="crewJoin">Join</button>
+      <button class="pill-btn primary" id="crewMake">New crew</button>
+    </div>
+    <small class="crew-hint">Make a crew, share the code, turn on Go live, and you all see each other move on the map in real time.</small>
+  </div>
+
   <h2 class="view-sub">Badges</h2>
   <div class="badge-row" id="badgeRow"></div>
   <h2 class="view-sub">Your reviews</h2>

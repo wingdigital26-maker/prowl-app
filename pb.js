@@ -4,6 +4,7 @@
 
 const MOTH_PB = "http://127.0.0.1:8090";
 const PB_SPOTS = MOTH_PB + "/api/collections/spots/records";
+const PB_PRESENCE = MOTH_PB + "/api/collections/presence/records"; // Live 360
 
 function recToSpot(r) {
   return {
