@@ -27,7 +27,8 @@ const ABANDONED_SPOTS = [
     reviews: [
       { user: "concretecathedral", stars: 5, text: "The scale is unreal, like a ruined cathedral of concrete over Main Street." },
       { user: "fwrust", stars: 4, text: "Shot it from the road. Do not climb these, people have been badly hurt in there." }
-    ]
+    ],
+    embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@reed3rr/video/7629481533606300941" }]
   },
   {
     id: 503, name: "Swift Meat Packing Ruins", cat: "abandoned",
@@ -40,7 +41,8 @@ const ABANDONED_SPOTS = [
     reviews: [
       { user: "stockyardstan", stars: 5, text: "Old packing plant bones right above the creek. Feels like a lost city up there." },
       { user: "bricksandbeef", stars: 4, text: "Great texture for photos. Watch the posted signs, some of it is fenced off." }
-    ]
+    ],
+    embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@jonny.goodday/video/7511108976621227310" }]
   },
   {
     id: 504, name: "Dallas Underground Pedestrian Tunnels", cat: "tunnel",
@@ -51,7 +53,8 @@ const ABANDONED_SPOTS = [
     reviews: [
       { user: "tunnelrat_d", stars: 5, text: "A dead mall underground that almost nobody knows about. Wonderfully liminal." },
       { user: "downtowndrift", stars: 4, text: "Half the storefronts are empty which makes it creepier. Go on a weekday or its locked." }
-    ]
+    ],
+    embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@gabymusprime/video/7550804733733129503" }]
   },
   {
     id: 505, name: "Old Dallas High School (Crozier Tech)", cat: "abandoned",
@@ -111,7 +114,8 @@ const ABANDONED_SPOTS = [
     reviews: [
       { user: "petrifiedpete", stars: 5, text: "A whole building made of petrified wood with a moonshine past. So strange and cool." },
       { user: "dinovalley", stars: 4, text: "Shot it from the road. Odd little roadside relic, worth a stop near Glen Rose." }
-    ]
+    ],
+    embeds: [{ type: "instagram", url: "https://www.instagram.com/p/DVwVmeqEW_S/" }]
   },
   {
     id: 510, name: "Continental Avenue Bridge", cat: "abandoned",
@@ -124,7 +128,8 @@ const ABANDONED_SPOTS = [
     reviews: [
       { user: "trinitytread", stars: 5, text: "Old car bridge turned walkway with the best skyline and river bottom view in town." },
       { user: "archangler", stars: 4, text: "Go at sunset. The empty river floodplain under it feels post apocalyptic." }
-    ]
+    ],
+    embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@visitdallas/video/6843149351104056581" }]
   },
   {
     id: 511, name: "Penn Farm (Cedar Hill State Park)", cat: "abandoned",
@@ -137,7 +142,8 @@ const ABANDONED_SPOTS = [
     reviews: [
       { user: "barnlight", stars: 5, text: "Silver weathered barns in the tall grass, totally legal to walk right up. Photo heaven." },
       { user: "joepooljen", stars: 4, text: "Inside a state park so its safe and open. The old equipment is beautifully rusted." }
-    ]
+    ],
+    embeds: [{ type: "instagram", url: "https://www.instagram.com/p/C1dD9hiPgSq/" }]
   },
   {
     id: 512, name: "Old Alton Bridge (Goatman's Bridge)", cat: "abandoned",

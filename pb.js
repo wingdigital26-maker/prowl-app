@@ -212,12 +212,20 @@ async function initMoth() {
   if (window.handleDeepLink) handleDeepLink();  // shared pins: ?s=<id> or ?pin=lat,lng
 }
 
-// Backend records don't store photos/photoCredit (schema has no such columns).
-// SPOT_EXTRAS (built in data.js) is the source of truth for real photos + credit,
-// so overlay them onto the loaded spots. Real photos always win over stock.
+// The seed data files (real-spots.js, abandoned-spots.js, ...) are the source of
+// truth for a SEEDED spot's definition. Backend records can go stale (old cat,
+// old desc) and don't store photos/embeds at all, so overlay the authoritative
+// fields from the seed by id. User-added spots (not in the seed) are left as-is.
 function reconcilePhotos() {
   const ex = window.SPOT_EXTRAS || {};
+  const seedById = {};
+  (typeof SEED_SPOTS !== "undefined" ? SEED_SPOTS : []).forEach(s => { seedById[s.id] = s; });
+  const DEFINITIONAL = ["cat", "name", "desc", "lat", "lng", "zip", "tags", "danger", "rating"];
   for (const s of state.spots) {
+    const seed = seedById[s.id];
+    if (seed) {                                    // seeded spot -> data file wins
+      DEFINITIONAL.forEach(k => { if (seed[k] !== undefined) s[k] = seed[k]; });
+    }
     const e = ex[s.id];
     if (!e) continue;
     if (e.photos && e.photos.length) s.photos = e.photos;

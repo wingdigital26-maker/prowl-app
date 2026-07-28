@@ -249,7 +249,7 @@ const REAL_SPOTS = [
 
   // ---------- ABANDONED / URBEX-FLAVORED (all publicly accessible unless noted) ----------
   {
-    id: 122, name: "Fabrication Yard", cat: "abandoned",
+    id: 122, name: "Fabrication Yard", cat: "hangout",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Fabrication%20Yard%20Dallas",
     lat: 32.7790, lng: -96.8300, zip: "75212",
     desc: "Dallas first legal free art wall, an old warehouse lot where anyone can spray paint. Constantly changing murals, gritty and photogenic. Legal to paint and shoot, watch broken glass.",
@@ -260,7 +260,7 @@ const REAL_SPOTS = [
     ]
   },
   {
-    id: 123, name: "Deep Ellum Blues Alley Murals", cat: "abandoned",
+    id: 123, name: "Deep Ellum Blues Alley Murals", cat: "hangout",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Deep%20Ellum%20Murals%20Dallas",
     photos: ["img/real/deep-ellum-1.jpg", "img/real/deep-ellum-2.jpg"],
     lat: 32.7840, lng: -96.7810, zip: "75226",
@@ -272,7 +272,7 @@ const REAL_SPOTS = [
     ]
   },
   {
-    id: 124, name: "Santa Fe Trestle Trail", cat: "abandoned",
+    id: 124, name: "Santa Fe Trestle Trail", cat: "nature",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Santa%20Fe%20Trestle%20Trail%20Dallas",
     photos: ["img/real/trestle-1.jpg", "img/real/trestle-2.jpg"],
     lat: 32.7530, lng: -96.8010, zip: "75215",
@@ -284,7 +284,7 @@ const REAL_SPOTS = [
     ]
   },
   {
-    id: 125, name: "Trinity Overlook Park", cat: "abandoned",
+    id: 125, name: "Trinity Overlook Park", cat: "nature",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Trinity%20Overlook%20Park%20Dallas",
     photos: ["img/real/trinity-overlook-1.jpg", "img/real/trinity-overlook-2.jpg"],
     lat: 32.7720, lng: -96.8230, zip: "75207",
@@ -296,7 +296,7 @@ const REAL_SPOTS = [
     ]
   },
   {
-    id: 126, name: "Dealey Plaza and the Grassy Knoll", cat: "abandoned",
+    id: 126, name: "Dealey Plaza and the Grassy Knoll", cat: "hangout",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Dealey%20Plaza%20Dallas",
     photos: ["img/real/dealey-plaza-2.jpg", "img/real/dealey-plaza-1.jpg"],
     lat: 32.7787, lng: -96.8083, zip: "75202",
