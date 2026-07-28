@@ -5,13 +5,13 @@
 
 const ABANDONED_SPOTS = [
   {
-    id: 501, name: "Baker Hotel (Mineral Wells)", cat: "abandoned",
+    id: 501, name: "Baker Hotel (Mineral Wells)", cat: "hangout",
     photos: ["img/real/abandoned-501.jpg"],
     photoCredit: { by: "Jeff Burkett", license: "CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:The_Baker_Hotel,_Mineral_Wells,_Texas.jpg" },
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Baker%20Hotel%20Mineral%20Wells",
     lat: 32.8094, lng: -98.1114, zip: "76067",
-    desc: "Fourteen story 1929 spa hotel that hosted Clark Gable and Judy Garland, empty since 1972 and looming over tiny Mineral Wells about an hour west of Fort Worth. The interior is fenced, posted, and under active restoration, so shoot the facade from the public sidewalk only. Go in daylight, bring a friend, and respect the fences, do not try to get inside.",
-    tags: ["private", "historic", "trespassing-risk"], danger: 4, rating: 4.6,
+    desc: "Fourteen story 1929 spa hotel that hosted Clark Gable and Judy Garland, now being restored and reopening as a landmark hotel and spa in tiny Mineral Wells about an hour west of Fort Worth. Admire the towering restored facade from downtown, grab a coffee nearby, and watch the grand old lady come back to life.",
+    tags: ["historic", "landmark", "restored"], danger: 1, rating: 4.6,
     reviews: [
       { user: "spahotelsam", stars: 5, text: "Even from the street this thing is jaw dropping. Fourteen stories of old ghosts." },
       { user: "wellsroamer", stars: 4, text: "Fenced off and guarded now with the rebuild, but the outside alone is worth the drive." }
@@ -57,13 +57,13 @@ const ABANDONED_SPOTS = [
     embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@gabymusprime/video/7550804733733129503" }]
   },
   {
-    id: 505, name: "Old Dallas High School (Crozier Tech)", cat: "abandoned",
+    id: 505, name: "Old Dallas High School (Crozier Tech)", cat: "hangout",
     photos: ["img/real/abandoned-505.jpg"],
     photoCredit: { by: "Renegomezphotography", license: "CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Dallas_High_School_Wiki.jpg" },
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Old%20Dallas%20High%20School%20Crozier%20Tech",
     lat: 32.7875, lng: -96.7920, zip: "75201",
-    desc: "The oldest high school building in Dallas, a 1907 Classical Revival hulk that sat abandoned and rotting downtown for two decades before a recent office renovation. The Dallas High School lettering is still carved over the doors. Fully public to view and photograph from the street and its patio plaza, a legal way to shoot a building with a long decayed history.",
-    tags: ["public", "historic", "downtown"], danger: 1, rating: 4.4,
+    desc: "The oldest high school building in Dallas, a 1907 Classical Revival landmark beautifully restored into downtown offices and apartments with the Dallas High School lettering still carved over the doors. Wander the street and its patio plaza, grab a bite from the ground-floor tenants, and take in a saved piece of city history.",
+    tags: ["public", "historic", "downtown", "restored"], danger: 1, rating: 4.4,
     reviews: [
       { user: "chalkdust", stars: 5, text: "Loved it derelict, still love the old carved lettering over the doors. Real history." },
       { user: "eastwick", stars: 4, text: "Cleaned up now but the bones and the story are all there. Easy legal photo stop." }
@@ -118,13 +118,13 @@ const ABANDONED_SPOTS = [
     embeds: [{ type: "instagram", url: "https://www.instagram.com/p/DVwVmeqEW_S/" }]
   },
   {
-    id: 510, name: "Continental Avenue Bridge", cat: "abandoned",
+    id: 510, name: "Ronald Kirk Pedestrian Bridge (Continental Ave)", cat: "nature",
     photos: ["img/real/abandoned-510.jpg"],
     photoCredit: { by: "Renelibrary", license: "CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:LamarMcKinneyBridge.jpg" },
-    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Continental%20Avenue%20Bridge%20Dallas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Ronald%20Kirk%20Pedestrian%20Bridge%20Dallas",
     lat: 32.7825, lng: -96.8265, zip: "75212",
-    desc: "A 1930s automobile bridge over the Trinity River decommissioned from traffic and reborn as a pedestrian deck, all old concrete arches with the skyline and the wild river bottoms below. Free, open, and fully public. Best at dusk when the empty floodplain and the towers light up together.",
-    tags: ["public", "bridge", "trinity"], danger: 1, rating: 4.6,
+    desc: "The old 1930s Continental Avenue auto bridge over the Trinity River, now the Ronald Kirk pedestrian bridge and park, an active greenspace of old concrete arches with picnic tables, games, and open lawn framing the skyline and river bottoms. Free, open, and fully public. Best at dusk when the floodplain and the towers light up together.",
+    tags: ["public", "park", "trinity"], danger: 1, rating: 4.6,
     reviews: [
       { user: "trinitytread", stars: 5, text: "Old car bridge turned walkway with the best skyline and river bottom view in town." },
       { user: "archangler", stars: 4, text: "Go at sunset. The empty river floodplain under it feels post apocalyptic." }
@@ -158,27 +158,5 @@ const ABANDONED_SPOTS = [
       { user: "dentondayhiker", stars: 4, text: "Great in daylight. Gets genuinely eerie and dark out there at night, go with people." }
     ],
     embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@kalanighosthunter/video/7143259558662720811" }]
-  },
-  {
-    // Community-discovered via TikTok. Exact location kept quiet by the urbex
-    // community (as they do), so the pin is approximate and it is flagged for review.
-    id: 513, name: "The Big Empty", cat: "abandoned",
-    reviewUrl: "https://www.google.com/maps/search/?api=1&query=abandoned%20building%20Dallas",
-    lat: 32.7935, lng: -96.8100, zip: "75201",
-    desc: "A massive abandoned complex that Dallas urban explorers call one of the biggest bandos in the city, cavernous empty floors with rooftop views over downtown. The exact spot is kept quiet by the urbex community, so this pin is approximate. It is private property, so treat it as a look and photograph from a distance spot, do not force your way in.",
-    tags: ["private", "urbex", "trespassing-risk", "loc-approx", "auto-ingested"], danger: 3, rating: null,
-    needs_review: true, legal_status: "unverified",
-    reviews: [],
-    embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@decaying.texas/video/7469547348864044331" }]
-  },
-  {
-    id: 514, name: "The Hideaway (Deep Ellum edge)", cat: "abandoned",
-    reviewUrl: "https://www.google.com/maps/search/?api=1&query=abandoned%20places%20Dallas",
-    lat: 32.7680, lng: -96.7850, zip: "75226",
-    desc: "A Dallas urbex hidden gem passed around by local explorers, the kind of quiet decayed spot people go to just to get away and shoot. The exact location is kept quiet, so this pin is approximate. Private and unofficial, so go in daylight with a friend and respect the property.",
-    tags: ["private", "urbex", "trespassing-risk", "loc-approx", "auto-ingested"], danger: 3, rating: null,
-    needs_review: true, legal_status: "unverified",
-    reviews: [],
-    embeds: [{ type: "tiktok", url: "https://www.tiktok.com/@_mr.meraki/video/7235991442525556010" }]
   }
 ];

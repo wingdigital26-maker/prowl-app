@@ -176,8 +176,8 @@ const REAL_SPOTS = [
   {
     id: 116, name: "Black Swan Saloon", cat: "bar",
     reviewUrl: "https://www.yelp.com/biz/black-swan-saloon-dallas-3",
-    lat: 32.7845, lng: -96.7830, zip: "75226",
-    desc: "Deep Ellum craft cocktail spot run by a bartender who muddles fresh fruit and jalapeno to order. No menu, tell them what you like and trust the process.",
+    lat: 32.7970, lng: -96.7910, zip: "75204",
+    desc: "East Dallas craft cocktail spot near downtown, run by a bartender who muddles fresh fruit and jalapeno to order. No menu, tell them what you like and trust the process.",
     tags: ["cocktails", "deepellum", "bartenderschoice"], danger: 1, rating: 4.6,
     reviews: [
       { user: "gunpowdergin", stars: 5, text: "No menu, just tell him what you like. Never missed." },
