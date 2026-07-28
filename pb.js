@@ -203,6 +203,7 @@ async function initMoth() {
   } catch (e) {
     // Server not running -> offline demo mode (localStorage + seed)
     state.spots = loadSpots();
+    reconcilePhotos();   // also inject video previews/embeds in offline mode
     state.online = false;
     setBackendBadge(false);
   }
@@ -227,10 +228,20 @@ function reconcilePhotos() {
       DEFINITIONAL.forEach(k => { if (seed[k] !== undefined) s[k] = seed[k]; });
     }
     const e = ex[s.id];
-    if (!e) continue;
-    if (e.photos && e.photos.length) s.photos = e.photos;
-    if (e.photoCredit) s.photoCredit = e.photoCredit;
-    if (e.embeds && e.embeds.length) s.embeds = e.embeds;
+    if (e) {
+      if (e.photos && e.photos.length) s.photos = e.photos;
+      if (e.photoCredit) s.photoCredit = e.photoCredit;
+      if (e.embeds && e.embeds.length) s.embeds = e.embeds;
+    }
+    // A discovered video (VIDEO_THUMBS) becomes both the preview frame AND an
+    // embed, so one generated file drives previews + "watch" links for every spot.
+    const vt = window.VIDEO_THUMBS && window.VIDEO_THUMBS[s.id];
+    if (vt && vt.video) {
+      s.embeds = s.embeds || [];
+      if (!s.embeds.some(em => em.url === vt.video)) {
+        s.embeds.push({ type: vt.type || "tiktok", url: vt.video });
+      }
+    }
   }
 }
 
