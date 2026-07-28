@@ -96,6 +96,13 @@ const cluster = L.markerClusterGroup({
 });
 map.addLayer(cluster);
 
+// Keep the map correctly sized on resize / rotate / mobile address-bar changes
+let _resizeT;
+function fixMapSize() { clearTimeout(_resizeT); _resizeT = setTimeout(() => { try { map.invalidateSize(); } catch (e) {} }, 150); }
+window.addEventListener("resize", fixMapSize);
+window.addEventListener("orientationchange", () => setTimeout(fixMapSize, 300));
+if (window.visualViewport) window.visualViewport.addEventListener("resize", fixMapSize);
+
 // Presence: who's here right now (demo data)
 const HERE = { 3: 4, 4: 3, 8: 6, 9: 2, 12: 1 };
 function hereCount(s) { return HERE[s.id] || 0; }

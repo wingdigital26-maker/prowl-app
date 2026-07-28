@@ -1067,3 +1067,61 @@ html, body { overflow-x: hidden; }
   border-radius: 50%; background: #37e08b; border: 2px solid var(--bg-2);
 }
 .crew-pin.live span { position: relative; }
+
+/* ==================================================================
+   MOBILE POLISH + SNAPCHAT-ROUNDED PASS
+   Cleaner, softer, fully rounded edges everywhere; robust on mobile.
+   ================================================================== */
+:root { --radius: 22px; }
+
+/* Kill finicky mobile behaviors: no rubber-band scroll, no tap flash, no page zoom fighting the map */
+html, body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+button, a, .pill-btn, .chip, .tab, .mode-btn { -webkit-tap-highlight-color: transparent; }
+
+/* Dynamic viewport height so the mobile address bar never cuts things off */
+#map { height: 100dvh; }
+.story-viewer { height: 100dvh; }
+.splash { min-height: 100dvh; }
+.guide-panel { max-height: 66dvh; }
+
+/* Rounder cards + surfaces (Snapchat vibe) */
+.explore-card { border-radius: 22px; }
+.feed-card { border-radius: 24px; }
+.feed-card .fc-media { border-radius: 0; }
+.zip-card { border-radius: 20px; }
+.badge-card { border-radius: 16px; }
+.review { border-radius: 16px; }
+.crew-card, .composer { border-radius: 22px; }
+.guide-panel { border-radius: 26px; }
+.g-rec { border-radius: 16px; }
+.plus-opt { border-radius: 18px; }
+.plus-sheet { border-radius: 26px; }
+.modal { border-radius: 28px; }
+.notif-panel { border-radius: 22px; }
+.sponsor-banner { border-radius: 18px; }
+.photo-cell { border-radius: 14px; }
+.g-rec-thumb { border-radius: 14px; }
+
+/* Pill-round every single-line input */
+#search, .crew-join input, .guide-input input, .modal input:not([type="checkbox"]), #authEmail, #authPass, #authName, #reviewText, #composeText, #addName, #addZip, #addDesc, #photoCaption { border-radius: 18px; }
+.crew-join input, .guide-input input, #search { border-radius: 999px; }
+.modal select, #addCat, #photoSpot, #composeSpot { border-radius: 999px; }
+
+/* Bottom sheet: bigger rounded top corners, dynamic height */
+@media (max-width: 560px) {
+  .sheet { height: 90dvh; border-radius: 28px 28px 0 0; }
+  .sheet-hero { border-radius: 28px 28px 0 0; }
+  .modal { width: 92vw; }
+  .guide-panel { width: calc(100vw - 20px); right: 10px; }
+  .guide-fab { right: 12px; }
+  /* comfortable touch targets */
+  .pill-btn { padding: 11px 18px; }
+  .chip { padding: 9px 15px; }
+  .round-btn { width: 46px; height: 46px; }
+}
+[data-theme] .sheet { border-radius: 26px 0 0 26px; }  /* desktop side sheet: soften left edge */
+@media (max-width: 560px) { [data-theme] .sheet { border-radius: 28px 28px 0 0; } }
+
+/* Softer, cleaner floating chrome corners already pill; make the badge + toggle consistent */
+.badge-live { border-radius: 999px; }
+.mode-toggle { border-radius: 999px; }
