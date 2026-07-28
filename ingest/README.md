@@ -55,6 +55,41 @@ quality gates (min upvotes, min title length), and politeness/rate-limit sleeps.
   come through at `location_confidence 0.2–0.5` and get a `loc-approx` tag.
   Use `promote.py --min-conf 0.9` to keep only exactly-located ones.
 
+## TikTok hashtag discovery (experimental, fragile)
+
+`tiktok_ingest.py` is a second, **best-effort** ingestion path that discovers
+TikTok videos by hashtag (`#abandoneddallas`, `#urbextexas`, `#dallasabandoned`,
+etc.) and writes candidates in the **same** `candidates.jsonl` format, so
+`promote.py` consumes them unchanged (the TikTok like count fills the `upvotes`
+field). It reuses the Reddit place-extraction, geocoding, region gate, and
+classifier by import, so behavior matches the Reddit pipeline.
+
+**This path is ToS-gray and fragile by design.** TikTok has no official public
+search API, so discovery shells out to `yt-dlp` against public hashtag pages.
+TikTok's anti-bot can block it at any time; when it does, the script prints a
+clear message and exits gracefully instead of crashing. For durable volume the
+clean answer is the official **TikTok Research API** — this is the scrappy
+stopgap.
+
+Hard rules baked in:
+
+- **Embed-only.** Never downloads a video or image. The only thing stored is the
+  public video URL as `{"type":"tiktok","url":"https://www.tiktok.com/@user/video/ID"}`.
+- **No login / no credentials.** Public unauthenticated access only.
+- Every discovered video is confirmed live via TikTok's **public oEmbed**
+  endpoint (no key), which also supplies the author name for credit.
+
+```bash
+python tiktok_ingest.py --limit 20     # small test run
+python tiktok_ingest.py                # full sweep (may be blocked — that's expected)
+python tiktok_ingest.py --dry-run      # discover + geocode, write nothing
+```
+
+Needs `yt-dlp` (`pip install yt-dlp`; already present on this machine). Knobs
+live in `config.py` under the TikTok section: `TIKTOK_HASHTAGS`,
+`TIKTOK_PER_HASHTAG`, the sleeps, and `TIKTOK_MIN_LIKES`. Processed video ids
+are remembered in `seen_tiktok_ids.txt` so reruns skip them.
+
 ## Cloud runner (the "PC-off" version)
 
 To run overnight without your PC on, this script goes on a small always-on host
@@ -69,6 +104,8 @@ point it at a hosted DB and it just works.
 |------|------|
 | `config.py` | all the knobs — subreddits, region, gates |
 | `reddit_ingest.py` | the engine: Reddit -> candidates.jsonl |
+| `tiktok_ingest.py` | experimental TikTok hashtag discovery -> candidates.jsonl |
+| `seen_tiktok_ids.txt` | tiktok video ids already processed, so reruns skip them |
 | `promote.py` | candidates -> publishable ingested-spots.js |
 | `candidates.jsonl` | staging output (git-ignored; regenerated each run) |
 | `seen_ids.txt` | posts already processed, so reruns skip them |

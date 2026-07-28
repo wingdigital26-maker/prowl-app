@@ -62,6 +62,32 @@ TIKTOK_OEMBED = "https://www.tiktok.com/oembed"
 MAX_EMBEDS = 4             # cap embeds per spot (1 reddit + up to a few social)
 SOCIAL_SLEEP = 0.8         # seconds between oEmbed validation calls
 
+# --- TikTok hashtag discovery (EXPERIMENTAL, fragile, ToS-gray) ------------
+# Standalone discovery path used by tiktok_ingest.py. Unlike the Reddit social
+# harvest above (which only reads TikTok links already posted to Reddit), this
+# actively discovers TikTok videos by hashtag. TikTok has no official public
+# search API, so discovery leans on an unofficial best-effort method (yt-dlp)
+# and can be blocked by TikTok anti-bot at any time. It is embed-only: it never
+# downloads a single video or image, it only stores the public video URL and
+# validates it through the same public oEmbed endpoint used above.
+# The durable clean path is the official TikTok Research API, not this.
+TIKTOK_HASHTAGS = [
+    "abandoneddallas", "urbextexas", "dallasabandoned", "abandonedtexas",
+    "urbexdallas", "texasurbex", "abandonedfortworth", "houstonurbex",
+]
+
+# Videos to pull per hashtag page before stopping (kept small on purpose —
+# this is a fragile path, do not hammer it).
+TIKTOK_PER_HASHTAG = 25
+
+# Politeness sleeps for the TikTok path.
+TIKTOK_DISCOVER_SLEEP = 3.0   # seconds between hashtag pages (go slow, avoid blocks)
+TIKTOK_VALIDATE_SLEEP = 0.8   # seconds between oEmbed validation calls
+
+# Minimum like count to keep a discovered video (mirrors MIN_UPVOTES on Reddit).
+TIKTOK_MIN_LIKES = 0          # 0 = keep all; raise once volume is proven
+
 # --- Output ---------------------------------------------------------------
 CANDIDATES_FILE = "candidates.jsonl"   # one JSON spot-candidate per line
 SEEN_FILE = "seen_ids.txt"             # reddit post ids already processed (dedupe across runs)
+TIKTOK_SEEN_FILE = "seen_tiktok_ids.txt"  # tiktok video ids already processed (dedupe across runs)

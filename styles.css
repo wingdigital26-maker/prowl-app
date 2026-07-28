@@ -1139,3 +1139,56 @@ button, a, .pill-btn, .chip, .tab, .mode-btn { -webkit-tap-highlight-color: tran
 /* "What people say" community-quote style (abandoned/urbex spots) */
 .review.say { position: relative; padding-left: 26px; background: var(--bg-3); border: 1px solid var(--border); border-radius: 14px; padding: 11px 14px 11px 26px; font-size: 13px; line-height: 1.5; font-style: italic; color: var(--text); }
 .review.say::before { content: "\201C"; position: absolute; left: 9px; top: 4px; font-size: 26px; font-style: normal; color: var(--accent); line-height: 1; }
+
+/* ==================================================================
+   CONDENSE + COOLER PASS
+   Less stacked chrome over the map, tighter bands, a calmer surface,
+   and a cleaner Guide button that reads less "AI robot", more "spark".
+   ================================================================== */
+
+/* --- Tighter, calmer floating chrome (lighter glass shadows) --- */
+.round-btn, .search-pill, .mode-toggle, .badge-live, .chip, .recenter-btn {
+  box-shadow: 0 2px 10px rgba(0,0,0,.14);
+}
+.float-top { padding: 10px 12px 4px; gap: 8px; }
+.round-btn { width: 42px; height: 42px; }
+.search-pill { height: 42px; }
+
+/* Mode toggle: slightly smaller, sits just under the search bar */
+.mode-toggle { top: 58px; padding: 3px; }
+.mode-btn { padding: 6px 14px; font-size: 12px; }
+
+/* Story strip: smaller rings, moved up, tighter band (was the biggest space hog) */
+.story-strip { top: 98px; gap: 10px; padding: 4px 12px; }
+.story-ring { width: 46px; height: 46px; padding: 2.5px; box-shadow: 0 2px 8px rgba(0,0,0,.22); }
+.story-face { font-size: 18px; border-width: 2px; }
+.story-name { font-size: 9.5px; max-width: 52px; }
+
+/* Chip strip: pull up tight under the (now smaller) stories, no dead gap */
+.chip-strip { top: 172px; gap: 5px; padding: 2px 12px; }
+.chip { padding: 6px 12px; font-size: 11.5px; box-shadow: none; border-color: var(--border); }
+
+/* On phones, go even tighter and thin the always-on filter row */
+@media (max-width: 560px) {
+  .mode-toggle { top: 56px; }
+  .story-strip { top: 94px; }
+  .story-ring { width: 44px; height: 44px; }
+  .chip-strip { top: 166px; }
+  .chip { padding: 7px 12px; }        /* keep tap target but visually lighter */
+  .badge-live { padding: 7px 12px; font-size: 11px; }
+}
+
+/* --- Cleaner, cooler Guide button (glassy spark, not a loud AI blob) --- */
+.guide-fab {
+  width: 48px; height: 48px;
+  background: var(--glass); backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 3px 14px rgba(0,0,0,.16);
+}
+.guide-fab svg { width: 22px; height: 22px; fill: var(--accent); }
+.guide-fab::after {           /* one tiny accent spark dot, subtle */
+  content: ""; position: absolute; top: 11px; right: 12px;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--accent); opacity: .9;
+}
+.guide-fab:active { transform: scale(.9); }
