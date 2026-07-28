@@ -1125,3 +1125,7 @@ button, a, .pill-btn, .chip, .tab, .mode-btn { -webkit-tap-highlight-color: tran
 /* Softer, cleaner floating chrome corners already pill; make the badge + toggle consistent */
 .badge-live { border-radius: 999px; }
 .mode-toggle { border-radius: 999px; }
+
+/* "What people say" community-quote style (abandoned/urbex spots) */
+.review.say { position: relative; padding-left: 26px; background: var(--bg-3); border: 1px solid var(--border); border-radius: 14px; padding: 11px 14px 11px 26px; font-size: 13px; line-height: 1.5; font-style: italic; color: var(--text); }
+.review.say::before { content: "\201C"; position: absolute; left: 9px; top: 4px; font-size: 26px; font-style: normal; color: var(--accent); line-height: 1; }

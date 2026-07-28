@@ -730,16 +730,28 @@ function closeSheet() {
 document.getElementById("sheetClose").onclick = closeSheet;
 document.getElementById("sheetBackdrop").onclick = closeSheet;
 
+function isCommunitySpot(s) { return s.cat === "abandoned" || s.cat === "tunnel"; }
 function renderReviews(s) {
   const extra = (window.SPOT_EXTRAS && window.SPOT_EXTRAS[s.id]) || {};
-  const revUrl = extra.reviewUrl || ("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(s.name + " " + (s.zip || "Dallas TX")));
-  const link = `<a class="reviews-link" href="${revUrl}" target="_blank" rel="noopener">Read real reviews ↗</a>`;
-  const body = s.reviews.map(r => `
-    <div class="review">
-      <div class="review-head"><b>@${r.user}</b><span class="stars">${starStr(r.stars)}</span></div>
-      ${r.text}
-    </div>`).join("") || `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>No reviews yet</b><small>Nobody has prowled this one yet. Drop the first review.</small></div>`;
-  document.getElementById("reviews").innerHTML = link + body;
+  const community = isCommunitySpot(s);
+  const h = document.getElementById("reviewsHeading");
+  if (h) h.textContent = community ? "What people say" : "Reviews";
+
+  const link = community
+    ? `<a class="reviews-link" href="https://www.reddit.com/search/?q=${encodeURIComponent(s.name + " Dallas")}" target="_blank" rel="noopener">See what people say on Reddit ↗</a>`
+    : `<a class="reviews-link" href="${extra.reviewUrl || ("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(s.name + " " + (s.zip || "Dallas TX")))}" target="_blank" rel="noopener">Read real reviews ↗</a>`;
+
+  const body = community
+    ? s.reviews.map(r => `<div class="review say">${r.text}</div>`).join("")
+    : s.reviews.map(r => `
+      <div class="review">
+        <div class="review-head"><b>@${r.user}</b><span class="stars">${starStr(r.stars)}</span></div>
+        ${r.text}
+      </div>`).join("");
+  const fallback = community
+    ? `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>Not much chatter yet</b><small>Tap the link to see the threads.</small></div>`
+    : `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>No reviews yet</b><small>Nobody has prowled this one yet. Drop the first review.</small></div>`;
+  document.getElementById("reviews").innerHTML = link + (body || fallback);
 }
 
 // Star input
