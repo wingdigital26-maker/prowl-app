@@ -51,7 +51,7 @@ const REAL_SPOTS = [
   {
     id: 105, name: "Taqueria El Si Hay", cat: "food",
     reviewUrl: "https://www.yelp.com/biz/taqueria-el-si-hay-dallas",
-    lat: 32.7455, lng: -96.8290, zip: "75208",
+    lat: 32.7497, lng: -96.8318, zip: "75208",
     desc: "Cash only Oak Cliff walk up window with al pastor carved straight off the trompo. A true hole in the wall, some of the best tacos in Dallas. Bring cash.",
     tags: ["tacos", "oakcliff", "cashonly"], danger: 1, rating: 4.5,
     reviews: [
@@ -73,7 +73,7 @@ const REAL_SPOTS = [
   {
     id: 107, name: "El Tacaso", cat: "food",
     reviewUrl: "https://www.yelp.com/biz/el-tacaso-dallas-5",
-    lat: 32.8500, lng: -96.7690, zip: "75231",
+    lat: 32.863, lng: -96.856, zip: "75220",
     desc: "Literal 24/7 hole in the wall off Northwest Highway for the late night taco run. Come after the bars, order tacos and a horchata, do not overthink it.",
     tags: ["latenight", "tacos", "247"], danger: 1, rating: 4.3,
     reviews: [
@@ -107,7 +107,7 @@ const REAL_SPOTS = [
   },
   {
     id: 110, name: "La La Land Kind Cafe", cat: "coffee",
-    reviewUrl: "https://www.yelp.com/biz/la-la-land-kind-cafe-dallas",
+    reviewUrl: "https://www.yelp.com/biz/la-la-land-dallas-6",
     lat: 32.8250, lng: -96.7730, zip: "75206",
     desc: "Feel good cafe that hires and trains youth aging out of foster care. Pastel patio, the Iced Kind Latte with rose and honey is the signature. Bright, sweet, popular.",
     tags: ["cozy", "patio", "goodcause"], danger: 1, rating: 4.6,
@@ -164,7 +164,7 @@ const REAL_SPOTS = [
   },
   {
     id: 115, name: "Bar Eden", cat: "bar",
-    reviewUrl: "https://www.yelp.com/biz/bar-eden-dallas",
+    reviewUrl: "https://www.yelp.com/biz/bar-eden-lounge-at-paradiso-dallas",
     lat: 32.7500, lng: -96.8290, zip: "75208",
     desc: "Bishop Arts cocktail bar with a botanical garden fever dream vibe. Drinks built around flowers, herbs and smoke. Dress up a little, order whatever looks most alive.",
     tags: ["cocktails", "botanical", "bishoparts"], danger: 1, rating: 4.7,

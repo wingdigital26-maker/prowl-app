@@ -62,7 +62,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 406, name: "Beto and Son", cat: "food",
-    reviewUrl: "https://www.yelp.com/biz/beto-and-son-dallas",
+    reviewUrl: "https://www.yelp.com/biz/beto-and-son-dallas-2",
     lat: 32.7775, lng: -96.8360, zip: "75212",
     desc: "Flashy Trinity Groves modern Mexican from a father and son team, with skyline views and tableside guacamole. Come for the churro tower and the sunset over the bridge.",
     tags: ["mexican", "trinitygroves", "skyline"], danger: 1, rating: 4.5,
@@ -71,22 +71,10 @@ const DALLAS_DEPTH_SPOTS = [
       { user: "gulden_g", stars: 4, text: "Loud, fun, great margs. Get a patio table for the bridge at sunset." }
     ]
   },
-  {
-    id: 407, name: "Niwa Japanese BBQ", cat: "food",
-    reviewUrl: "https://www.yelp.com/biz/niwa-japanese-bbq-dallas",
-    lat: 32.7838, lng: -96.7790, zip: "75226",
-    desc: "Deep Ellum yakiniku where you grill premium cuts over a smokeless flame at your own table. Warm woods, soft light, real occasion energy. Splurge on the wagyu and go all in.",
-    tags: ["yakiniku", "deepellum", "datenight"], danger: 1, rating: 4.6,
-    reviews: [
-      { user: "wagyuwren", stars: 5, text: "Grilling your own wagyu is the most fun dinner in Deep Ellum. Beautiful room." },
-      { user: "smokelesssam", stars: 4, text: "Interactive and delicious. Pricey but a genuine special night out." }
-    ]
-  },
-
   // ---------- COFFEE ----------
   {
     id: 408, name: "Merit Coffee", cat: "coffee",
-    reviewUrl: "https://www.yelp.com/biz/merit-coffee-dallas-2",
+    reviewUrl: "https://www.yelp.com/biz/merit-coffee-dallas",
     lat: 32.7842, lng: -96.7845, zip: "75226",
     desc: "San Antonio roaster whose bright Deep Ellum shop nails a clean espresso program and a light airy room. Grab a cortado and a seat by the window, good for a work session.",
     tags: ["thirdwave", "espresso", "deepellum"], danger: 1, rating: 4.6,
@@ -109,7 +97,7 @@ const DALLAS_DEPTH_SPOTS = [
   {
     id: 410, name: "Cafe Duro", cat: "coffee",
     reviewUrl: "https://www.yelp.com/biz/cafe-duro-dallas",
-    lat: 32.8135, lng: -96.7690, zip: "75206",
+    lat: 32.8265, lng: -96.7695, zip: "75206",
     desc: "Small European style cafe on Lower Greenville pulling strong espresso and pastries. Tucked into a walkable stretch, good for a quick cortado before wandering the avenue.",
     tags: ["espresso", "greenville", "european"], danger: 1, rating: 4.6,
     reviews: [
@@ -120,7 +108,7 @@ const DALLAS_DEPTH_SPOTS = [
   {
     id: 411, name: "Wayward Coffee Co", cat: "coffee",
     reviewUrl: "https://www.yelp.com/biz/wayward-coffee-dallas",
-    lat: 32.7495, lng: -96.8295, zip: "75208",
+    lat: 32.7495, lng: -96.834, zip: "75208",
     desc: "Neighborhood Bishop Arts coffee bar with a warm, unfussy feel and a solid pour over. Friendly, local and easy to linger in. Good for reading or a slow morning off Bishop Ave.",
     tags: ["pourover", "bishoparts", "cozy"], danger: 1, rating: 4.7,
     reviews: [
@@ -143,7 +131,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 413, name: "Bowen House", cat: "bar",
-    reviewUrl: "https://www.yelp.com/biz/bowen-house-dallas",
+    reviewUrl: "https://www.yelp.com/biz/bowen-house-dallas-2",
     lat: 32.7975, lng: -96.8010, zip: "75204",
     desc: "Cocktails inside a restored 1874 Uptown farmhouse, all candlelight and old wood, with a hidden bar within a bar in back for the real occasion. Order something imaginative and settle in.",
     tags: ["cocktails", "historic", "uptown"], danger: 1, rating: 4.6,
@@ -164,17 +152,6 @@ const DALLAS_DEPTH_SPOTS = [
     ]
   },
   {
-    id: 415, name: "Truth and Alibi", cat: "bar",
-    reviewUrl: "https://www.yelp.com/biz/truth-and-alibi-dallas",
-    lat: 32.7845, lng: -96.7810, zip: "75226",
-    desc: "Deep Ellum speakeasy hidden behind a fake candy store front, dim and clubby once you find the door. Look for the password energy, dress sharp, and go later when it gets moody.",
-    tags: ["speakeasy", "deepellum", "cocktails"], danger: 1, rating: 4.4,
-    reviews: [
-      { user: "candyshopcaz", stars: 5, text: "Walk through the candy store into a whole hidden bar. Loved the reveal." },
-      { user: "alibiali", stars: 4, text: "Fun speakeasy gimmick that actually delivers. Go late, dress up a little." }
-    ]
-  },
-  {
     id: 416, name: "Twilite Lounge", cat: "bar",
     reviewUrl: "https://www.yelp.com/biz/twilite-lounge-dallas",
     lat: 32.7844, lng: -96.7805, zip: "75226",
@@ -187,7 +164,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 417, name: "Parliament", cat: "bar",
-    reviewUrl: "https://www.yelp.com/biz/parliament-dallas",
+    reviewUrl: "https://www.yelp.com/biz/parliament-dallas-2",
     lat: 32.7968, lng: -96.8025, zip: "75204",
     desc: "Uptown cocktail bar with a famously enormous menu and a serious craft program. Overwhelmed by the list? Tell the bartender two spirits you like and a mood, and trust them.",
     tags: ["cocktails", "uptown", "craft"], danger: 1, rating: 4.6,

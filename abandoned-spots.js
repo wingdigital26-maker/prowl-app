@@ -74,7 +74,7 @@ const ABANDONED_SPOTS = [
     photos: ["img/real/abandoned-506.jpg"],
     photoCredit: { by: "Nicolas Henderson", license: "CC BY 2.0", url: "https://commons.wikimedia.org/wiki/File:Smokestack,_Thurber._Texas_(10999189166).jpg" },
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Thurber%20Texas%20ghost%20town",
-    lat: 32.5054, lng: -98.3878, zip: "76458",
+    lat: 32.5072, lng: -98.4172, zip: "76458",
     desc: "A coal and brick company town that peaked near 10,000 people in 1920 and emptied out to almost nothing, about 75 minutes west of Fort Worth off I-20. The 128 foot smokestack still stands and the old cemetery holds around 1,000 graves. Drive through freely, stop at the historic markers and the little museum, all public and roadside.",
     tags: ["public", "ghost-town", "historic"], danger: 1, rating: 4.6,
     reviews: [
@@ -86,7 +86,7 @@ const ABANDONED_SPOTS = [
   {
     id: 507, name: "Stony Ghost Town", cat: "abandoned",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Stony%20Texas%20ghost%20town%20schoolhouse",
-    lat: 33.2200, lng: -97.3500, zip: "76247",
+    lat: 33.2242, lng: -97.3525, zip: "76247",
     desc: "A near vanished 1884 settlement in northwest Denton County where the restored Old Stony schoolhouse still stands off US 380. Quiet, rural, and easy to reach, you drive right up to it. All roadside and public, best in low golden hour light with the empty fields around it.",
     tags: ["public", "ghost-town", "roadside"], danger: 1, rating: 4.3,
     reviews: [
@@ -97,7 +97,7 @@ const ABANDONED_SPOTS = [
   {
     id: 508, name: "Drop Ghost Town", cat: "abandoned",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Drop%20Texas%20ghost%20town",
-    lat: 33.3000, lng: -97.5300, zip: "76078",
+    lat: 33.1308, lng: -97.3558, zip: "76247",
     desc: "A tiny faded farming community on FM 156 north of Fort Worth, marked now by the old Drop school building and a weathered general store at the corner of FM 1384 and Oliver Creek Road. Nothing gated, just a drive through slice of vanished rural Texas. All public roadside, go in daylight and respect the private homes nearby.",
     tags: ["public", "ghost-town", "roadside"], danger: 1, rating: 4.1,
     reviews: [
@@ -150,7 +150,7 @@ const ABANDONED_SPOTS = [
     photos: ["img/real/abandoned-512.jpg"],
     photoCredit: { by: "Nicolas Henderson", license: "CC BY 2.0", url: "https://commons.wikimedia.org/wiki/File:Old_Alton_Bridge,_Denton,_Texas_(8979780387).jpg" },
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Old%20Alton%20Bridge%20Goatmans%20Bridge%20Denton",
-    lat: 33.1372, lng: -97.0522, zip: "76226",
+    lat: 33.1292, lng: -97.1036, zip: "76226",
     desc: "An 1884 iron truss bridge in the woods south of Denton, decommissioned, rusting, and soaked in the local Goatman legend that makes it one of the most photographed haunted spots in North Texas. Public trail access and free. It is secluded, so go in daylight and bring a friend rather than chasing the ghost story after dark.",
     tags: ["public", "bridge", "haunted"], danger: 2, rating: 4.5,
     reviews: [
