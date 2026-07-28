@@ -715,6 +715,11 @@ function openSheet(id) {
   } else {
     pg.innerHTML = [0,1,2].map(() => `<div class="photo-cell" style="background:${CAT_META[s.cat].grad}">📷</div>`).join("");
   }
+  const credEl = document.getElementById("photoCredit");
+  const cred = (window.SPOT_EXTRAS && window.SPOT_EXTRAS[s.id] && window.SPOT_EXTRAS[s.id].photoCredit) || s.photoCredit;
+  credEl.innerHTML = cred
+    ? `Photo: <a href="${cred.url}" target="_blank" rel="noopener">${cred.by}</a> · ${cred.license}`
+    : "";
   renderReviews(s);
   document.getElementById("sheet").classList.add("open");
   document.getElementById("sheetBackdrop").classList.add("open");

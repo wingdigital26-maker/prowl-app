@@ -197,6 +197,7 @@ async function initMoth() {
       }
     }
     state.spots = spots.length ? spots : JSON.parse(JSON.stringify(SEED_SPOTS));
+    reconcilePhotos();   // backend records lack photos/credit fields -> overlay from SPOT_EXTRAS
     state.online = true;
     setBackendBadge(true);
   } catch (e) {
@@ -209,6 +210,19 @@ async function initMoth() {
   renderStories();
   renderAll();
   if (window.handleDeepLink) handleDeepLink();  // shared pins: ?s=<id> or ?pin=lat,lng
+}
+
+// Backend records don't store photos/photoCredit (schema has no such columns).
+// SPOT_EXTRAS (built in data.js) is the source of truth for real photos + credit,
+// so overlay them onto the loaded spots. Real photos always win over stock.
+function reconcilePhotos() {
+  const ex = window.SPOT_EXTRAS || {};
+  for (const s of state.spots) {
+    const e = ex[s.id];
+    if (!e) continue;
+    if (e.photos && e.photos.length) s.photos = e.photos;
+    if (e.photoCredit) s.photoCredit = e.photoCredit;
+  }
 }
 
 function setBackendBadge(online) {

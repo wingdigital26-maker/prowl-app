@@ -1050,6 +1050,9 @@ html, body { overflow-x: hidden; }
 /* Read-real-reviews link in the spot sheet */
 .reviews-link { display: inline-block; margin: 0 0 10px; font-size: 12.5px; font-weight: 700; color: var(--accent); text-decoration: none; }
 .reviews-link:hover { text-decoration: underline; }
+.photo-credit { font-size: 11px; color: var(--muted, #8b93a7); margin: 6px 2px 2px; opacity: .8; }
+.photo-credit:empty { display: none; }
+.photo-credit a { color: inherit; text-decoration: underline; }
 
 /* ============ Live 360 · Crew ============ */
 .crew-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 18px; padding: 14px; margin-bottom: 4px; }
