@@ -120,12 +120,25 @@ const CAT_ICON = {
   hangout:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V9a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2"/><path d="M3 11a2 2 0 0 1 2 2v3h14v-3a2 2 0 0 1 2-2"/><path d="M6 19v2M18 19v2"/></svg>',
   nature:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l5 7h-3l3 5H7l3-5H7z"/><path d="M12 15v6"/></svg>',
 };
+// Distinct, meaningful color per category so a glance tells you what it is.
+const CAT_COLOR = {
+  abandoned: "#5c6b7a",  // slate
+  tunnel:    "#3b424b",  // dark gray
+  rooftop:   "#4b5c8a",  // indigo
+  bar:       "#7a4bc4",  // purple
+  coffee:    "#8a5a3c",  // brown
+  food:      "#e0733a",  // orange
+  hangout:   "#2f8f8a",  // teal
+  nature:    "#3a9d5d",  // green
+};
+function catColor(cat) { return CAT_COLOR[cat] || "#5c6b7a"; }
 function catLogo(cat) { return `<span class="cat-logo">${CAT_ICON[cat] || CAT_ICON.abandoned}</span>`; }
 function realPhoto(s) { return (s.photoCredit && s.photos && s.photos.length) ? s.photos[0] : null; }
 function hasVideo(s) { return (s.embeds || []).some(e => e.type === "tiktok" || e.type === "instagram"); }
+function firstVideoUrl(s) { const e = (s.embeds || []).find(e => e.type === "tiktok" || e.type === "instagram"); return e ? e.url : null; }
 function faceStyle(s) {
   const p = realPhoto(s);
-  return p ? `style="background-image:url('${p}')"` : `style="background:${CAT_META[s.cat].grad}"`;
+  return p ? `style="background-image:url('${p}')"` : `style="background:${catColor(s.cat)}"`;
 }
 function faceInner(s) { return realPhoto(s) ? "" : catLogo(s.cat); }
 function playBadge(s) { return hasVideo(s) ? `<span class="play-badge">▶</span>` : ""; }
@@ -677,11 +690,12 @@ function openSheet(id) {
     hero.classList.remove("emoji-hero");
     document.getElementById("heroEmoji").innerHTML = "";
   } else {
-    hero.style.background = CAT_META[s.cat].grad;
+    hero.style.background = catColor(s.cat);
     hero.classList.add("emoji-hero");
     // Category logo as the face; if there's a video, a play cue that jumps to it.
+    const vurl = firstVideoUrl(s);
     document.getElementById("heroEmoji").innerHTML =
-      catLogo(s.cat) + (hasVideo(s) ? `<span class="hero-play" onclick="document.getElementById('embedSlot').scrollIntoView({behavior:'smooth'})">▶ watch</span>` : "");
+      catLogo(s.cat) + (vurl ? `<a class="hero-play" href="${vurl}" target="_blank" rel="noopener">▶ watch the video</a>` : "");
   }
   document.getElementById("sheetName").textContent = s.name;
   const rating = rateOf(s);
@@ -791,8 +805,12 @@ function renderEmbeds(s) {
   const extra = (window.SPOT_EXTRAS && window.SPOT_EXTRAS[s.id]) || {};
   const embeds = extra.embeds || s.embeds || [];
   if (!embeds.length) { slot.innerHTML = ""; return; }
+  const label = { tiktok: "Open on TikTok", instagram: "Open on Instagram", reddit: "Open on Reddit" };
+  const directLinks = embeds.map(e =>
+    `<a class="embed-open" href="${e.url}" target="_blank" rel="noopener">▶ ${label[e.type] || "Open post"} ↗</a>`).join("");
   slot.innerHTML =
     `<h3 class="embed-h">From explorers who've been</h3>
+     <div class="embed-openrow">${directLinks}</div>
      <div class="embed-list">${embeds.map(embedBlock).join("")}</div>
      <p class="embed-note">Real posts, hosted on their original platform. Credit and the link go to whoever shared them.</p>`;
   const types = [...new Set(embeds.map(e => e.type))];
