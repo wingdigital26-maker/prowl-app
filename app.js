@@ -720,6 +720,7 @@ function openSheet(id) {
   credEl.innerHTML = cred
     ? `Photo: <a href="${cred.url}" target="_blank" rel="noopener">${cred.by}</a> · ${cred.license}`
     : "";
+  renderEmbeds(s);
   renderReviews(s);
   document.getElementById("sheet").classList.add("open");
   document.getElementById("sheetBackdrop").classList.add("open");
@@ -734,6 +735,53 @@ function closeSheet() {
 }
 document.getElementById("sheetClose").onclick = closeSheet;
 document.getElementById("sheetBackdrop").onclick = closeSheet;
+
+// ===== Social embeds (Instagram / TikTok / Reddit) =====
+// We NEVER copy someone's photo. Instead we embed their actual public post,
+// which stays hosted on their platform, auto-credits them, and links back.
+// That is the only legal way to show social content we do not own.
+const EMBED_SCRIPTS = {
+  instagram: "https://www.instagram.com/embed.js",
+  tiktok:    "https://www.tiktok.com/embed.js",
+  reddit:    "https://embed.reddit.com/widgets.js",
+};
+function embedBlock(e) {
+  const dark = document.documentElement.getAttribute("data-theme") !== "day";
+  if (e.type === "instagram")
+    return `<blockquote class="instagram-media" data-instgrm-permalink="${e.url}" data-instgrm-version="14" style="margin:0;width:100%;min-width:0"><a href="${e.url}" target="_blank" rel="noopener">View this post on Instagram ↗</a></blockquote>`;
+  if (e.type === "tiktok")
+    return `<blockquote class="tiktok-embed" cite="${e.url}" style="margin:0;max-width:100%"><section><a href="${e.url}" target="_blank" rel="noopener">Watch on TikTok ↗</a></section></blockquote>`;
+  if (e.type === "reddit")
+    return `<blockquote class="reddit-embed-bq" data-embed-theme="${dark ? "dark" : "light"}" data-embed-height="420" style="margin:0"><a href="${e.url}" target="_blank" rel="noopener">See this post on Reddit ↗</a></blockquote>`;
+  return `<a class="embed-fallback" href="${e.url}" target="_blank" rel="noopener">See the original post ↗</a>`;
+}
+// Re-run each platform's embed script so newly injected blockquotes get enhanced.
+// If a script fails to load (offline, blocked), the blockquote still shows a
+// clickable link to the original post, so nothing breaks.
+function processEmbeds(types) {
+  types.forEach(t => {
+    const src = EMBED_SCRIPTS[t];
+    if (!src) return;
+    if (t === "instagram" && window.instgrm && window.instgrm.Embeds) { window.instgrm.Embeds.process(); return; }
+    document.querySelectorAll(`script[data-embed="${t}"]`).forEach(n => n.remove());
+    const sc = document.createElement("script");
+    sc.src = src; sc.async = true; sc.charset = "utf-8"; sc.setAttribute("data-embed", t);
+    document.body.appendChild(sc);
+  });
+}
+function renderEmbeds(s) {
+  const slot = document.getElementById("embedSlot");
+  if (!slot) return;
+  const extra = (window.SPOT_EXTRAS && window.SPOT_EXTRAS[s.id]) || {};
+  const embeds = extra.embeds || s.embeds || [];
+  if (!embeds.length) { slot.innerHTML = ""; return; }
+  slot.innerHTML =
+    `<h3 class="embed-h">From explorers who've been</h3>
+     <div class="embed-list">${embeds.map(embedBlock).join("")}</div>
+     <p class="embed-note">Real posts, hosted on their original platform. Credit and the link go to whoever shared them.</p>`;
+  const types = [...new Set(embeds.map(e => e.type))];
+  setTimeout(() => processEmbeds(types), 60);
+}
 
 function isCommunitySpot(s) { return s.cat === "abandoned" || s.cat === "tunnel"; }
 function renderReviews(s) {

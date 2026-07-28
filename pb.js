@@ -222,6 +222,7 @@ function reconcilePhotos() {
     if (!e) continue;
     if (e.photos && e.photos.length) s.photos = e.photos;
     if (e.photoCredit) s.photoCredit = e.photoCredit;
+    if (e.embeds && e.embeds.length) s.embeds = e.embeds;
   }
 }
 
