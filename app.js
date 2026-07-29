@@ -46,26 +46,31 @@ document.documentElement.dataset.theme = "night";
 // ===== Map =====
 const map = L.map("map", {
   zoomControl: false,
-  zoomSnap: 0.5, zoomDelta: 0.5,            // finer zoom steps = find the detail you want
-  wheelPxPerZoomLevel: 90,                  // calmer wheel zoom on web
-  zoomAnimationThreshold: 8,
+  // Continuous zoom: no snapping to whole levels, so pinch and wheel glide
+  // instead of clunking between steps.
+  zoomSnap: 0, zoomDelta: 0.4,
+  wheelPxPerZoomLevel: 140,                 // slower, smoother wheel travel
+  wheelDebounceTime: 20,
+  zoomAnimation: true, zoomAnimationThreshold: 12,
+  fadeAnimation: true, markerZoomAnimation: true,
+  inertia: true, inertiaDeceleration: 2400, easeLinearity: 0.22,
 }).setView([32.79, -96.82], 12);
 
 // Snap Map approach: a LIGHT, richly labeled basemap (streets, businesses,
 // neighborhoods all readable) with the app's dark UI floating on top. A dark
 // map under dark chrome hides everything, which is the opposite of useful.
-// Standard OSM raster: the most detailed free basemap there is. Real building
-// footprints (shaped like the actual buildings), business names, street names,
-// parks and water - the density Snap Map has. CARTO's styles label far less.
-// Note for launch: OSM's public tiles are fine for a demo but rate-limited, so
-// a real release should point at our own tile host or a paid provider.
-const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+// CARTO Voyager: compared side by side against raw OSM, Positron and Esri, this
+// is the one that is both PRETTY and detailed. Cream base, clean white roads,
+// real building footprints, street labels drawn ON TOP (the old
+// voyager_labels_under hid names behind buildings, which is why names only
+// showed when zoomed out).
+const TILE_URL = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 let tileLayer = null;
 function setBasemap() {
   if (tileLayer) map.removeLayer(tileLayer);
   tileLayer = L.tileLayer(TILE_URL, {
-    attribution: '&copy; OpenStreetMap contributors',
-    maxZoom: 21, maxNativeZoom: 19,
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 21, maxNativeZoom: 20,
     detectRetina: false,      // half the requests = tiles land before you see gaps
     updateWhenIdle: false, updateWhenZooming: false,
     keepBuffer: 4,            // hold a ring of off-screen tiles so panning is seamless
@@ -150,9 +155,11 @@ function pinFace(s) { return faceStyle(s); }
 function renderMarkers() {
   cluster.clearLayers();
   visibleSpots().forEach(s => {
+    // Name rides under the pin, like Snap Map labels its places. Our curated
+    // spots ARE the POIs, so this is where the business names come from.
     const icon = L.divIcon({
       className: "",
-      html: `<div class="bubble-pin ${s.sponsored ? "sponsored" : ""} ${s.id === state.openSpotId ? "selected" : ""}" data-sid="${s.id}" ${pinFace(s)}>${faceInner(s)}${playBadge(s)}${hereCount(s) ? `<span class="here-dot">${hereCount(s)}</span>` : ""}${s.sponsored ? `<span class="sponsor-tag">Featured</span>` : ""}</div>`,
+      html: `<div class="pin-wrap"><div class="bubble-pin ${s.sponsored ? "sponsored" : ""} ${s.id === state.openSpotId ? "selected" : ""}" data-sid="${s.id}" ${pinFace(s)}>${faceInner(s)}${playBadge(s)}${hereCount(s) ? `<span class="here-dot">${hereCount(s)}</span>` : ""}${s.sponsored ? `<span class="sponsor-tag">Featured</span>` : ""}</div><span class="pin-label">${s.name}</span></div>`,
       iconSize: [48, 48], iconAnchor: [24, 24],
     });
     const m = L.marker([s.lat, s.lng], { icon });
@@ -161,7 +168,13 @@ function renderMarkers() {
   });
   const sc = document.getElementById("spotCount");
   if (sc) sc.textContent = visibleSpots().length;   // badge removed from map screen
+  syncLabelZoom();
 }
+// Names appear once you are close enough for them not to collide.
+function syncLabelZoom() {
+  document.body.classList.toggle("show-pin-labels", map.getZoom() >= 14.5);
+}
+map.on("zoomend", syncLabelZoom);
 // Lift + ring the selected pin without a full re-render
 function highlightSelectedPin() {
   document.querySelectorAll(".bubble-pin").forEach(p => {

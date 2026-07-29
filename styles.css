@@ -1478,10 +1478,23 @@ body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.18) contrast(1.06) 
    One dark map, but a LIVE one: streets, houses and labels read clearly.
    ================================================================== */
 
-/* Full-detail OSM base. Leave it alone - every filter costs legibility. */
-[data-theme="night"] .leaflet-tile { filter: none; }
+/* Voyager base with a light gloss. Tested against raw/1.25/1.4 saturation on
+   real tiles: this is the point where it looks rich without going garish. */
+[data-theme="night"] .leaflet-tile { filter: saturate(1.18) contrast(1.05); }
 /* Abandoned mode: the faintest cool lean, never enough to hide a street name */
-body[data-mode="urbex"] .leaflet-tile { filter: saturate(.9) hue-rotate(-6deg); }
+body[data-mode="urbex"] .leaflet-tile { filter: saturate(1.0) contrast(1.05) hue-rotate(-8deg); }
+
+/* ---- Spot name labels (our POIs, Snap Map style) ---- */
+.pin-wrap { position: relative; width: 48px; height: 48px; }
+.pin-label {
+  position: absolute; top: 50px; left: 50%; transform: translateX(-50%);
+  max-width: 128px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-family: var(--font); font-size: 11px; font-weight: 800; letter-spacing: -.1px;
+  color: #10151d;
+  text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 1px 2px rgba(255,255,255,.95);
+  display: none; pointer-events: none;
+}
+body.show-pin-labels .pin-label { display: block; }
 
 /* THE SQUARES FIX: a tile that has not landed yet used to show as a hard dark
    block. Now the map sits on OSM's own paper colour and tiles fade in, so a
