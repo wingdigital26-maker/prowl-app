@@ -1263,6 +1263,55 @@ body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.18) contrast(1.06) 
 /* Sharper zoom feel */
 .leaflet-zoom-anim .leaflet-zoom-animated { transition-timing-function: cubic-bezier(.25,.9,.25,1); }
 
+/* ==================================================================
+   YOU ON THE MAP — character pin + builder, tighter top chrome
+   ================================================================== */
+
+/* Your character pin (Snap Map style) */
+.me-pin {
+  position: relative; width: 46px; height: 46px; border-radius: 50%;
+  background: var(--glass); backdrop-filter: blur(10px);
+  border: 3px solid var(--me, var(--accent));
+  display: grid; place-items: center; font-size: 24px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.35);
+}
+.me-pulse {
+  position: absolute; inset: -9px; border-radius: 50%;
+  border: 2px solid var(--me, var(--accent)); opacity: .5;
+  animation: mePulse 2.2s ease-out infinite; pointer-events: none;
+}
+@keyframes mePulse {
+  0% { transform: scale(.75); opacity: .55; }
+  70% { transform: scale(1.15); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* Character builder (profile) */
+.avatar-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 22px; padding: 14px; }
+.avatar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 12px; }
+.av-opt {
+  aspect-ratio: 1; border-radius: 14px; border: 2px solid transparent;
+  background: var(--bg-3); font-size: 22px; cursor: pointer; display: grid; place-items: center;
+  transition: transform .12s, border-color .15s;
+}
+.av-opt:active { transform: scale(.9); }
+.av-opt.on { border-color: var(--accent); background: var(--accent-soft); }
+.avatar-colors { display: flex; gap: 10px; margin-bottom: 10px; }
+.av-color {
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+  border: 2px solid var(--border); transition: transform .12s;
+}
+.av-color:active { transform: scale(.88); }
+.av-color.on { border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* Top chrome: one centralized cluster, less spread */
+.float-top { padding: 10px 10px 4px; gap: 6px; }
+.round-btn { width: 40px; height: 40px; font-size: 17px; }
+.search-pill { height: 40px; padding: 0 14px; }
+.mode-toggle { top: 56px; }
+.chip-strip { top: 100px; }
+@media (max-width: 560px) { .mode-toggle { top: 54px; } .chip-strip { top: 97px; } }
+
 /* "What people say" community-quote style (abandoned/urbex spots) */
 .review.say { position: relative; padding-left: 26px; background: var(--bg-3); border: 1px solid var(--border); border-radius: 14px; padding: 11px 14px 11px 26px; font-size: 13px; line-height: 1.5; font-style: italic; color: var(--text); }
 .review.say::before { content: "\201C"; position: absolute; left: 9px; top: 4px; font-size: 26px; font-style: normal; color: var(--accent); line-height: 1; }

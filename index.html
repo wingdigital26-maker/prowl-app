@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#35bdf7">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
-<link rel="stylesheet" href="styles.css?v=46">
+<link rel="stylesheet" href="styles.css?v=48">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
@@ -55,8 +55,6 @@
   <button class="chip chip-sketch" data-sketch="chill"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14.5s1.5 2 4 2 4-2 4-2"/><path d="M9 9.5h.01M15 9.5h.01"/></svg>Chill only</button>
   <button class="chip chip-sketch" data-sketch="sketchy"><svg class="ico" viewBox="0 0 24 24"><path d="M10.3 4l-8 14a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3l-8-14a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4M12 17h.01"/></svg>Sketchy+</button>
 </div>
-
-<div class="badge-live"><span class="dot"></span> <span id="spotCount">0</span> <span id="badgeTail">spots live · DFW</span></div>
 
 <!-- In-app route banner (drawn on our own map) -->
 <div class="route-banner" id="routeBanner">
@@ -113,6 +111,13 @@
     <div id="authCta"></div>
     <div class="profile-stats" id="profileStats"></div>
   </div>
+  <h2 class="view-sub">Your character</h2>
+  <div class="avatar-card">
+    <div class="avatar-grid" id="avatarGrid"></div>
+    <div class="avatar-colors" id="avatarColors"></div>
+    <small class="crew-hint">Your character is you on the map — pick a face and a color, Snap Map style.</small>
+  </div>
+
   <h2 class="view-sub">Live 360 · Crew</h2>
   <div class="crew-card">
     <div class="crew-row">
@@ -358,16 +363,16 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-<script src="real-spots.js?v=46"></script>
-<script src="plano-spots.js?v=46"></script>
-<script src="plano-new-spots.js?v=46"></script>
-<script src="hangout-nature-spots.js?v=46"></script>
-<script src="dallas-depth-spots.js?v=46"></script>
-<script src="abandoned-spots.js?v=46"></script>
-<script src="urbex-north-spots.js?v=46"></script>
-<script src="video-thumbs.js?v=46"></script>
-<script src="data.js?v=46"></script>
-<script src="app.js?v=46"></script>
-<script src="pb.js?v=46"></script>
+<script src="real-spots.js?v=48"></script>
+<script src="plano-spots.js?v=48"></script>
+<script src="plano-new-spots.js?v=48"></script>
+<script src="hangout-nature-spots.js?v=48"></script>
+<script src="dallas-depth-spots.js?v=48"></script>
+<script src="abandoned-spots.js?v=48"></script>
+<script src="urbex-north-spots.js?v=48"></script>
+<script src="video-thumbs.js?v=48"></script>
+<script src="data.js?v=48"></script>
+<script src="app.js?v=48"></script>
+<script src="pb.js?v=48"></script>
 </body>
 </html>

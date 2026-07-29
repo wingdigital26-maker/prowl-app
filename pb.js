@@ -129,7 +129,10 @@ function closeAuth() {
 }
 function renderAuthUI() {
   const u = currentUser();
-  const initial = (u ? (u.name || u.email)[0] : "?").toUpperCase();
+  // The character (state.avatar) owns the avatar face; auth only fills it in
+  // as a fallback before the character system has loaded.
+  const av = (window.appState && window.appState.avatar && window.appState.avatar.emoji) || null;
+  const initial = av || (u ? (u.name || u.email)[0] : "?").toUpperCase();
   const topAv = document.getElementById("profileBtn");
   if (topAv) topAv.textContent = initial;
   const pAv = document.getElementById("profileAvatar");

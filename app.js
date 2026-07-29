@@ -167,7 +167,8 @@ function renderMarkers() {
     m.on("click", () => openSheet(s.id));
     cluster.addLayer(m);
   });
-  document.getElementById("spotCount").textContent = visibleSpots().length;
+  const sc = document.getElementById("spotCount");
+  if (sc) sc.textContent = visibleSpots().length;   // badge removed from map screen
 }
 // Lift + ring the selected pin without a full re-render
 function highlightSelectedPin() {
@@ -579,10 +580,64 @@ function renderCrew() {
 renderCrew();
 
 // ===== Recenter on DFW =====
+// ===== You on the map — custom character (Snap Map style) =====
+const AVATAR_EMOJI = ["🦊","🦉","👻","🐺","🥷","🤠","🐸","😎","🐱","🧙","🦇","👽"];
+const AVATAR_COLORS = ["#35bdf7","#9b6dff","#37e08b","#ffb84d","#ff5d6c","#f4f4f4"];
+state.avatar = (() => {
+  try { return JSON.parse(localStorage.getItem("prowl.avatar")) || {}; } catch (e) { return {}; }
+})();
+if (!state.avatar.emoji) state.avatar = { emoji: "🦊", color: "#35bdf7" };
+window.appState = state;   // bridge so pb.js (auth UI) can respect the character
+let meMarker = null;
+
+function meIcon() {
+  return L.divIcon({
+    className: "",
+    html: `<div class="me-pin" style="--me:${state.avatar.color}"><span>${state.avatar.emoji}</span><i class="me-pulse"></i></div>`,
+    iconSize: [46, 46], iconAnchor: [23, 23],
+  });
+}
+function showMe(lat, lng) {
+  state.meAt = [lat, lng];
+  if (meMarker) { meMarker.setLatLng([lat, lng]); }
+  else meMarker = L.marker([lat, lng], { icon: meIcon(), zIndexOffset: 900, interactive: false }).addTo(map);
+}
+function startMe() {
+  if (!navigator.geolocation || !window.isSecureContext) return;   // https only
+  navigator.geolocation.watchPosition(
+    p => showMe(p.coords.latitude, p.coords.longitude),
+    () => {}, { enableHighAccuracy: true, maximumAge: 8000 });
+}
+function applyAvatar() {
+  localStorage.setItem("prowl.avatar", JSON.stringify(state.avatar));
+  if (meMarker) meMarker.setIcon(meIcon());
+  const btn = document.getElementById("profileBtn");
+  if (btn) { btn.textContent = state.avatar.emoji; btn.style.background = state.avatar.color; }
+  const pa = document.getElementById("profileAvatar");
+  if (pa) { pa.textContent = state.avatar.emoji; pa.style.background = state.avatar.color; }
+  renderAvatarBuilder();
+}
+function renderAvatarBuilder() {
+  const grid = document.getElementById("avatarGrid"), colors = document.getElementById("avatarColors");
+  if (!grid || !colors) return;
+  grid.innerHTML = AVATAR_EMOJI.map(e =>
+    `<button class="av-opt ${e === state.avatar.emoji ? "on" : ""}" data-e="${e}">${e}</button>`).join("");
+  colors.innerHTML = AVATAR_COLORS.map(c =>
+    `<button class="av-color ${c === state.avatar.color ? "on" : ""}" data-c="${c}" style="background:${c}"></button>`).join("");
+  grid.querySelectorAll(".av-opt").forEach(b => b.onclick = () => { state.avatar.emoji = b.dataset.e; applyAvatar(); });
+  colors.querySelectorAll(".av-color").forEach(b => b.onclick = () => { state.avatar.color = b.dataset.c; applyAvatar(); });
+}
+startMe();
+applyAvatar();
+
+// Recenter: first stop is YOU (if located), tap again for the DFW overview.
 const recenterBtn = document.getElementById("recenterBtn");
+let recenterToggle = false;
 if (recenterBtn) recenterBtn.onclick = () => {
   recenterBtn.classList.remove("spin"); void recenterBtn.offsetWidth; recenterBtn.classList.add("spin");
-  try { map.flyTo([32.79, -96.82], 12, { duration: 0.9, easeLinearity: 0.25 }); } catch (e) { map.setView([32.79, -96.82], 12); }
+  const target = (state.meAt && !recenterToggle) ? { at: state.meAt, z: 15 } : { at: [32.79, -96.82], z: 12 };
+  recenterToggle = state.meAt ? !recenterToggle : false;
+  try { map.flyTo(target.at, target.z, { duration: 0.9, easeLinearity: 0.25 }); } catch (e) { map.setView(target.at, target.z); }
   closeSheet();
 };
 
