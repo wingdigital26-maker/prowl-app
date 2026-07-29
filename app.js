@@ -227,7 +227,31 @@ function maneuverText(step, destName) {
 function clearRoute() {
   if (state.routeLine) { map.removeLayer(state.routeLine); state.routeLine = null; }
   if (state.routeMe) { map.removeLayer(state.routeMe); state.routeMe = null; }
+  if (state.navWatch) { navigator.geolocation.clearWatch(state.navWatch); state.navWatch = null; }
+  state.navDest = null;
   document.getElementById("routeBanner").classList.remove("open");
+}
+// Live navigation: follow the user's position, keep distance/ETA fresh,
+// recenter gently as they move, and celebrate arrival.
+function startLiveNav(s) {
+  state.navDest = s;
+  if (state.navWatch) navigator.geolocation.clearWatch(state.navWatch);
+  state.navWatch = navigator.geolocation.watchPosition((pos) => {
+    if (!state.navDest) return;
+    const lat = pos.coords.latitude, lng = pos.coords.longitude;
+    if (state.routeMe) state.routeMe.setLatLng([lat, lng]);
+    const meters = map.distance([lat, lng], [s.lat, s.lng]);
+    if (meters < 60) {                       // arrived
+      document.getElementById("rbMeta").textContent = "You're here 🎉";
+      toast(`Welcome to ${s.name}`);
+      navigator.geolocation.clearWatch(state.navWatch); state.navWatch = null;
+      return;
+    }
+    const mi = (meters / 1609.34).toFixed(1);
+    const min = Math.max(1, Math.round((meters / 1609.34) / 0.5));  // ~30 mph city pace
+    document.getElementById("rbMeta").textContent = `${mi} mi left · ~${min} min`;
+    map.panTo([lat, lng], { animate: true, duration: 0.8 });
+  }, null, { enableHighAccuracy: true, maximumAge: 3000 });
 }
 function showRouteBanner(s, route, from) {
   const mi = (route.distance / 1609.34).toFixed(1);
@@ -275,6 +299,7 @@ function routeToSpot(s) {
       closeSheet();
       map.fitBounds(state.routeLine.getBounds(), { padding: [70, 70] });
       showRouteBanner(s, route, { lat, lng });
+      startLiveNav(s);                        // follow the user until they arrive
     } catch (e) {
       toast("Couldn't draw the route — opening Maps");
       window.open(extNavUrl(s), "_blank");

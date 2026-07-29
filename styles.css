@@ -1139,6 +1139,98 @@ button, a, .pill-btn, .chip, .tab, .mode-btn { -webkit-tap-highlight-color: tran
 .badge-live { border-radius: 999px; }
 .mode-toggle { border-radius: 999px; }
 
+/* ==================================================================
+   FULL REVAMP — CLEAN PASS
+   One visual language: soft glass, one accent, generous space,
+   smaller quieter chrome, image-forward cards. Mobile + web.
+   ================================================================== */
+
+/* --- Calmer, softer base tokens --- */
+[data-theme="night"] {
+  --shadow: 0 4px 18px rgba(0, 0, 0, 0.38);
+  --glass: rgba(13, 18, 27, 0.78);
+  --border: rgba(127, 219, 255, 0.10);
+}
+[data-theme="day"] {
+  --shadow: 0 4px 16px rgba(30, 120, 180, 0.10);
+  --glass: rgba(255, 255, 255, 0.82);
+}
+
+/* --- Map: cleaner canvas — kill the heavy vignette, gentle tone only --- */
+.map-vignette { box-shadow: inset 0 0 90px 10px rgba(0,0,0,.16); }
+[data-theme="day"] .map-vignette { box-shadow: inset 0 0 80px 8px rgba(30,80,120,.07); }
+[data-theme="night"] .leaflet-tile { filter: brightness(1.06) saturate(1.05); }
+[data-theme="day"] .leaflet-tile { filter: saturate(1.04) contrast(1.01); }
+body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.04) saturate(1.02) hue-rotate(-8deg); }
+
+/* --- Pins: smaller, sharper, quieter (photo does the talking) --- */
+.bubble-pin {
+  width: 42px; height: 42px; border-width: 2.5px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.30);
+}
+.bubble-pin .cat-logo svg { width: 20px; height: 20px; }
+.bubble-cluster {
+  width: 40px; height: 40px; border-width: 2.5px; font-size: 14px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.30);
+}
+.here-dot { transform: scale(.9); }
+.play-badge { width: 15px; height: 15px; font-size: 7px; top: 4px; right: 4px; }
+
+/* --- Top chrome: one thin, consistent glass band --- */
+.round-btn, .search-pill { box-shadow: 0 1px 8px rgba(0,0,0,.10); border: 1px solid var(--border); }
+.mode-toggle { box-shadow: 0 1px 8px rgba(0,0,0,.10); }
+.chip { box-shadow: none; }
+.badge-live { box-shadow: 0 1px 8px rgba(0,0,0,.10); border: 1px solid var(--border); }
+
+/* --- Typography rhythm --- */
+.view-title { font-size: 26px; letter-spacing: -0.6px; margin-bottom: 16px; }
+.view-sub { font-size: 14px; text-transform: uppercase; letter-spacing: .8px; color: var(--text-dim); font-weight: 800; margin: 22px 0 10px; }
+.sheet-hero-overlay h2 { font-size: 23px; }
+
+/* --- Cards: flatter, image-forward, consistent radius --- */
+.explore-card, .zip-card, .feed-card, .crew-card, .composer, .g-rec {
+  border: 1px solid var(--border); box-shadow: none;
+}
+.explore-card .ec-label { font-size: 12px; padding: 30px 10px 9px; }
+.zip-card { box-shadow: none; }
+
+/* --- Detail sheet: airier body, quieter meta --- */
+.sheet-body { padding: 18px 18px 40px; }
+.sheet-meta { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+.sheet-desc { font-size: 14px; line-height: 1.65; }
+.sheet-tags { margin: 10px 0 4px; }
+.tag { font-size: 11px; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); border: none; }
+.danger-meter { font-size: 12.5px; margin: 12px 0 4px; }
+.verify-box { font-size: 12.5px; }
+.photo-grid { gap: 6px; margin-top: 12px; }
+.photo-cell { border-radius: 12px; }
+
+/* --- Buttons: one primary style, quieter secondaries --- */
+.pill-btn { font-weight: 700; box-shadow: none; }
+.pill-btn.primary { box-shadow: 0 2px 10px rgba(0,0,0,.14); }
+
+/* --- Tab bar: cleaner, floating feel --- */
+.tabbar { border-top: 1px solid var(--border); background: var(--glass); backdrop-filter: blur(18px); }
+.tab { font-size: 10px; letter-spacing: .2px; }
+.tab-ico svg { width: 21px; height: 21px; }
+
+/* --- Guide panel: match the language --- */
+.guide-panel { box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+.g-msg { font-size: 13px; }
+
+/* --- Scrollbars off the aesthetic path (webkit) --- */
+.view::-webkit-scrollbar, .sheet-body::-webkit-scrollbar { width: 0; }
+
+/* --- Desktop/web: give the floating UI a max width so it reads as an app --- */
+@media (min-width: 900px) {
+  .float-top { left: 50%; right: auto; transform: translateX(-50%); width: min(560px, 92vw); padding-top: 14px; }
+  .mode-toggle { top: 64px; }
+  .story-strip { left: 50%; transform: translateX(-50%); width: min(680px, 96vw); justify-content: center; top: 102px; }
+  .chip-strip { left: 50%; transform: translateX(-50%); width: min(680px, 96vw); justify-content: center; top: 178px; }
+  .view { padding: 26px max(24px, calc(50vw - 480px)) 40px; }
+  .tabbar { left: 50%; transform: translateX(-50%); width: min(520px, 94vw); border-radius: 22px 22px 0 0; border: 1px solid var(--border); border-bottom: none; }
+}
+
 /* "What people say" community-quote style (abandoned/urbex spots) */
 .review.say { position: relative; padding-left: 26px; background: var(--bg-3); border: 1px solid var(--border); border-radius: 14px; padding: 11px 14px 11px 26px; font-size: 13px; line-height: 1.5; font-style: italic; color: var(--text); }
 .review.say::before { content: "\201C"; position: absolute; left: 9px; top: 4px; font-size: 26px; font-style: normal; color: var(--accent); line-height: 1; }
