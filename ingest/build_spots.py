@@ -12,7 +12,7 @@ Does three jobs the research agents should not be trusted to do themselves:
 Example:
     python build_spots.py plano_food.json PLANO_FOOD_SPOTS ../plano-food-spots.js 701 "Plano TX"
 """
-import json, re, glob, os, sys
+import json, re, glob, os, sys, html
 from urllib.parse import quote
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -24,8 +24,9 @@ def norm(n):
 
 
 def plain(t):
-    """Strip em dashes and smart quotes. Jack does not want em dashes anywhere."""
-    t = (t or "")
+    """Strip em dashes and smart quotes. Jack does not want em dashes anywhere.
+    Also decodes HTML entities, which the research agents keep emitting."""
+    t = html.unescape(t or "")
     for bad, good in [(" — ", ", "), (" – ", ", "), ("—", ", "), ("–", "-"),
                       ("’", "'"), ("‘", "'"), ("“", '"'), ("”", '"')]:
         t = t.replace(bad, good)

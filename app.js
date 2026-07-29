@@ -1618,11 +1618,23 @@ function scrollGuide() { const m = document.getElementById("guideMsgs"); m.scrol
 // mood, distance, price, and whether you are following up on the last answer.
 const CRAVINGS = {
   taco: ["taco","tacos","al pastor","birria","taqueria"], bbq: ["bbq","barbecue","brisket","smoked","ribs"],
-  ramen: ["ramen","noodle","noodles","pho"], sushi: ["sushi","omakase","sashimi","japanese"],
-  pizza: ["pizza","slice","pie"], burger: ["burger","burgers","smash"],
-  mexican: ["mexican","enchilada","queso","salsa"], thai: ["thai","curry","pad"],
+  ramen: ["ramen","izakaya","tonkotsu"], noodles: ["noodle","noodles","pho","udon"],
+  dumplings: ["dumpling","dumplings","xiao long bao","xlb","soup dumpling","bao","manti","samsa"],
+  sushi: ["sushi","omakase","sashimi","nigiri","robata"],
+  pizza: ["pizza","slice"], burger: ["burger","burgers","smash"],
+  mexican: ["mexican","enchilada","queso","salsa","pupusa","pupusas"],
+  thai: ["thai","pad thai","panang"], chinese: ["chinese","sichuan","szechuan","chongqing","lanzhou"],
+  korean: ["korean","kbbq","soondubu","tofu house","banchan","kimchi","bibimbap"],
+  japanese: ["japanese","obanyaki","takoyaki","karaage"],
+  taiwanese: ["taiwanese","boba","milk tea","bubble tea"],
+  vietnamese: ["vietnamese","banh mi"],
+  indian: ["indian","curry","tikka","tandoori","biryani","karahi","naan","masala"],
+  pakistani: ["pakistani","seekh","halal"],
+  middleeast: ["kabob","kebab","shawarma","falafel","persian","afghan","uzbek","plov","pulao","gyro","mediterranean"],
+  peruvian: ["peruvian","ceviche","lomo saltado"],
+  bakery: ["bakery","croissant","pastry","pastries","bread","eclair","macaron","cinnamon roll","waffle"],
   breakfast: ["breakfast","brunch","biscuit","pancake","migas","eggs"],
-  dessert: ["dessert","ice cream","sweet","pastry","donut","cake"],
+  dessert: ["dessert","ice cream","sweet","donut","cake","crepe","crepes","creamery","gelato"],
   vegan: ["vegan","vegetarian","plant based"],
   cocktail: ["cocktail","cocktails","mixology","speakeasy","martini","mezcal","whiskey"],
   beer: ["beer","brewery","brewpub","draft","taproom","cider"], wine: ["wine","winery","vino"],
@@ -1670,13 +1682,18 @@ function guideSearch(intent) {
   let pool = matchingSpots().length ? state.spots.slice() : state.spots.slice();
   if (intent.cat) pool = pool.filter(s => s.cat === intent.cat);
 
-  const words = intent.raw.toLowerCase().split(/[^a-z]+/).filter(w => w.length > 2);
+  const STOP = new Set(["the","and","for","near","some","good","best","great","really","where","what","can","get","find","want","looking","place","places","spot","spots","food","around","here","there","something","anything"]);
+  const words = intent.raw.toLowerCase().split(/[^a-z]+/).filter(w => w.length > 2 && !STOP.has(w));
   const scored = pool.map(s => {
+    const name = s.name.toLowerCase(), tags = s.tags.join(" ").toLowerCase();
     const hay = (s.name + " " + s.desc + " " + s.tags.join(" ") + " " + CAT_META[s.cat].label).toLowerCase();
     let sc = (rateOf(s) || 3.8) * 1.1;
     if (intent.craving) sc += intent.cravingWords.some(w => saysWord(hay, w)) ? 6 : -1.5;
     intent.moods.forEach(m => { if (m.words.some(w => saysWord(hay, w))) sc += 2.2; });
-    sc += words.reduce((a, w) => a + (hay.includes(w) ? 0.8 : 0), 0);
+    // A word in the NAME is the strongest possible signal. Asking for "boba"
+    // should surface Boba Republic, not a nearby plaza that happens to rate well.
+    sc += words.reduce((a, w) =>
+      a + (saysWord(name, w) ? 7 : saysWord(tags, w) ? 3.5 : saysWord(hay, w) ? 1.2 : 0), 0);
     if (hasVideo(s)) sc += 0.3;
     const mi = milesBetween(me, s);
     // Distance always matters. Even when they did not say "near me", nobody
