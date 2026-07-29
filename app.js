@@ -51,9 +51,10 @@ const map = L.map("map", {
   zoomAnimationThreshold: 8,
 }).setView([32.79, -96.82], 12);
 
-// One dark basemap. Labels + roads + building footprints at close zoom, and we
-// zoom a level past the native tiles so houses stay legible when you dive in.
-const TILE_URL = "https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png";
+// Snap Map approach: a LIGHT, richly labeled basemap (streets, businesses,
+// neighborhoods all readable) with the app's dark UI floating on top. A dark
+// map under dark chrome hides everything, which is the opposite of useful.
+const TILE_URL = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png";
 let tileLayer = null;
 function setBasemap() {
   if (tileLayer) map.removeLayer(tileLayer);
@@ -265,16 +266,29 @@ function metersOffRoute(lat, lng) {
   return best === Infinity ? 0 : best;
 }
 
+// Drop a marker on the map exactly where the next turn happens, so you can SEE
+// the turn coming, not just read it.
+function setTurnMarker(p, arrow) {
+  if (!p) { if (nav.turn) { map.removeLayer(nav.turn); nav.turn = null; } return; }
+  const icon = L.divIcon({
+    className: "", iconSize: [38, 38], iconAnchor: [19, 19],
+    html: `<div class="turn-pin">${arrow}</div>`,
+  });
+  if (nav.turn) { nav.turn.setLatLng([p.lat, p.lng]); nav.turn.setIcon(icon); }
+  else nav.turn = L.marker([p.lat, p.lng], { icon, zIndexOffset: 950, interactive: false }).addTo(map);
+}
+
 function renderNavHud(lat, lng) {
   const hud = navHud();
   if (!hud || !nav.steps.length) return;
   const st = nav.steps[Math.min(nav.i, nav.steps.length - 1)];
-  const p = stepPoint(nav.steps[Math.min(nav.i + 1, nav.steps.length - 1)]) || stepPoint(st);
+  const next = nav.steps[nav.i + 1];
+  const p = stepPoint(next || st);
   const toManeuver = p ? map.distance([lat, lng], [p.lat, p.lng]) : 0;
   const toDest = map.distance([lat, lng], [nav.dest.lat, nav.dest.lng]);
-  const next = nav.steps[nav.i + 1];
+  const arrow = maneuverArrow((next || st).maneuver);
 
-  document.getElementById("navArrow").textContent = maneuverArrow((next || st).maneuver);
+  document.getElementById("navArrow").textContent = arrow;
   document.getElementById("navInstr").textContent = maneuverText(next || st, nav.dest.name);
   document.getElementById("navDist").textContent = fmtFeet(toManeuver);
   const mins = Math.max(1, Math.round((toDest / 1609.34) / 0.5));
@@ -284,7 +298,12 @@ function renderNavHud(lat, lng) {
   document.getElementById("navThen").textContent =
     after ? `then ${maneuverText(after, nav.dest.name)}` : "";
 
-  // Advance when we are on top of the upcoming maneuver.
+  setTurnMarker(p, arrow);
+  // Close in as the turn approaches, like a real guide talking you through it.
+  const wantZoom = toManeuver < 120 ? 19 : toManeuver < 400 ? 18 : 17;
+  if (map.getZoom() !== wantZoom) map.setZoom(wantZoom, { animate: false });
+
+  // Advance once we are on top of the maneuver.
   if (p && toManeuver < 35 && nav.i < nav.steps.length - 1) nav.i++;
 }
 
@@ -315,7 +334,7 @@ function startDrive(s, route, from) {
       zIndexOffset: 1000, interactive: false,
     }).addTo(map);
   }
-  map.setView([from.lat, from.lng], 17, { animate: false });  // snap to street level, like Maps does
+  map.setView([from.lat, from.lng], 18, { animate: false });  // snap in tight on you, like a real guide
   renderNavHud(from.lat, from.lng);
 
   if (nav.watch) navigator.geolocation.clearWatch(nav.watch);
@@ -346,6 +365,7 @@ function endDrive() {
   if (nav.watch) { navigator.geolocation.clearWatch(nav.watch); nav.watch = null; }
   if (nav.line) { map.removeLayer(nav.line); nav.line = null; }
   if (nav.me) { map.removeLayer(nav.me); nav.me = null; }
+  if (nav.turn) { map.removeLayer(nav.turn); nav.turn = null; }
   nav.steps = []; nav.i = 0; nav.dest = null;
 }
 function showRouteBanner(s, route, from) {
