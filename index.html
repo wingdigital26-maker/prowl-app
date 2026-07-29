@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#35bdf7">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
-<link rel="stylesheet" href="styles.css?v=49">
+<link rel="stylesheet" href="styles.css?v=52">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
@@ -66,6 +66,22 @@
   <div class="rb-actions">
     <a class="rb-start" id="rbStart" target="_blank" rel="noopener">▶ Start</a>
     <a class="rb-ext" id="rbExt" target="_blank" rel="noopener" title="Open in Maps">Maps ↗</a>
+  </div>
+</div>
+
+<!-- Turn-by-turn drive HUD (in-app navigation) -->
+<div class="nav-hud" id="navHud">
+  <div class="nh-card">
+    <span class="nh-arrow" id="navArrow">↑</span>
+    <div class="nh-text">
+      <b id="navDist">—</b>
+      <span id="navInstr">Starting…</span>
+      <small id="navThen"></small>
+    </div>
+  </div>
+  <div class="nh-bar">
+    <span id="navEta"></span>
+    <button class="nh-end" id="navEnd">End</button>
   </div>
 </div>
 
@@ -363,16 +379,16 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-<script src="real-spots.js?v=49"></script>
-<script src="plano-spots.js?v=49"></script>
-<script src="plano-new-spots.js?v=49"></script>
-<script src="hangout-nature-spots.js?v=49"></script>
-<script src="dallas-depth-spots.js?v=49"></script>
-<script src="abandoned-spots.js?v=49"></script>
-<script src="urbex-north-spots.js?v=49"></script>
-<script src="video-thumbs.js?v=49"></script>
-<script src="data.js?v=49"></script>
-<script src="app.js?v=49"></script>
-<script src="pb.js?v=49"></script>
+<script src="real-spots.js?v=52"></script>
+<script src="plano-spots.js?v=52"></script>
+<script src="plano-new-spots.js?v=52"></script>
+<script src="hangout-nature-spots.js?v=52"></script>
+<script src="dallas-depth-spots.js?v=52"></script>
+<script src="abandoned-spots.js?v=52"></script>
+<script src="urbex-north-spots.js?v=52"></script>
+<script src="video-thumbs.js?v=52"></script>
+<script src="data.js?v=52"></script>
+<script src="app.js?v=52"></script>
+<script src="pb.js?v=52"></script>
 </body>
 </html>

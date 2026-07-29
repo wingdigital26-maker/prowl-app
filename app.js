@@ -39,15 +39,9 @@ function starStr(n) {
 }
 const SKETCH_WORDS = ["", "Chill", "Easy", "Moderate", "Sketchy", "Extreme"];
 
-// ===== Theme =====
-const savedTheme = localStorage.getItem("haunt.theme") || "night";
-document.documentElement.dataset.theme = savedTheme;
-document.getElementById("themeBtn").onclick = () => {
-  const t = document.documentElement.dataset.theme === "night" ? "day" : "night";
-  document.documentElement.dataset.theme = t;
-  localStorage.setItem("haunt.theme", t);
-  setBasemap(t);
-};
+// ===== Theme: night only. One look, always dark. =====
+const savedTheme = "night";
+document.documentElement.dataset.theme = "night";
 
 // ===== Map =====
 const map = L.map("map", {
@@ -57,39 +51,24 @@ const map = L.map("map", {
   zoomAnimationThreshold: 8,
 }).setView([32.79, -96.82], 12);
 
-const TILE_URLS = {
-  // Labeled tiles so streets + neighborhoods are readable (like Snap Map)
-  day: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-  night: "https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png",
-};
+// One dark basemap. Labels + roads + building footprints at close zoom, and we
+// zoom a level past the native tiles so houses stay legible when you dive in.
+const TILE_URL = "https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png";
 let tileLayer = null;
-function setBasemap(theme) {
+function setBasemap() {
   if (tileLayer) map.removeLayer(tileLayer);
-  tileLayer = L.tileLayer(TILE_URLS[theme], {
+  tileLayer = L.tileLayer(TILE_URL, {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
-    maxZoom: 20, maxNativeZoom: 19,   // zoom past native tiles (upscaled) for close-in detail
+    maxZoom: 21, maxNativeZoom: 20,
+    detectRetina: true,
+    updateWhenIdle: false, keepBuffer: 3,
   }).addTo(map);
 }
-setBasemap(savedTheme);
+setBasemap();
 
-// Heat glow layer (Snap Map vibe): soft glow under spot clusters
-const glowLayer = L.layerGroup().addTo(map);
-function renderGlow() {
-  glowLayer.clearLayers();
-  const byZip = {};
-  state.spots.filter(s => spotMode(s.cat) === state.mode)
-    .forEach(s => (byZip[s.zip] = byZip[s.zip] || []).push(s));
-  Object.values(byZip).forEach(spots => {
-    if (spots.length < 2) return;
-    const lat = spots.reduce((a, s) => a + s.lat, 0) / spots.length;
-    const lng = spots.reduce((a, s) => a + s.lng, 0) / spots.length;
-    L.circle([lat, lng], {
-      radius: 1400 + spots.length * 350,
-      stroke: false, fillColor: state.mode === "urbex" ? "#9b6dff" : "#35bdf7",
-      fillOpacity: 0.10 + Math.min(spots.length * 0.02, 0.1),
-    }).addTo(glowLayer);
-  });
-}
+// The old blue "heat glow" circles are gone on purpose: they buried the streets
+// and told you nothing the pins do not already say.
+function renderGlow() {}
 
 const cluster = L.markerClusterGroup({
   showCoverageOnHover: false,
@@ -232,33 +211,142 @@ function maneuverText(step, destName) {
 }
 
 function clearRoute() {
-  if (state.routeLine) { map.removeLayer(state.routeLine); state.routeLine = null; }
-  if (state.routeMe) { map.removeLayer(state.routeMe); state.routeMe = null; }
-  if (state.navWatch) { navigator.geolocation.clearWatch(state.navWatch); state.navWatch = null; }
-  state.navDest = null;
+  endDrive();
+  state.pendingRoute = null;
   document.getElementById("routeBanner").classList.remove("open");
 }
-// Live navigation: follow the user's position, keep distance/ETA fresh,
-// recenter gently as they move, and celebrate arrival.
-function startLiveNav(s) {
-  state.navDest = s;
-  if (state.navWatch) navigator.geolocation.clearWatch(state.navWatch);
-  state.navWatch = navigator.geolocation.watchPosition((pos) => {
-    if (!state.navDest) return;
+// ===== Drive mode: real in-app turn-by-turn =====
+// Follows you at street zoom, calls the next maneuver, advances steps as you
+// pass them, and re-routes when you leave the line. No handoff to Maps.
+const nav = { on: false, steps: [], i: 0, dest: null, watch: null, line: null, me: null, lastReroute: 0 };
+
+function fmtFeet(m) {
+  if (m >= 1609.34) return `${(m / 1609.34).toFixed(1)} mi`;
+  if (m >= 305) return `${(Math.round(m / 0.3048 / 100) * 100)} ft`;
+  return `${Math.max(50, Math.round(m / 0.3048 / 10) * 10)} ft`;
+}
+function navHud() { return document.getElementById("navHud"); }
+
+function drawRoute(route) {
+  if (nav.line) map.removeLayer(nav.line);
+  const line = route.geometry.coordinates.map(c => [c[1], c[0]]);
+  // Casing under the route so it reads on any street color.
+  nav.line = L.layerGroup([
+    L.polyline(line, { color: "#0b0f16", weight: 11, opacity: .9, lineCap: "round", lineJoin: "round" }),
+    L.polyline(line, { color: accentColor(), weight: 6, opacity: 1, lineCap: "round", lineJoin: "round" }),
+  ]).addTo(map);
+  nav.steps = (route.legs && route.legs[0] && route.legs[0].steps) || [];
+  nav.i = 0;
+  return line;
+}
+
+async function fetchRoute(from, to) {
+  const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}`
+            + `?overview=full&geometries=geojson&steps=true`;
+  const j = await (await fetch(url)).json();
+  if (!j.routes || !j.routes.length) throw new Error("no route");
+  return j.routes[0];
+}
+
+function stepPoint(st) {
+  const l = st && st.maneuver && st.maneuver.location;
+  return l ? { lat: l[1], lng: l[0] } : null;
+}
+
+// Distance from the user to the route line, to detect going off course.
+function metersOffRoute(lat, lng) {
+  if (!nav.steps.length) return 0;
+  let best = Infinity;
+  for (let k = nav.i; k < Math.min(nav.i + 3, nav.steps.length); k++) {
+    const geo = nav.steps[k].geometry && nav.steps[k].geometry.coordinates;
+    if (!geo) continue;
+    for (const c of geo) best = Math.min(best, map.distance([lat, lng], [c[1], c[0]]));
+  }
+  return best === Infinity ? 0 : best;
+}
+
+function renderNavHud(lat, lng) {
+  const hud = navHud();
+  if (!hud || !nav.steps.length) return;
+  const st = nav.steps[Math.min(nav.i, nav.steps.length - 1)];
+  const p = stepPoint(nav.steps[Math.min(nav.i + 1, nav.steps.length - 1)]) || stepPoint(st);
+  const toManeuver = p ? map.distance([lat, lng], [p.lat, p.lng]) : 0;
+  const toDest = map.distance([lat, lng], [nav.dest.lat, nav.dest.lng]);
+  const next = nav.steps[nav.i + 1];
+
+  document.getElementById("navArrow").textContent = maneuverArrow((next || st).maneuver);
+  document.getElementById("navInstr").textContent = maneuverText(next || st, nav.dest.name);
+  document.getElementById("navDist").textContent = fmtFeet(toManeuver);
+  const mins = Math.max(1, Math.round((toDest / 1609.34) / 0.5));
+  document.getElementById("navEta").textContent =
+    `${(toDest / 1609.34).toFixed(1)} mi · ~${mins} min · ${fmtEta(mins * 60)}`;
+  const after = nav.steps[nav.i + 2];
+  document.getElementById("navThen").textContent =
+    after ? `then ${maneuverText(after, nav.dest.name)}` : "";
+
+  // Advance when we are on top of the upcoming maneuver.
+  if (p && toManeuver < 35 && nav.i < nav.steps.length - 1) nav.i++;
+}
+
+async function reroute(lat, lng) {
+  const now = Date.now ? 0 : 0;                      // Date.now avoided; throttle by flag
+  if (nav.rerouting) return;
+  nav.rerouting = true;
+  try {
+    toast("Re-routing…");
+    const route = await fetchRoute({ lat, lng }, nav.dest);
+    drawRoute(route);
+    renderNavHud(lat, lng);
+  } catch (e) { /* keep the old line if the reroute fails */ }
+  nav.rerouting = false;
+}
+
+function startDrive(s, route, from) {
+  nav.on = true; nav.dest = s;
+  document.body.classList.add("driving");
+  closeSheet();
+  document.getElementById("routeBanner").classList.remove("open");
+  navHud().classList.add("open");
+
+  if (!nav.me) {
+    nav.me = L.marker([from.lat, from.lng], {
+      icon: L.divIcon({ className: "", iconSize: [40, 40], iconAnchor: [20, 20],
+        html: `<div class="nav-me" style="--me:${state.avatar.color}"></div>` }),
+      zIndexOffset: 1000, interactive: false,
+    }).addTo(map);
+  }
+  map.setView([from.lat, from.lng], 17, { animate: false });  // snap to street level, like Maps does
+  renderNavHud(from.lat, from.lng);
+
+  if (nav.watch) navigator.geolocation.clearWatch(nav.watch);
+  nav.watch = navigator.geolocation.watchPosition((pos) => {
+    if (!nav.on) return;
     const lat = pos.coords.latitude, lng = pos.coords.longitude;
-    if (state.routeMe) state.routeMe.setLatLng([lat, lng]);
-    const meters = map.distance([lat, lng], [s.lat, s.lng]);
-    if (meters < 60) {                       // arrived
-      document.getElementById("rbMeta").textContent = "You're here 🎉";
-      toast(`Welcome to ${s.name}`);
-      navigator.geolocation.clearWatch(state.navWatch); state.navWatch = null;
+    nav.me.setLatLng([lat, lng]);
+    map.panTo([lat, lng], { animate: true, duration: 0.9 });
+
+    if (map.distance([lat, lng], [s.lat, s.lng]) < 55) {   // arrived
+      document.getElementById("navInstr").textContent = `You've arrived at ${s.name}`;
+      document.getElementById("navArrow").textContent = "★";
+      document.getElementById("navDist").textContent = "";
+      document.getElementById("navThen").textContent = "";
+      toast(`Welcome to ${s.name} 🎉`);
+      if (nav.watch) { navigator.geolocation.clearWatch(nav.watch); nav.watch = null; }
       return;
     }
-    const mi = (meters / 1609.34).toFixed(1);
-    const min = Math.max(1, Math.round((meters / 1609.34) / 0.5));  // ~30 mph city pace
-    document.getElementById("rbMeta").textContent = `${mi} mi left · ~${min} min`;
-    map.panTo([lat, lng], { animate: true, duration: 0.8 });
-  }, null, { enableHighAccuracy: true, maximumAge: 3000 });
+    if (metersOffRoute(lat, lng) > 60) reroute(lat, lng);
+    else renderNavHud(lat, lng);
+  }, null, { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
+}
+
+function endDrive() {
+  nav.on = false;
+  document.body.classList.remove("driving");
+  const hud = navHud(); if (hud) hud.classList.remove("open");
+  if (nav.watch) { navigator.geolocation.clearWatch(nav.watch); nav.watch = null; }
+  if (nav.line) { map.removeLayer(nav.line); nav.line = null; }
+  if (nav.me) { map.removeLayer(nav.me); nav.me = null; }
+  nav.steps = []; nav.i = 0; nav.dest = null;
 }
 function showRouteBanner(s, route, from) {
   const mi = (route.distance / 1609.34).toFixed(1);
@@ -279,7 +367,13 @@ function showRouteBanner(s, route, from) {
       ${dist && !last ? `<small>${dist}</small>` : ""}
     </li>`;
   }).join("");
-  document.getElementById("rbStart").href = extNavUrl(s, from);
+  // Start drives IN the app now. Maps stays as an escape hatch.
+  const start = document.getElementById("rbStart");
+  start.removeAttribute("href");
+  start.onclick = () => {
+    const p = state.pendingRoute;
+    if (p) startDrive(p.s, p.route, p.from);
+  };
   document.getElementById("rbExt").href = extMapsUrl(s);
   document.getElementById("routeBanner").classList.add("open");
 }
@@ -296,17 +390,12 @@ function routeToSpot(s) {
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const lat = pos.coords.latitude, lng = pos.coords.longitude;
     try {
-      const url = `https://router.project-osrm.org/route/v1/driving/${lng},${lat};${s.lng},${s.lat}?overview=full&geometries=geojson&steps=true`;
-      const j = await (await fetch(url)).json();
-      if (!j.routes || !j.routes.length) throw new Error("no route");
-      const route = j.routes[0];
-      const line = route.geometry.coordinates.map(c => [c[1], c[0]]);
-      state.routeLine = L.polyline(line, { color: accentColor(), weight: 5, opacity: .9, lineCap: "round", lineJoin: "round" }).addTo(map);
-      state.routeMe = L.circleMarker([lat, lng], { radius: 7, color: "#fff", weight: 2, fillColor: accentColor(), fillOpacity: 1 }).addTo(map);
+      const route = await fetchRoute({ lat, lng }, s);
+      drawRoute(route);
       closeSheet();
-      map.fitBounds(state.routeLine.getBounds(), { padding: [70, 70] });
-      showRouteBanner(s, route, { lat, lng });
-      startLiveNav(s);                        // follow the user until they arrive
+      map.fitBounds(L.latLngBounds(route.geometry.coordinates.map(c => [c[1], c[0]])), { padding: [70, 90] });
+      state.pendingRoute = { s, route, from: { lat, lng } };
+      showRouteBanner(s, route, { lat, lng });   // preview + Start
     } catch (e) {
       toast("Couldn't draw the route — opening Maps");
       window.open(extNavUrl(s), "_blank");
@@ -319,6 +408,7 @@ function routeToSpot(s) {
   }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 60000 });
 }
 document.getElementById("rbClose").onclick = clearRoute;
+document.getElementById("navEnd").onclick = clearRoute;
 
 // ===== Story strip =====
 function renderStories() {
