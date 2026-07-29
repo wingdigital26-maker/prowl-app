@@ -48,9 +48,9 @@ const map = L.map("map", {
   zoomControl: false,
   // Continuous zoom: no snapping to whole levels, so pinch and wheel glide
   // instead of clunking between steps.
-  zoomSnap: 0, zoomDelta: 0.4,
-  wheelPxPerZoomLevel: 200,                 // long, gliding wheel travel
-  wheelDebounceTime: 6,                     // react immediately, no stutter step
+  zoomSnap: 0, zoomDelta: 0.7,              // a tap/button moves a meaningful amount
+  wheelPxPerZoomLevel: 75,                  // responsive scroll: a flick covers real ground
+  wheelDebounceTime: 4,                     // react immediately, no stutter step
   bounceAtZoomLimits: false,                // no rubber-band snap at the ends
   zoomAnimation: true, zoomAnimationThreshold: 12,
   fadeAnimation: true, markerZoomAnimation: true,

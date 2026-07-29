@@ -1260,8 +1260,12 @@ body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.04) saturate(1.02) 
 [data-theme="night"] .leaflet-tile { filter: brightness(1.22) contrast(1.08) saturate(1.05); }
 body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.18) contrast(1.06) saturate(1.0) hue-rotate(-8deg); }
 
-/* Sharper zoom feel */
-.leaflet-zoom-anim .leaflet-zoom-animated { transition-timing-function: cubic-bezier(.25,.9,.25,1); }
+/* Zoom animation: short and eased out, so it feels immediate but never jerky */
+.leaflet-zoom-anim .leaflet-zoom-animated {
+  transition: transform .2s cubic-bezier(.2,.85,.3,1) !important;
+}
+/* Pins should not smear during the zoom */
+.leaflet-marker-icon { transition: none; }
 
 /* ==================================================================
    YOU ON THE MAP — character pin + builder, tighter top chrome
