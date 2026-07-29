@@ -54,15 +54,21 @@ const map = L.map("map", {
 // Snap Map approach: a LIGHT, richly labeled basemap (streets, businesses,
 // neighborhoods all readable) with the app's dark UI floating on top. A dark
 // map under dark chrome hides everything, which is the opposite of useful.
-const TILE_URL = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png";
+// Standard OSM raster: the most detailed free basemap there is. Real building
+// footprints (shaped like the actual buildings), business names, street names,
+// parks and water - the density Snap Map has. CARTO's styles label far less.
+// Note for launch: OSM's public tiles are fine for a demo but rate-limited, so
+// a real release should point at our own tile host or a paid provider.
+const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 let tileLayer = null;
 function setBasemap() {
   if (tileLayer) map.removeLayer(tileLayer);
   tileLayer = L.tileLayer(TILE_URL, {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    maxZoom: 21, maxNativeZoom: 20,
-    detectRetina: true,
-    updateWhenIdle: false, keepBuffer: 3,
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 21, maxNativeZoom: 19,
+    detectRetina: false,      // half the requests = tiles land before you see gaps
+    updateWhenIdle: false, updateWhenZooming: false,
+    keepBuffer: 4,            // hold a ring of off-screen tiles so panning is seamless
   }).addTo(map);
 }
 setBasemap();
@@ -73,7 +79,13 @@ function renderGlow() {}
 
 const cluster = L.markerClusterGroup({
   showCoverageOnHover: false,
-  maxClusterRadius: 52,
+  // Break apart early and easily. A tight cluster you have to fight to open is
+  // worse than a few overlapping pins.
+  maxClusterRadius: 34,
+  disableClusteringAtZoom: 16,   // past neighborhood zoom, always show real pins
+  spiderfyOnMaxZoom: true,
+  spiderfyDistanceMultiplier: 1.6,
+  animateAddingMarkers: false,
   iconCreateFunction: c => L.divIcon({
     className: "",
     html: `<div class="bubble-cluster">${c.getChildCount()}</div>`,

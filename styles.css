@@ -1478,14 +1478,18 @@ body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.18) contrast(1.06) 
    One dark map, but a LIVE one: streets, houses and labels read clearly.
    ================================================================== */
 
-/* Light Snap-Map-style basemap: keep it clean and legible, just a touch of
-   punch. No brightness hacks needed now that the map is not dark on dark. */
-[data-theme="night"] .leaflet-tile,
-body[data-mode="urbex"] .leaflet-tile {
-  filter: saturate(1.05) contrast(1.04);
-}
+/* Full-detail OSM base. Leave it alone - every filter costs legibility. */
+[data-theme="night"] .leaflet-tile { filter: none; }
 /* Abandoned mode: the faintest cool lean, never enough to hide a street name */
-body[data-mode="urbex"] .leaflet-tile { filter: saturate(.92) contrast(1.05) hue-rotate(-6deg); }
+body[data-mode="urbex"] .leaflet-tile { filter: saturate(.9) hue-rotate(-6deg); }
+
+/* THE SQUARES FIX: a tile that has not landed yet used to show as a hard dark
+   block. Now the map sits on OSM's own paper colour and tiles fade in, so a
+   loading tile is invisible instead of a flashing square. */
+#map, .leaflet-container { background: #f2efe9 !important; }
+.leaflet-tile-container img { will-change: auto; }
+.leaflet-tile { opacity: 0; transition: opacity .18s ease-out; }
+.leaflet-tile-loaded { opacity: 1 !important; }
 
 /* No vignette over a light map - it just made the corners muddy */
 .map-vignette { box-shadow: none; }
