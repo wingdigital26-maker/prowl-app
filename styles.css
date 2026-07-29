@@ -1333,6 +1333,40 @@ body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.18) contrast(1.06) 
 }
 .av-frame.on { background: var(--accent); color: #06121b; border-color: var(--accent); }
 
+/* ==================================================================
+   PRODUCT POLISH — one type scale, real action hierarchy, consistent
+   section language in the spot sheet.
+   ================================================================== */
+
+/* One section-label voice everywhere in the sheet */
+#reviewsHeading, .embed-h, .gist-label, .photo-label {
+  font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text-dim); margin: 20px 0 10px;
+}
+
+/* Action hierarchy: getting there is THE action, the rest are quiet */
+.sheet-actions { gap: 8px; }
+.sheet-actions #dirBtn {
+  flex: 1.7; background: var(--accent); color: #06121b; border-color: var(--accent);
+  font-weight: 800; font-size: 14.5px;
+}
+.sheet-actions #shareBtn, .sheet-actions #saveBtn {
+  flex: 1; background: var(--bg-3); border: 1px solid var(--border); color: var(--text);
+  font-weight: 700;
+}
+.sheet-actions .save-btn.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+/* Body copy: one comfortable reading size */
+.sheet-desc { font-size: 14.5px; line-height: 1.62; color: var(--text); }
+.sheet-meta { font-size: 12px; color: var(--text-dim); }
+
+/* Meta blocks: same quiet card language as everything else */
+.danger-meter, .verify-box {
+  background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: 16px; padding: 12px 14px; font-size: 12.5px;
+}
+.sheet-tags .tag { font-size: 11px; opacity: .85; }
+
 /* Review call-to-action: the real rating and the real link lead */
 .reviews-cta {
   display: flex; align-items: center; gap: 12px; text-decoration: none;
