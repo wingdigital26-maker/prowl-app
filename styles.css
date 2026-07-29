@@ -245,6 +245,13 @@ body[data-mode="urbex"] .leaflet-tile { filter: contrast(1.06) saturate(1.12) hu
 
 /* Feed cards (Instagram style) */
 .feed { max-width: 520px; margin: 0 auto; }
+/* Feed type filter row: in-flow horizontal scroller under the composer */
+.feed-filters {
+  max-width: 520px; margin: 2px auto 12px; padding: 2px 2px 4px;
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+}
+.feed-filters::-webkit-scrollbar { display: none; }
+.feed-filters .chip { position: static; }
 .feed-card {
   background: var(--bg-2); border: 1px solid var(--border);
   border-radius: 20px; margin-bottom: 14px; overflow: hidden;
@@ -1787,7 +1794,35 @@ body.driving .recenter-btn { opacity: 0; pointer-events: none; transition: opaci
 
 /* You, driving */
 .nav-me {
+  position: relative;
   width: 22px; height: 22px; border-radius: 50%;
   background: var(--me, var(--accent)); border: 3px solid #fff;
   box-shadow: 0 0 0 7px color-mix(in srgb, var(--me, #35bdf7) 26%, transparent), 0 3px 10px rgba(0,0,0,.5);
 }
+/* Forward chevron: the map is heading-up while driving, so screen-up = the way
+   you're going. A fixed up-pointing arrow reads as "you, facing forward". */
+body.driving .nav-me::before {
+  content: ""; position: absolute; left: 50%; top: 0;
+  transform: translate(-50%, -118%);
+  border-left: 8px solid transparent; border-right: 8px solid transparent;
+  border-bottom: 13px solid var(--me, #35bdf7);
+  filter: drop-shadow(0 -1px 1px rgba(0,0,0,.35));
+}
+.nav-dest {
+  color: var(--accent); font-size: 26px; font-weight: 900; line-height: 1;
+  text-shadow: 0 0 3px #fff, 0 2px 6px rgba(0,0,0,.5);
+}
+
+/* Heading-up drive camera. Oversizing the container means the rotated map still
+   fills the viewport with real tiles (no empty corners); the transform is purely
+   visual and never touches Leaflet's internal pane positioning. Only active in
+   drive mode via .nav-rot, so the normal map is completely unaffected. */
+#map.nav-rot {
+  inset: auto; top: -75%; left: -75%; width: 250%; height: 250%;
+  transform: rotate(var(--bearing, 0deg));
+  transform-origin: 50% 50%;
+  transition: transform .5s ease-out;
+  will-change: transform;
+}
+/* Keep the upcoming-turn arrow upright and readable as the map spins under it. */
+body.driving .turn-pin { animation: none; transform: rotate(var(--nav-bearing, 0deg)); }

@@ -4,6 +4,7 @@ const state = {
   online: false,
   mode: localStorage.getItem("moth.mode") || "cool",  // "cool" (bars/food/coffee) or "urbex" (abandoned)
   filter: "all",
+  feedFilter: "all",  // feed-tab category filter (food/nature/bar/…) independent of the map
   sketchFilter: null, // "chill" (<=2) | "sketchy" (>=4) | null
   search: "",
   placing: false,
@@ -255,7 +256,32 @@ function clearRoute() {
 // ===== Drive mode: real in-app turn-by-turn =====
 // Follows you at street zoom, calls the next maneuver, advances steps as you
 // pass them, and re-routes when you leave the line. No handoff to Maps.
-const nav = { on: false, steps: [], i: 0, dest: null, watch: null, line: null, me: null, lastReroute: 0 };
+const nav = { on: false, steps: [], i: 0, dest: null, watch: null, line: null, me: null, lastReroute: 0,
+  bearing: 0, _cont: null, lastPt: null, destMark: null };
+
+// Compass bearing (deg, 0=N clockwise) from point a to point b.
+function bearingDeg(a, b) {
+  const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+  const y = Math.sin(rad(b.lng - a.lng)) * Math.cos(rad(b.lat));
+  const x = Math.cos(rad(a.lat)) * Math.sin(rad(b.lat)) -
+            Math.sin(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.cos(rad(b.lng - a.lng));
+  return (deg(Math.atan2(y, x)) + 360) % 360;
+}
+// Turn the map so the direction of travel points UP, like Google Maps nav.
+// Rotation is a CSS transform on the (oversized, while driving) #map container,
+// so it never touches Leaflet's own pane math. We unwrap the angle to a
+// continuous value so we always rotate the short way — no 360° spins at N.
+function setNavBearing(deg) {
+  if (deg == null || isNaN(deg)) return;
+  if (nav._cont == null) nav._cont = deg;
+  const d = ((deg - (nav._cont % 360)) + 540) % 360 - 180;   // shortest signed delta
+  nav._cont += d;
+  nav.bearing = deg;
+  const mapEl = document.getElementById("map");
+  if (mapEl) mapEl.style.setProperty("--bearing", (-nav._cont).toFixed(1) + "deg");
+  // Keep upright glyphs (the turn arrow) readable by counter-rotating them.
+  document.body.style.setProperty("--nav-bearing", nav._cont.toFixed(1) + "deg");
+}
 
 function fmtFeet(m) {
   if (m >= 1609.34) return `${(m / 1609.34).toFixed(1)} mi`;
@@ -356,8 +382,27 @@ async function reroute(lat, lng) {
   nav.rerouting = false;
 }
 
+// Turn the heading-up camera on/off. Oversizing the container while driving
+// means the rotated map still fills the screen with real (crisp) tiles instead
+// of black corners; invalidateSize lets Leaflet render into the bigger box.
+function setNavCamera(on) {
+  const mapEl = document.getElementById("map");
+  if (!mapEl) return;
+  if (on) {
+    mapEl.classList.add("nav-rot");
+    if (map.hasLayer(cluster)) map.removeLayer(cluster);   // clean nav view: route + you + turn only
+  } else {
+    mapEl.classList.remove("nav-rot");
+    mapEl.style.removeProperty("--bearing");
+    document.body.style.removeProperty("--nav-bearing");
+    if (!map.hasLayer(cluster)) map.addLayer(cluster);
+  }
+  setTimeout(() => { try { map.invalidateSize({ animate: false }); } catch (e) {} }, 60);
+}
+
 function startDrive(s, route, from) {
   nav.on = true; nav.dest = s;
+  nav._cont = null; nav.lastPt = { lat: from.lat, lng: from.lng };
   document.body.classList.add("driving");
   closeSheet();
   document.getElementById("routeBanner").classList.remove("open");
@@ -370,6 +415,18 @@ function startDrive(s, route, from) {
       zIndexOffset: 1000, interactive: false,
     }).addTo(map);
   }
+  // A destination pin so you can see where you're headed, like every maps app.
+  if (nav.destMark) map.removeLayer(nav.destMark);
+  nav.destMark = L.marker([s.lat, s.lng], {
+    icon: L.divIcon({ className: "", iconSize: [30, 30], iconAnchor: [15, 30],
+      html: `<div class="nav-dest">◎</div>` }),
+    zIndexOffset: 900, interactive: false,
+  }).addTo(map);
+
+  setNavCamera(true);
+  // Point the camera along the first leg right away.
+  const firstAim = (route.geometry.coordinates[1] || route.geometry.coordinates[0]);
+  if (firstAim) setNavBearing(bearingDeg(from, { lat: firstAim[1], lng: firstAim[0] }));
   map.setView([from.lat, from.lng], 18, { animate: false });  // snap in tight on you, like a real guide
   renderNavHud(from.lat, from.lng);
 
@@ -379,6 +436,16 @@ function startDrive(s, route, from) {
     const lat = pos.coords.latitude, lng = pos.coords.longitude;
     nav.me.setLatLng([lat, lng]);
     map.panTo([lat, lng], { animate: true, duration: 0.9 });
+
+    // Heading: use the GPS-reported heading when moving, else derive it from how
+    // far we've traveled since the last fix (ignoring tiny GPS jitter).
+    const gh = pos.coords.heading;
+    if (typeof gh === "number" && !isNaN(gh) && (pos.coords.speed == null || pos.coords.speed > 0.5)) {
+      setNavBearing(gh);
+    } else if (nav.lastPt && map.distance([lat, lng], [nav.lastPt.lat, nav.lastPt.lng]) > 6) {
+      setNavBearing(bearingDeg(nav.lastPt, { lat, lng }));
+    }
+    nav.lastPt = { lat, lng };
 
     if (map.distance([lat, lng], [s.lat, s.lng]) < 55) {   // arrived
       document.getElementById("navInstr").textContent = `You've arrived at ${s.name}`;
@@ -398,11 +465,13 @@ function endDrive() {
   nav.on = false;
   document.body.classList.remove("driving");
   const hud = navHud(); if (hud) hud.classList.remove("open");
+  setNavCamera(false);
   if (nav.watch) { navigator.geolocation.clearWatch(nav.watch); nav.watch = null; }
   if (nav.line) { map.removeLayer(nav.line); nav.line = null; }
   if (nav.me) { map.removeLayer(nav.me); nav.me = null; }
   if (nav.turn) { map.removeLayer(nav.turn); nav.turn = null; }
-  nav.steps = []; nav.i = 0; nav.dest = null;
+  if (nav.destMark) { map.removeLayer(nav.destMark); nav.destMark = null; }
+  nav.steps = []; nav.i = 0; nav.dest = null; nav._cont = null; nav.lastPt = null;
 }
 function showRouteBanner(s, route, from) {
   const mi = (route.distance / 1609.34).toFixed(1);
@@ -1117,26 +1186,107 @@ document.getElementById("composer").onsubmit = e => {
   toast("Posted to the feed 🦋");
 };
 
+// ===== Feed: real posts from real spots, filterable by type =====
+// Captions read like a local telling you why to go, per category.
+const FEED_CAPTIONS = {
+  food:      ["the food at <b>{name}</b> is unreal 🔥 go hungry", "found my new go-to at <b>{name}</b> 🍴 everything hits", "late plate at <b>{name}</b>, worth every bite 🌮"],
+  coffee:    ["slow morning at <b>{name}</b> ☕ best pour in town", "posted up at <b>{name}</b> all afternoon, perfect patio ☕", "<b>{name}</b> latte + a good book = reset button"],
+  bar:       ["<b>{name}</b> hits different at night 🍸 pull up", "<b>{name}</b> was buzzing tonight, found the good seats", "cocktails at <b>{name}</b> 🍸 speakeasy energy"],
+  hangout:   ["whole crew ended up at <b>{name}</b> tonight 🛋", "chill day at <b>{name}</b>, easy vibes all around", "<b>{name}</b> is where everyone's hanging lately"],
+  nature:    ["golden hour at <b>{name}</b> 🌳 absolutely worth it", "trail day at <b>{name}</b> 🥾 quiet and green", "<b>{name}</b> in the morning, had it to myself"],
+  abandoned: ["explored <b>{name}</b> today 🏚 frozen in time", "<b>{name}</b> at dusk is eerie in the best way", "made it into <b>{name}</b> 🔦 wild place"],
+  tunnel:    ["went deep into <b>{name}</b> 🕳 flashlights only", "<b>{name}</b> echoes forever, unreal down there"],
+  rooftop:   ["caught the skyline from <b>{name}</b> 🌆 worth the climb", "<b>{name}</b> at sunset, whole city glowing"],
+};
+const FEED_USERS = ["dfw.wanderer","mena.j","lens.leo","nightowl.dfw","kaylaroams","grindcity","smokestackjenny","trailmix.tx","urbex.kate","sunset.sam","forklore","quietwalks","backroads.bee","cityclimber"];
+const FEED_TIMES = ["12m ago","28m ago","45m ago","1h ago","2h ago","3h ago","5h ago","7h ago","yesterday"];
+// Build a stable, spot-driven feed: 6 curated posts up top, then auto posts for
+// the strongest spots in every category (media first) so each filter has life.
+let _genFeed = null;
+function buildGenFeed() {
+  if (_genFeed) return _genFeed;
+  const out = [];
+  const byCat = {};
+  SEED_SPOTS.forEach(s => (byCat[s.cat] = byCat[s.cat] || []).push(s));
+  Object.keys(byCat).forEach(cat => {
+    const caps = FEED_CAPTIONS[cat] || FEED_CAPTIONS.hangout;
+    // Media-bearing spots first so cards look real, then by interest.
+    const ranked = byCat[cat].slice().sort((a, b) =>
+      ((previewImg(b) ? 1 : 0) - (previewImg(a) ? 1 : 0)) || (spotScore(b) - spotScore(a)));
+    ranked.slice(0, 6).forEach((s, k) => {
+      out.push({
+        user: FEED_USERS[(s.id + k) % FEED_USERS.length],
+        spotId: s.id,
+        likes: 8 + ((s.id * 7) % 80),
+        comments: (s.id * 3) % 14,
+        time: FEED_TIMES[(s.id + k) % FEED_TIMES.length],
+        text: caps[(s.id + k) % caps.length].replace("{name}", s.name),
+        _gen: true,
+      });
+    });
+  });
+  _genFeed = out;
+  return out;
+}
+// One flat list, newest-first-ish: your posts, the curated 6, then generated.
+// Each post carries a STABLE key so like/comment state survives filtering
+// (a list index would point at a different post once a filter is applied).
+function allFeedPosts() {
+  const list = [...userPosts(), ...SEED_FEED, ...buildGenFeed()];
+  return list.map((f, i) => ({ ...f, _key: f._gen ? `g${f.spotId}_${f.user}` : `${f.user}|${f.spotId}|${f.time}|${i}` }));
+}
+function feedCatOf(f) {
+  const s = SEED_SPOTS.find(x => x.id === f.spotId);
+  return s ? s.cat : null;
+}
+// Which categories actually have posts, in a sensible order, for the chip row.
+const FEED_CHIP_ORDER = ["food","coffee","bar","hangout","nature","abandoned","tunnel","rooftop"];
+function renderFeedChips() {
+  const el = document.getElementById("feedFilters");
+  if (!el) return;
+  const present = new Set(allFeedPosts().map(feedCatOf).filter(Boolean));
+  const cats = FEED_CHIP_ORDER.filter(c => present.has(c));
+  el.innerHTML =
+    `<button class="chip ${state.feedFilter === "all" ? "active" : ""}" data-fcat="all">All</button>` +
+    cats.map(c => `<button class="chip ${state.feedFilter === c ? "active" : ""}" data-fcat="${c}">${CHIP_LABEL[c] || c}</button>`).join("");
+  el.querySelectorAll(".chip").forEach(c => c.onclick = () => {
+    state.feedFilter = c.dataset.fcat;
+    renderFeedChips();
+    renderFeed();
+    el.scrollIntoView({ block: "nearest" });
+  });
+}
+
 function renderFeed() {
-  const all = [...userPosts(), ...SEED_FEED];
-  document.getElementById("feed").innerHTML = all.map((f, i) => {
+  renderFeedChips();
+  const all = allFeedPosts().filter(f => {
+    if (state.feedFilter === "all") return true;
+    return feedCatOf(f) === state.feedFilter;
+  });
+  const feedEl = document.getElementById("feed");
+  if (!all.length) {
+    feedEl.innerHTML = `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>Nothing here yet</b><small>No posts in that category. Try another type, or post the first one.</small></div>`;
+    return;
+  }
+  feedEl.innerHTML = all.map((f) => {
+    const key = f._key, cid = "cmts-" + cssId(key);
     const spot = state.spots.find(s => f.spotId === s.id);
     const media = spot ? faceStyle(spot) : `style="background:var(--bg-3)"`;
-    const liked = state.likes["f" + i];
+    const liked = state.likes["f" + key];
     const likeCount = (f.likes || 0) + (liked ? 1 : 0);
     return `<div class="feed-card">
       <div class="fc-head"><span class="fc-avatar">${f.user[0].toUpperCase()}</span><b>@${f.user}</b><span class="fc-time">${f.time}</span></div>
-      ${spot ? `<div class="fc-media fc-logo-media" data-id="${spot.id}" data-i="${i}" ${media}>${realPhoto(spot) ? "" : catLogo(spot.cat)}${playBadge(spot)}<div class="fc-heart-burst"><span>❤️</span></div></div>` : ""}
+      ${spot ? `<div class="fc-media fc-logo-media" data-id="${spot.id}" data-key="${key}" ${media}>${realPhoto(spot) ? "" : catLogo(spot.cat)}${playBadge(spot)}<div class="fc-heart-burst"><span>❤️</span></div></div>` : ""}
       <div class="fc-body">${f.text}</div>
       <div class="fc-actions">
-        <button class="like-btn ${liked ? "liked" : ""}" data-i="${i}">${liked ? "❤️" : "🤍"} ${likeCount}</button>
-        <button class="cmt-btn" data-i="${i}">${SVG.comment}${(f.comments || 0) + myComments(i).length}</button>
+        <button class="like-btn ${liked ? "liked" : ""}" data-key="${key}">${liked ? "❤️" : "🤍"} ${likeCount}</button>
+        <button class="cmt-btn" data-cid="${cid}">${SVG.comment}${(f.comments || 0) + myComments(key).length}</button>
         <button>${SVG.share}Share</button>
       </div>
-      <div class="fc-comments" id="cmts-${i}" style="display:none">
+      <div class="fc-comments" id="${cid}" style="display:none">
         ${(f.seedComments || []).map(c => `<div class="fc-comment"><b>@${c.user}</b> ${c.text}</div>`).join("")}
-        ${myComments(i).map(c => `<div class="fc-comment"><b>@you</b> ${c}</div>`).join("")}
-        <form class="fc-comment-form" data-i="${i}">
+        ${myComments(key).map(c => `<div class="fc-comment"><b>@you</b> ${c}</div>`).join("")}
+        <form class="fc-comment-form" data-key="${key}" data-cid="${cid}">
           <input placeholder="Add a comment…" maxlength="200">
           <button type="submit">➤</button>
         </form>
@@ -1150,7 +1300,7 @@ function renderFeed() {
       const now = Date.now();
       if (now - lastTap < 300) {
         clearTimeout(tapTimer); lastTap = 0;
-        likeFeedPost(+m.dataset.i, true);
+        likeFeedPost(m.dataset.key, true);
         const burst = m.querySelector(".fc-heart-burst");
         burst.classList.remove("pop"); void burst.offsetWidth; burst.classList.add("pop");
       } else {
@@ -1159,9 +1309,9 @@ function renderFeed() {
       }
     };
   });
-  document.querySelectorAll(".like-btn").forEach(b => b.onclick = () => likeFeedPost(+b.dataset.i, false));
+  document.querySelectorAll(".like-btn").forEach(b => b.onclick = () => likeFeedPost(b.dataset.key, false));
   document.querySelectorAll(".cmt-btn").forEach(b => b.onclick = () => {
-    const el = document.getElementById("cmts-" + b.dataset.i);
+    const el = document.getElementById(b.dataset.cid);
     el.style.display = el.style.display === "none" ? "block" : "none";
   });
   document.querySelectorAll(".fc-comment-form").forEach(f => f.onsubmit = e => {
@@ -1169,15 +1319,17 @@ function renderFeed() {
     const input = f.querySelector("input");
     if (!input.value.trim()) return;
     const all = JSON.parse(localStorage.getItem("moth.comments") || "{}");
-    (all[f.dataset.i] = all[f.dataset.i] || []).push(input.value.trim());
+    (all[f.dataset.key] = all[f.dataset.key] || []).push(input.value.trim());
     localStorage.setItem("moth.comments", JSON.stringify(all));
     renderFeed();
-    const el = document.getElementById("cmts-" + f.dataset.i);
+    const el = document.getElementById(f.dataset.cid);
     if (el) el.style.display = "block";
   });
 }
-function likeFeedPost(i, forceLike) {
-  const k = "f" + i;
+// Safe DOM id from a stable post key (keys contain | and other chars).
+function cssId(key) { return String(key).replace(/[^a-zA-Z0-9_-]/g, "_"); }
+function likeFeedPost(key, forceLike) {
+  const k = "f" + key;
   const next = forceLike ? true : !state.likes[k];
   const wasLiked = !!state.likes[k];
   state.likes[k] = next;
