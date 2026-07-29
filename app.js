@@ -231,14 +231,17 @@ function maneuverText(step, destName) {
   const m = step.maneuver || {}, road = step.name || "";
   const onRoad = road ? ` onto ${road}` : "";
   const onRoad2 = road ? ` on ${road}` : "";
+  const mod = m.modifier || "";
+  // A U-turn is its own phrasing; "Turn uturn onto X" reads like broken English.
+  if (mod.includes("uturn")) return `Make a U-turn${onRoad}`;
   switch (m.type) {
-    case "depart":   return `Head ${m.modifier || "out"}${onRoad2}`;
-    case "turn":     return `Turn ${m.modifier || ""}${onRoad}`.replace(/\s+/g, " ").trim();
-    case "merge":    return `Merge${m.modifier ? " " + m.modifier : ""}${onRoad}`;
-    case "on ramp":  return `Take the ramp${m.modifier ? " " + m.modifier : ""}${onRoad}`;
-    case "off ramp": return `Take the exit${m.modifier ? " " + m.modifier : ""}${onRoad}`;
-    case "fork":     return `Keep ${m.modifier || "straight"}${onRoad}`;
-    case "end of road": return `Turn ${m.modifier || ""}${onRoad}`.replace(/\s+/g, " ").trim();
+    case "depart":   return road ? `Head ${mod || "out"} on ${road}` : "Start driving";
+    case "turn":     return mod === "straight" ? `Continue${onRoad}` : `Turn ${mod}${onRoad}`.replace(/\s+/g, " ").trim();
+    case "merge":    return `Merge${mod ? " " + mod : ""}${onRoad}`;
+    case "on ramp":  return `Take the ramp${mod ? " " + mod : ""}${onRoad}`;
+    case "off ramp": return `Take the exit${mod ? " " + mod : ""}${onRoad}`;
+    case "fork":     return `Keep ${mod || "straight"}${onRoad}`;
+    case "end of road": return `Turn ${mod}${onRoad}`.replace(/\s+/g, " ").trim();
     case "roundabout":
     case "rotary":   return `Enter the roundabout${m.exit ? `, take exit ${m.exit}` : ""}${onRoad}`;
     case "continue":
@@ -299,8 +302,33 @@ function drawRoute(route) {
     L.polyline(line, { color: accentColor(), weight: 6, opacity: 1, lineCap: "round", lineJoin: "round" }),
   ]).addTo(map);
   nav.steps = (route.legs && route.legs[0] && route.legs[0].steps) || [];
+  // Progress tracking: cumulative meters along the polyline, and the cumulative
+  // distance at the END of each step (where its next turn happens). This is how
+  // we know which instruction to show and how far the next turn is — measuring
+  // straight-line distance to a maneuver point (the old way) broke as soon as
+  // you passed it, so the readout never advanced.
+  nav.geom = line;
+  nav.cum = [0];
+  for (let k = 1; k < line.length; k++) nav.cum[k] = nav.cum[k - 1] + map.distance(line[k - 1], line[k]);
+  nav.total = nav.cum[nav.cum.length - 1] || 0;
+  nav.stepEnd = [];
+  let acc = 0;
+  for (let s = 0; s < nav.steps.length; s++) { acc += (nav.steps[s].distance || 0); nav.stepEnd[s] = acc; }
   nav.i = 0;
   return line;
+}
+
+// Project the user onto the route: how far along (meters) the nearest point is,
+// and how far off the line they are. Dense geometry (overview=full) makes the
+// nearest-vertex approximation plenty accurate for guidance.
+function alongRoute(lat, lng) {
+  if (!nav.geom || !nav.geom.length) return { dist: 0, off: 0, idx: 0 };
+  let best = Infinity, bi = 0;
+  for (let k = 0; k < nav.geom.length; k++) {
+    const d = map.distance([lat, lng], nav.geom[k]);
+    if (d < best) { best = d; bi = k; }
+  }
+  return { dist: nav.cum[bi] || 0, off: best === Infinity ? 0 : best, idx: bi };
 }
 
 async function fetchRoute(from, to) {
@@ -317,16 +345,7 @@ function stepPoint(st) {
 }
 
 // Distance from the user to the route line, to detect going off course.
-function metersOffRoute(lat, lng) {
-  if (!nav.steps.length) return 0;
-  let best = Infinity;
-  for (let k = nav.i; k < Math.min(nav.i + 3, nav.steps.length); k++) {
-    const geo = nav.steps[k].geometry && nav.steps[k].geometry.coordinates;
-    if (!geo) continue;
-    for (const c of geo) best = Math.min(best, map.distance([lat, lng], [c[1], c[0]]));
-  }
-  return best === Infinity ? 0 : best;
-}
+function metersOffRoute(lat, lng) { return alongRoute(lat, lng).off; }
 
 // Drop a marker on the map exactly where the next turn happens, so you can SEE
 // the turn coming, not just read it.
@@ -343,30 +362,34 @@ function setTurnMarker(p, arrow) {
 function renderNavHud(lat, lng) {
   const hud = navHud();
   if (!hud || !nav.steps.length) return;
-  const st = nav.steps[Math.min(nav.i, nav.steps.length - 1)];
-  const next = nav.steps[nav.i + 1];
-  const p = stepPoint(next || st);
-  const toManeuver = p ? map.distance([lat, lng], [p.lat, p.lng]) : 0;
-  const toDest = map.distance([lat, lng], [nav.dest.lat, nav.dest.lng]);
-  const arrow = maneuverArrow((next || st).maneuver);
+  const d = alongRoute(lat, lng).dist;   // meters traveled along the route
+
+  // The step you're currently driving = the first whose end is still ahead.
+  let c = 0;
+  while (c < nav.stepEnd.length - 1 && nav.stepEnd[c] <= d + 1) c++;
+  nav.i = c;
+
+  const cur = nav.steps[c];
+  const upcoming = nav.steps[c + 1] || cur;             // the next turn (or arrival)
+  const toManeuver = Math.max(0, (nav.stepEnd[c] || 0) - d);
+  const toDest = Math.max(0, nav.total - d);
+  const p = stepPoint(upcoming);
+  const arrow = maneuverArrow(upcoming.maneuver);
 
   document.getElementById("navArrow").textContent = arrow;
-  document.getElementById("navInstr").textContent = maneuverText(next || st, nav.dest.name);
+  document.getElementById("navInstr").textContent = maneuverText(upcoming, nav.dest.name);
   document.getElementById("navDist").textContent = fmtFeet(toManeuver);
   const mins = Math.max(1, Math.round((toDest / 1609.34) / 0.5));
   document.getElementById("navEta").textContent =
     `${(toDest / 1609.34).toFixed(1)} mi · ~${mins} min · ${fmtEta(mins * 60)}`;
-  const after = nav.steps[nav.i + 2];
+  const after = nav.steps[c + 2];
   document.getElementById("navThen").textContent =
     after ? `then ${maneuverText(after, nav.dest.name)}` : "";
 
   setTurnMarker(p, arrow);
   // Close in as the turn approaches, like a real guide talking you through it.
   const wantZoom = toManeuver < 120 ? 19 : toManeuver < 400 ? 18 : 17;
-  if (map.getZoom() !== wantZoom) map.setZoom(wantZoom, { animate: false });
-
-  // Advance once we are on top of the maneuver.
-  if (p && toManeuver < 35 && nav.i < nav.steps.length - 1) nav.i++;
+  if (Math.abs(map.getZoom() - wantZoom) >= 0.5) map.setZoom(wantZoom, { animate: false });
 }
 
 async function reroute(lat, lng) {
@@ -779,35 +802,12 @@ function spotScore(s) {
        + Math.min(hereCount(s), 6) * 0.05;
 }
 
-// Progressive reveal: the best spots are on the map from the start, the rest
-// fill in as you zoom. Nothing is removed, it just arrives in waves instead of
-// dumping every pin on screen at once.
-const REVEAL_TIERS = [
-  { share: 0.35, zoom: 0 },      // always on the map
-  { share: 0.65, zoom: 13.2 },
-  { share: 0.85, zoom: 14.4 },
-  { share: 1.00, zoom: 15.4 },   // everything
-];
-function visibleSpots() {
-  const all = matchingSpots();
-  // Searching or filtering to one category means the user asked for those
-  // specifically, so show them all immediately.
-  if (state.search || state.filter !== "all") return all;
-
-  const z = map.getZoom();
-  let share = REVEAL_TIERS[0].share;
-  for (const t of REVEAL_TIERS) if (z >= t.zoom) share = t.share;
-  if (share >= 1) return all;
-
-  const ranked = all.slice().sort((a, b) => spotScore(b) - spotScore(a));
-  const keep = new Set(ranked.slice(0, Math.ceil(ranked.length * share)).map(s => s.id));
-  return all.filter(s => keep.has(s.id));
-}
-function revealShare() {
-  let share = REVEAL_TIERS[0].share;
-  for (const t of REVEAL_TIERS) if (map.getZoom() >= t.zoom) share = t.share;
-  return share;
-}
+// Every spot in the current mode/filter is on the map at all times. Clustering
+// keeps dense areas tidy and breaks apart as you zoom, so there's no need to
+// hide pins — hiding them just made spots feel missing, which they aren't.
+function visibleSpots() { return matchingSpots(); }
+// Kept so the zoom handler stays stable; the full set is always shown now.
+function revealShare() { return 1; }
 
 // ===== Inline SVG UI icons (currentColor, matches tab-bar style) =====
 const SVG = {
