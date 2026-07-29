@@ -1404,27 +1404,49 @@ function renderEmbeds(s) {
 }
 
 function isCommunitySpot(s) { return s.cat === "abandoned" || s.cat === "tunnel"; }
+// Reviews are handled honestly. The seeded lines are a researcher's summary of
+// what a place is like, NOT quotes from real named users, so they are no longer
+// dressed up with invented @handles and star ratings. The real rating and the
+// link to the real reviews are what carry weight, so those lead.
 function renderReviews(s) {
   const extra = (window.SPOT_EXTRAS && window.SPOT_EXTRAS[s.id]) || {};
   const community = isCommunitySpot(s);
   const h = document.getElementById("reviewsHeading");
-  if (h) h.textContent = community ? "What people say" : "Reviews";
+  if (h) h.textContent = "What people say";
 
-  const link = community
-    ? `<a class="reviews-link" href="https://www.reddit.com/search/?q=${encodeURIComponent(s.name + " Dallas")}" target="_blank" rel="noopener">See what people say on Reddit ↗</a>`
-    : `<a class="reviews-link" href="${extra.reviewUrl || ("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(s.name + " " + (s.zip || "Dallas TX")))}" target="_blank" rel="noopener">Read real reviews ↗</a>`;
+  const userWritten = s.reviews.filter(r => r.mine);       // reviews left in-app are real
+  const seeded = s.reviews.filter(r => !r.mine);
+  const rating = rateOf(s);
 
-  const body = community
-    ? s.reviews.map(r => `<div class="review say">${r.text}</div>`).join("")
-    : s.reviews.map(r => `
+  let href, label;
+  if (community) {
+    href = `https://www.reddit.com/search/?q=${encodeURIComponent(s.name + " Texas")}`;
+    label = "See the threads on Reddit ↗";
+  } else if (extra.reviewUrl && /yelp\.com\/biz/.test(extra.reviewUrl)) {
+    href = extra.reviewUrl; label = "Read the real reviews on Yelp ↗";
+  } else if (extra.reviewUrl && /google\./.test(extra.reviewUrl)) {
+    href = extra.reviewUrl; label = "Read the real reviews on Google ↗";
+  } else {
+    href = "https://www.google.com/maps/search/?api=1&query=" +
+           encodeURIComponent(s.name + " " + (cityOf(s.zip) || "Dallas") + " TX");
+    label = "Read the real reviews on Google ↗";
+  }
+
+  const head = `<a class="reviews-cta" href="${href}" target="_blank" rel="noopener">
+      ${rating ? `<span class="rc-score">${rating.toFixed(1)}</span>` : ""}
+      <span class="rc-text"><b>${label}</b><small>${rating ? "Rated by real customers" : "See what people are saying"}</small></span>
+    </a>`;
+
+  const mine = userWritten.map(r => `
       <div class="review">
         <div class="review-head"><b>@${r.user}</b><span class="stars">${starStr(r.stars)}</span></div>
         ${r.text}
       </div>`).join("");
-  const fallback = community
-    ? `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>Not much chatter yet</b><small>Tap the link to see the threads.</small></div>`
-    : `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>No reviews yet</b><small>Nobody has prowled this one yet. Drop the first review.</small></div>`;
-  document.getElementById("reviews").innerHTML = link + (body || fallback);
+  const gist = seeded.length
+    ? `<div class="gist-label">The gist</div>` + seeded.map(r => `<div class="review say">${r.text}</div>`).join("")
+    : "";
+  const fallback = `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>Be the first</b><small>Nobody has reviewed this one in Prowl yet.</small></div>`;
+  document.getElementById("reviews").innerHTML = head + mine + gist + (mine || gist ? "" : fallback);
 }
 
 // Star input
@@ -1440,7 +1462,9 @@ document.getElementById("reviewForm").onsubmit = e => {
   const text = document.getElementById("reviewText").value.trim();
   if (!text) return;
   const s = state.spots.find(x => x.id === state.openSpotId);
-  s.reviews.push({ user: (window.myName ? myName() : "you"), stars: state.reviewStars, text });
+  // mine: true marks a genuinely user-written review, so it renders with a real
+  // handle and stars while seeded summary lines stay unattributed.
+  s.reviews.unshift({ user: (window.myName ? myName() : "you"), stars: state.reviewStars, text, mine: true });
   saveSpots();
   if (state.online && s._pb) pbUpdate(s._pb, { reviews: s.reviews });
   document.getElementById("reviewText").value = "";
