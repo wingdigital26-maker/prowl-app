@@ -1478,11 +1478,13 @@ body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.18) contrast(1.06) 
    One dark map, but a LIVE one: streets, houses and labels read clearly.
    ================================================================== */
 
-/* Voyager base with a light gloss. Tested against raw/1.25/1.4 saturation on
-   real tiles: this is the point where it looks rich without going garish. */
-[data-theme="night"] .leaflet-tile { filter: saturate(1.18) contrast(1.05); }
+/* Voyager base, tuned on real z11/z12 tiles. The previous 1.18/1.05 was too
+   bright: the residential street grid washed straight out at distance. Pulling
+   brightness down and contrast up brings the roads, parks and water back
+   without muddying anything. */
+[data-theme="night"] .leaflet-tile { filter: saturate(1.2) brightness(.93) contrast(1.24); }
 /* Abandoned mode: the faintest cool lean, never enough to hide a street name */
-body[data-mode="urbex"] .leaflet-tile { filter: saturate(1.0) contrast(1.05) hue-rotate(-8deg); }
+body[data-mode="urbex"] .leaflet-tile { filter: saturate(1.05) brightness(.92) contrast(1.24) hue-rotate(-8deg); }
 
 /* ---- Spot name labels (our POIs, Snap Map style) ---- */
 .pin-wrap { position: relative; width: 48px; height: 48px; }
@@ -1495,6 +1497,39 @@ body[data-mode="urbex"] .leaflet-tile { filter: saturate(1.0) contrast(1.05) hue
   display: none; pointer-events: none;
 }
 body.show-pin-labels .pin-label { display: block; }
+
+/* ==================================================================
+   BEAUTY PASS
+   ================================================================== */
+
+/* Pins: softer, deeper shadow so they lift off the map instead of sitting flat */
+.bubble-pin {
+  border-width: 2.5px;
+  box-shadow: 0 4px 10px rgba(16,24,38,.28), 0 1px 3px rgba(16,24,38,.22);
+}
+.bubble-pin.selected { transform: scale(1.14); z-index: 5; }
+
+/* Clusters: match the pin language, no more heavy ring */
+.bubble-cluster {
+  border-width: 2.5px;
+  background: linear-gradient(150deg, var(--accent), var(--accent-2));
+  box-shadow: 0 4px 12px rgba(16,24,38,.3);
+  font-size: 15px; letter-spacing: -.3px;
+}
+
+/* Floating chrome: one consistent depth, slightly tighter radius family */
+.float-top .round-btn, .search-pill, .mode-toggle, .recenter-btn, .guide-fab {
+  box-shadow: 0 4px 16px rgba(16,24,38,.24);
+}
+.chip { box-shadow: 0 2px 8px rgba(16,24,38,.16); }
+
+/* Sheet: cleaner top edge and a calmer hero fade */
+.sheet-hero::after {
+  background: linear-gradient(to top, rgba(6,10,16,.88), rgba(6,10,16,.15) 58%, transparent);
+}
+
+/* Bottom bar sits on a light map now: give it a real edge */
+.tabbar { border-top: 1px solid var(--border); box-shadow: 0 -4px 20px rgba(16,24,38,.18); }
 
 /* THE SQUARES FIX: a tile that has not landed yet used to show as a hard dark
    block. Now the map sits on OSM's own paper colour and tiles fade in, so a

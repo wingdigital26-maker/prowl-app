@@ -49,8 +49,9 @@ const map = L.map("map", {
   // Continuous zoom: no snapping to whole levels, so pinch and wheel glide
   // instead of clunking between steps.
   zoomSnap: 0, zoomDelta: 0.4,
-  wheelPxPerZoomLevel: 140,                 // slower, smoother wheel travel
-  wheelDebounceTime: 20,
+  wheelPxPerZoomLevel: 200,                 // long, gliding wheel travel
+  wheelDebounceTime: 6,                     // react immediately, no stutter step
+  bounceAtZoomLimits: false,                // no rubber-band snap at the ends
   zoomAnimation: true, zoomAnimationThreshold: 12,
   fadeAnimation: true, markerZoomAnimation: true,
   inertia: true, inertiaDeceleration: 2400, easeLinearity: 0.22,
@@ -86,8 +87,8 @@ const cluster = L.markerClusterGroup({
   showCoverageOnHover: false,
   // Break apart early and easily. A tight cluster you have to fight to open is
   // worse than a few overlapping pins.
-  maxClusterRadius: 34,
-  disableClusteringAtZoom: 16,   // past neighborhood zoom, always show real pins
+  maxClusterRadius: 30,
+  disableClusteringAtZoom: 15,   // real pins as soon as you are into a neighborhood
   spiderfyOnMaxZoom: true,
   spiderfyDistanceMultiplier: 1.6,
   animateAddingMarkers: false,
@@ -172,7 +173,7 @@ function renderMarkers() {
 }
 // Names appear once you are close enough for them not to collide.
 function syncLabelZoom() {
-  document.body.classList.toggle("show-pin-labels", map.getZoom() >= 14.5);
+  document.body.classList.toggle("show-pin-labels", map.getZoom() >= 14);
 }
 map.on("zoomend", syncLabelZoom);
 // Lift + ring the selected pin without a full re-render
