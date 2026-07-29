@@ -254,7 +254,13 @@ function showRouteBanner(s, route, from) {
 }
 function routeToSpot(s) {
   clearRoute();
-  if (!navigator.geolocation) { window.open(extNavUrl(s), "_blank"); return; }
+  // Geolocation only works on a secure (https) page. The PocketBase http copy
+  // can't use it, so hand off to Maps with a clear reason.
+  if (!navigator.geolocation || !window.isSecureContext) {
+    if (navigator.geolocation && !window.isSecureContext)
+      toast("Open the https link to route in-app — opening Maps");
+    window.open(extNavUrl(s), "_blank"); return;
+  }
   toast("Finding your location…");
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const lat = pos.coords.latitude, lng = pos.coords.longitude;
@@ -273,10 +279,12 @@ function routeToSpot(s) {
       toast("Couldn't draw the route — opening Maps");
       window.open(extNavUrl(s), "_blank");
     }
-  }, () => {
-    toast("Location off — opening Maps instead");
+  }, (err) => {
+    toast(err && err.code === 1
+      ? "Turn on location for this site to route in-app — opening Maps"
+      : "Couldn't get your location — opening Maps");
     window.open(extNavUrl(s), "_blank");
-  }, { enableHighAccuracy: true, timeout: 8000 });
+  }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 60000 });
 }
 document.getElementById("rbClose").onclick = clearRoute;
 
