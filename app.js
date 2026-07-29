@@ -504,7 +504,7 @@ function openStory(id) {
   document.getElementById("svFace").style.background = CAT_META[s.cat].grad;
   document.getElementById("svFace").textContent = CAT_META[s.cat].emoji;
   document.getElementById("svName").textContent = s.name;
-  document.getElementById("svMeta").textContent = `ZIP ${s.zip} · ${SKETCH_WORDS[s.danger]}`;
+  document.getElementById("svMeta").textContent = `${cityOf(s.zip) || "ZIP " + s.zip} · ${SKETCH_WORDS[s.danger]}`;
   const seen = JSON.parse(localStorage.getItem("moth.seenStories") || "[]");
   if (!seen.includes(s.id)) { seen.push(s.id); localStorage.setItem("moth.seenStories", JSON.stringify(seen)); }
   sv.el.classList.add("open");
@@ -589,6 +589,44 @@ document.getElementById("svClose").onclick = closeStory;
 document.getElementById("svOpen").onclick = () => { const id = sv.spot.id; closeStory(); openSheet(id); };
 
 // ===== Filtering =====
+// ===== Places you can search by name =====
+// Spots only carry a ZIP, so "Plano" matched nothing. This maps ZIPs to the
+// city (and the neighborhood where one is well known) so typing a place name
+// works the way people expect.
+const ZIP_PLACE = {
+  // Dallas
+  "75201": ["Dallas", "Downtown"], "75202": ["Dallas", "Downtown"], "75204": ["Dallas", "Uptown"],
+  "75206": ["Dallas", "Lower Greenville", "Knox Henderson"], "75207": ["Dallas", "Design District"],
+  "75208": ["Dallas", "Bishop Arts", "Oak Cliff"], "75212": ["Dallas", "West Dallas"],
+  "75215": ["Dallas", "South Dallas"], "75217": ["Dallas"], "75218": ["Dallas", "White Rock"],
+  "75219": ["Dallas", "Oak Lawn"], "75220": ["Dallas"], "75226": ["Dallas", "Deep Ellum"],
+  "75231": ["Dallas"], "75249": ["Dallas", "Cedar Hill"], "75210": ["Dallas"], "75203": ["Dallas"],
+  "75214": ["Dallas", "Lakewood"], "75216": ["Dallas"], "75235": ["Dallas"], "75246": ["Dallas"],
+  // Plano
+  "75023": ["Plano"], "75024": ["Plano", "Legacy West"], "75025": ["Plano"], "75026": ["Plano"],
+  "75074": ["Plano", "Downtown Plano"], "75075": ["Plano"], "75093": ["Plano", "West Plano"],
+  "75094": ["Plano"],
+  // Nearby suburbs
+  "75034": ["Frisco"], "75035": ["Frisco"], "75081": ["Richardson"], "75080": ["Richardson"],
+  "75082": ["Richardson"], "75044": ["Garland"], "75040": ["Garland"], "75042": ["Garland"],
+  "75104": ["Cedar Hill"], "76226": ["Denton", "Argyle"], "76247": ["Denton"],
+  "76067": ["Mineral Wells"], "76104": ["Fort Worth"], "76164": ["Fort Worth"],
+  "76102": ["Fort Worth"], "76458": ["Thurber"], "76043": ["Glen Rose"], "76078": ["Rhome"],
+};
+function placesFor(zip) { return ZIP_PLACE[String(zip)] || []; }
+function cityOf(zip) { return (placesFor(zip)[0]) || ""; }
+
+// Every place name we know about, for detecting "take me to Plano".
+const ALL_PLACES = (() => {
+  const set = new Set();
+  Object.values(ZIP_PLACE).forEach(list => list.forEach(p => set.add(p.toLowerCase())));
+  return set;
+})();
+function searchIsPlace(q) {
+  const s = q.toLowerCase().trim().replace(/^(take me to|go to|show me|in)\s+/, "");
+  return ALL_PLACES.has(s) || /^\d{5}$/.test(s) ? s : null;
+}
+
 // Everything that passes the user's own filters. Nothing is ever dropped from
 // the app - this is the full set the map may draw from.
 function matchingSpots() {
@@ -598,8 +636,8 @@ function matchingSpots() {
     if (state.sketchFilter === "chill" && s.danger > 2) return false;
     if (state.sketchFilter === "sketchy" && s.danger < 4) return false;
     if (state.search) {
-      const q = state.search.toLowerCase();
-      const hay = `${s.name} ${s.zip} ${s.tags.join(" ")} ${CAT_META[s.cat].label}`.toLowerCase();
+      const q = state.search.toLowerCase().trim().replace(/^(take me to|go to|show me|in)\s+/, "");
+      const hay = `${s.name} ${s.zip} ${placesFor(s.zip).join(" ")} ${s.tags.join(" ")} ${CAT_META[s.cat].label}`.toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -688,7 +726,7 @@ function renderChips() {
 function applyModeVibe() {
   const cool = state.mode === "cool";
   const s = document.getElementById("search");
-  if (s) s.placeholder = cool ? "Search bars, food, coffee, or ZIP…" : "Search abandoned spots, tags, or ZIP…";
+  if (s) s.placeholder = cool ? "Try Plano, tacos, coffee, or a ZIP…" : "Try Dallas, tunnels, rooftops, or a ZIP…";
   const tail = document.getElementById("badgeTail");
   if (tail) tail.textContent = cool ? "spots live · DFW" : "abandoned spots · DFW";
 }
@@ -707,9 +745,33 @@ function setMode(mode) {
   toast(mode === "cool" ? "Cool Stuff 🍸" : "Into the Abandoned 🏚");
 }
 document.querySelectorAll(".mode-btn").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+// Typing a place name should take you there, not just filter the list.
+let flewFor = "";
+function flyToSearchResults() {
+  const place = searchIsPlace(state.search);
+  if (!place) { flewFor = ""; return; }
+  if (place === flewFor) return;              // already there, do not fight the user
+  const hits = matchingSpots();
+  if (!hits.length) return;
+  flewFor = place;
+  showView("map");
+  const b = L.latLngBounds(hits.map(s => [s.lat, s.lng]));
+  map.fitBounds(b, { padding: [60, 90], maxZoom: 14.5, animate: false });
+  toast(`${hits.length} spot${hits.length === 1 ? "" : "s"} in ${place.replace(/\b\w/g, c => c.toUpperCase())}`);
+}
 document.getElementById("search").oninput = e => {
   state.search = e.target.value.trim();
   renderAll();
+  flyToSearchResults();
+};
+// Enter jumps to the results even for a partial place name
+document.getElementById("search").onkeydown = e => {
+  if (e.key !== "Enter") return;
+  e.target.blur();
+  const hits = matchingSpots();
+  if (!hits.length) return;
+  showView("map");
+  map.fitBounds(L.latLngBounds(hits.map(s => [s.lat, s.lng])), { padding: [60, 90], maxZoom: 15, animate: false });
 };
 
 // ===== View switching (bottom tabs) =====
@@ -739,7 +801,7 @@ function renderExplore() {
       ${realPhoto(s) ? "" : `<span class="ec-emoji">${catLogo(s.cat)}</span>`}
       ${playBadge(s)}
       ${s.sponsored ? `<span class="ec-featured">★ Featured</span>` : ""}
-      <span class="ec-label">${s.name}<small>${rateOf(s) ? `${starStr(rateOf(s))} ${rateOf(s).toFixed(1)}` : "★ new"} · ZIP ${s.zip} · <span class="sketch-badge sketch-${s.danger}">${SKETCH_WORDS[s.danger]}</span></small></span>
+      <span class="ec-label">${s.name}<small>${rateOf(s) ? `${starStr(rateOf(s))} ${rateOf(s).toFixed(1)}` : "★ new"} · ${cityOf(s.zip) || s.zip} · <span class="sketch-badge sketch-${s.danger}">${SKETCH_WORDS[s.danger]}</span></small></span>
     </div>`;
   }).join("") || `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>Nothing out here yet</b><small>No spots match that. Try another filter, or go drop one yourself.</small></div>`;
   el.querySelectorAll(".explore-card").forEach(c => {
@@ -1106,7 +1168,7 @@ function openSheet(id) {
     `${rating ? `<span class="hero-pill star">★ ${rating.toFixed(1)}</span>` : `<span class="hero-pill">★ new</span>`}` +
     `<span class="hero-pill">${CAT_META[s.cat].emoji} ${CAT_META[s.cat].label}</span>` +
     (hereCount(s) ? `<span class="hero-pill live">🟢 ${hereCount(s)} here now</span>` : "");
-  document.getElementById("sheetMeta").innerHTML = `ZIP ${s.zip}` +
+  document.getElementById("sheetMeta").innerHTML = `${cityOf(s.zip) ? cityOf(s.zip) + " · " : ""}ZIP ${s.zip}` +
     (s.reviewUrl ? ` · <a class="meta-link" href="${s.reviewUrl}" target="_blank" rel="noopener">Read reviews ↗</a>` : "");
   const dirBtn = document.getElementById("dirBtn");
   dirBtn.href = extMapsUrl(s);                 // fallback if in-app routing can't run
@@ -1517,7 +1579,7 @@ document.getElementById("shareBtn").onclick = () => {
   if (s.photos && s.photos.length) { ph.style.background = `url('${s.photos[0]}') center/cover`; ph.textContent = ""; }
   else { ph.style.background = CAT_META[s.cat].grad; ph.textContent = CAT_META[s.cat].emoji; }
   document.getElementById("scName").textContent = s.name;
-  document.getElementById("scMeta").textContent = `★ ${rateOf(s).toFixed(1)} · ZIP ${s.zip} · ${SKETCH_WORDS[s.danger]}`;
+  document.getElementById("scMeta").textContent = `★ ${rateOf(s).toFixed(1)} · ${cityOf(s.zip) || "ZIP " + s.zip} · ${SKETCH_WORDS[s.danger]}`;
   document.getElementById("shareCard").classList.add("open");
   document.getElementById("shareBackdrop").classList.add("open");
 };
@@ -1607,7 +1669,7 @@ function guideAddRec(s, mi) {
     ? ` · ${mi < 1 ? mi.toFixed(1) : Math.round(mi)} mi` : "";
   const rating = rateOf(s);
   el.innerHTML = `<div class="g-rec-thumb" ${faceStyle(s)}>${previewImg(s) ? "" : catLogo(s.cat)}${playBadge(s)}</div>
-    <div class="g-rec-info"><b>${s.name}</b><small>${CAT_META[s.cat].label} · ${s.zip}${far}</small><span class="g-stars">${rating ? starStr(rating) + " " + rating.toFixed(1) : "★ new"}</span></div>`;
+    <div class="g-rec-info"><b>${s.name}</b><small>${CAT_META[s.cat].label} · ${cityOf(s.zip) || s.zip}${far}</small><span class="g-stars">${rating ? starStr(rating) + " " + rating.toFixed(1) : "★ new"}</span></div>`;
   el.onclick = () => { if (spotMode(s.cat) !== state.mode) setMode(spotMode(s.cat)); closeGuide(); showView("map"); openSheet(s.id); };
   document.getElementById("guideMsgs").appendChild(el);
   scrollGuide();
