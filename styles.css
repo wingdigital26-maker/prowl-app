@@ -1446,3 +1446,29 @@ body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.18) contrast(1.06) 
 .rb-close { width: 30px; height: 30px; border-radius: 50%; border: none; background: var(--bg-3); color: var(--text); cursor: pointer; font-size: 13px; flex-shrink: 0; }
 
 .meta-link { color: var(--accent); text-decoration: none; font-weight: 700; }
+
+/* ==================================================================
+   POLISH ROUND — banner glass, compact hero pills, tidy grids,
+   aligned bottom-right stack
+   ================================================================== */
+
+/* Route banner: match the app's glass language */
+.route-banner { background: var(--glass); backdrop-filter: blur(18px); border-radius: 24px; }
+.rb-steps { scrollbar-width: none; }
+.rb-steps::-webkit-scrollbar { display: none; }
+
+/* Hero pills: compact, never crowd the name */
+.hero-pill { font-size: 10.5px; padding: 4px 9px; backdrop-filter: blur(8px); }
+.sheet-hero-pills { gap: 5px; margin-top: 7px; }
+
+/* Explore grid: firm 2-col rhythm on phones */
+@media (max-width: 560px) {
+  .explore-grid { grid-template-columns: 1fr 1fr; gap: 7px; }
+}
+
+/* Bottom-right stack: recenter + Guide perfectly aligned */
+.recenter-btn { width: 48px; height: 48px; right: 14px; }
+@media (max-width: 560px) { .recenter-btn { right: 12px; } }
+
+/* Guide quick chips: match filter chip look */
+.g-quick { background: var(--bg-3); border-radius: 999px; }
