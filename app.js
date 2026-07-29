@@ -49,7 +49,10 @@ const map = L.map("map", {
   // Continuous zoom: no snapping to whole levels, so pinch and wheel glide
   // instead of clunking between steps.
   zoomSnap: 0, zoomDelta: 1,                // a tap/button moves a full level
-  wheelPxPerZoomLevel: 45,                  // one notch covers ~2 levels: fast, not sluggish
+  // Leaflet does not scale linearly here: it runs the wheel delta through a
+  // log curve, so the effective levels-per-notch is well under delta/px. At 20
+  // a normal 100px notch lands around 2.5 levels, which actually feels fast.
+  wheelPxPerZoomLevel: 20,
   wheelDebounceTime: 0,                     // no waiting, every scroll registers instantly
   bounceAtZoomLimits: false,                // no rubber-band snap at the ends
   zoomAnimation: true, zoomAnimationThreshold: 12,
@@ -462,6 +465,14 @@ function routeToSpot(s) {
 }
 document.getElementById("rbClose").onclick = clearRoute;
 document.getElementById("navEnd").onclick = clearRoute;
+
+// Zoom buttons. A press moves a clean whole level in either direction.
+function stepZoom(dir) {
+  const target = Math.round(map.getZoom()) + dir;
+  map.setZoom(Math.max(map.getMinZoom(), Math.min(map.getMaxZoom(), target)));
+}
+document.getElementById("zoomIn").onclick = () => stepZoom(1);
+document.getElementById("zoomOut").onclick = () => stepZoom(-1);
 
 // ===== Story strip =====
 function renderStories() {

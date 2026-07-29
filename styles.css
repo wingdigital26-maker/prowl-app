@@ -1533,6 +1533,27 @@ body.show-pin-labels .pin-label { display: block; }
   background: linear-gradient(to top, rgba(6,10,16,.88), rgba(6,10,16,.15) 58%, transparent);
 }
 
+/* Zoom in / out. There was previously no way to zoom out except scrolling. */
+.zoom-stack {
+  position: fixed; right: 14px; z-index: 481;
+  bottom: calc(var(--tabbar-h) + 130px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column;
+  border-radius: 18px; overflow: hidden;
+  box-shadow: 0 4px 16px rgba(16,24,38,.24);
+}
+.zoom-btn {
+  width: 48px; height: 44px; border: none; cursor: pointer;
+  background: rgba(16,22,32,.92); color: #f2f5f9;
+  font-family: var(--font); font-size: 22px; font-weight: 700; line-height: 1;
+  display: grid; place-items: center;
+  transition: background .15s, transform .1s;
+}
+.zoom-btn:first-child { border-bottom: 1px solid rgba(255,255,255,.14); }
+.zoom-btn:hover { background: rgba(28,38,54,.96); }
+.zoom-btn:active { transform: scale(.93); }
+body.driving .zoom-stack { opacity: 0; pointer-events: none; }
+@media (max-width: 560px) { .zoom-stack { right: 12px; } }
+
 /* Bottom bar sits on a light map now: give it a real edge */
 .tabbar { border-top: 1px solid var(--border); box-shadow: 0 -4px 20px rgba(16,24,38,.18); }
 
