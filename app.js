@@ -589,6 +589,63 @@ document.getElementById("svClose").onclick = closeStory;
 document.getElementById("svOpen").onclick = () => { const id = sv.spot.id; closeStory(); openSheet(id); };
 
 // ===== Filtering =====
+// ===== Saved spots =====
+// Your own catalog. Kept locally so it works signed out and offline.
+function savedIds() {
+  try { return JSON.parse(localStorage.getItem("prowl.saved") || "[]"); } catch (e) { return []; }
+}
+function isSaved(id) { return savedIds().includes(id); }
+function toggleSaved(id) {
+  const list = savedIds();
+  const i = list.indexOf(id);
+  if (i >= 0) list.splice(i, 1); else list.unshift(id);
+  localStorage.setItem("prowl.saved", JSON.stringify(list));
+  const spot = state.spots.find(s => s.id === id);
+  toast(i >= 0 ? "Removed from saved" : `Saved ${spot ? spot.name : "spot"} ✓`);
+  syncSaveBtn(id);
+  renderSaved();
+  return i < 0;
+}
+function syncSaveBtn(id) {
+  const b = document.getElementById("saveBtn");
+  if (!b || state.openSpotId !== id) return;
+  const on = isSaved(id);
+  b.classList.toggle("on", on);
+  b.innerHTML = `<svg class="ico" viewBox="0 0 24 24" fill="${on ? "currentColor" : "none"}"><path d="M6 3h12a1 1 0 0 1 1 1v16l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>${on ? "Saved" : "Save"}`;
+}
+function renderSaved() {
+  const wrap = document.getElementById("savedList");
+  if (!wrap) return;
+  const ids = savedIds();
+  const spots = ids.map(id => state.spots.find(s => s.id === id)).filter(Boolean);
+  document.getElementById("savedCount").textContent = spots.length;
+  if (!spots.length) {
+    wrap.innerHTML = `<div class="saved-empty">Nothing saved yet.<small>Tap Save on any spot to build your list.</small></div>`;
+    return;
+  }
+  wrap.innerHTML = spots.map(s => `
+    <div class="saved-row" data-id="${s.id}">
+      <div class="saved-thumb" ${faceStyle(s)}>${previewImg(s) ? "" : catLogo(s.cat)}${playBadge(s)}</div>
+      <div class="saved-info">
+        <b>${s.name}</b>
+        <small>${CAT_META[s.cat].label} · ${cityOf(s.zip) || s.zip}${rateOf(s) ? ` · ★ ${rateOf(s).toFixed(1)}` : ""}</small>
+      </div>
+      <button class="saved-x" data-remove="${s.id}" aria-label="Remove">✕</button>
+    </div>`).join("");
+  wrap.querySelectorAll(".saved-row").forEach(r => {
+    r.onclick = e => {
+      if (e.target.dataset.remove) return;
+      const s = state.spots.find(x => x.id === +r.dataset.id);
+      if (!s) return;
+      if (spotMode(s.cat) !== state.mode) setMode(spotMode(s.cat));
+      showView("map"); openSheet(s.id);
+    };
+  });
+  wrap.querySelectorAll("[data-remove]").forEach(b => b.onclick = ev => {
+    ev.stopPropagation(); toggleSaved(+b.dataset.remove);
+  });
+}
+
 // ===== Places you can search by name =====
 // Spots only carry a ZIP, so "Plano" matched nothing. This maps ZIPs to the
 // city (and the neighborhood where one is well known) so typing a place name
@@ -838,8 +895,20 @@ renderCrew();
 
 // ===== Recenter on DFW =====
 // ===== You on the map — custom character (Snap Map style) =====
-const AVATAR_EMOJI = ["🦊","🦉","👻","🐺","🥷","🤠","🐸","😎","🐱","🧙","🦇","👽"];
-const AVATAR_COLORS = ["#35bdf7","#9b6dff","#37e08b","#ffb84d","#ff5d6c","#f4f4f4"];
+const AVATAR_GROUPS = {
+  "Creatures": ["🦊","🦉","🐺","🐸","🐱","🦇","🐝","🦝","🐙","🦎","🐊","🦅"],
+  "Characters": ["🥷","🤠","🧙","👽","🤖","🧛","🧜","🦸","🕵️","👻","💀","🎃"],
+  "Moods": ["😎","🔥","👀","💫","🌙","⚡","🍄","🌵","🎧","🛹","📸","🗝️"],
+};
+const AVATAR_EMOJI = Object.values(AVATAR_GROUPS).flat();
+const AVATAR_COLORS = ["#35bdf7","#9b6dff","#37e08b","#ffb84d","#ff5d6c",
+                       "#f4f4f4","#ff8fd0","#00d4c8","#ffd93d","#7c8cff"];
+const AVATAR_FRAMES = [
+  { key: "solid",  label: "Solid" },
+  { key: "ring",   label: "Ring" },
+  { key: "glow",   label: "Glow" },
+  { key: "gradient", label: "Gradient" },
+];
 state.avatar = (() => {
   try { return JSON.parse(localStorage.getItem("prowl.avatar")) || {}; } catch (e) { return {}; }
 })();
@@ -850,7 +919,7 @@ let meMarker = null;
 function meIcon() {
   return L.divIcon({
     className: "",
-    html: `<div class="me-pin" style="--me:${state.avatar.color}"><span>${state.avatar.emoji}</span><i class="me-pulse"></i></div>`,
+    html: `<div class="me-pin frame-${state.avatar.frame || "solid"}" style="--me:${state.avatar.color}"><span>${state.avatar.emoji}</span><i class="me-pulse"></i></div>`,
     iconSize: [46, 46], iconAnchor: [23, 23],
   });
 }
@@ -877,12 +946,28 @@ function applyAvatar() {
 function renderAvatarBuilder() {
   const grid = document.getElementById("avatarGrid"), colors = document.getElementById("avatarColors");
   if (!grid || !colors) return;
-  grid.innerHTML = AVATAR_EMOJI.map(e =>
-    `<button class="av-opt ${e === state.avatar.emoji ? "on" : ""}" data-e="${e}">${e}</button>`).join("");
-  colors.innerHTML = AVATAR_COLORS.map(c =>
-    `<button class="av-color ${c === state.avatar.color ? "on" : ""}" data-c="${c}" style="background:${c}"></button>`).join("");
+  const prev = document.getElementById("avPreview");
+  if (prev) {
+    prev.className = "av-preview frame-" + (state.avatar.frame || "solid");
+    prev.style.setProperty("--me", state.avatar.color);
+    prev.textContent = state.avatar.emoji;
+  }
+  grid.innerHTML = Object.entries(AVATAR_GROUPS).map(([label, list]) => `
+    <div class="av-group"><span class="av-group-label">${label}</span>
+      <div class="av-group-grid">${list.map(e =>
+        `<button class="av-opt ${e === state.avatar.emoji ? "on" : ""}" data-e="${e}">${e}</button>`).join("")}</div>
+    </div>`).join("");
+  colors.innerHTML =
+    `<div class="av-row-label">Color</div>
+     <div class="av-swatches">${AVATAR_COLORS.map(c =>
+       `<button class="av-color ${c === state.avatar.color ? "on" : ""}" data-c="${c}" style="background:${c}"></button>`).join("")}</div>
+     <div class="av-row-label">Style</div>
+     <div class="av-frames">${AVATAR_FRAMES.map(f =>
+       `<button class="av-frame ${(state.avatar.frame || "solid") === f.key ? "on" : ""}" data-f="${f.key}">${f.label}</button>`).join("")}</div>`;
+
   grid.querySelectorAll(".av-opt").forEach(b => b.onclick = () => { state.avatar.emoji = b.dataset.e; applyAvatar(); });
   colors.querySelectorAll(".av-color").forEach(b => b.onclick = () => { state.avatar.color = b.dataset.c; applyAvatar(); });
+  colors.querySelectorAll(".av-frame").forEach(b => b.onclick = () => { state.avatar.frame = b.dataset.f; applyAvatar(); });
 }
 startMe();
 applyAvatar();
@@ -1173,6 +1258,8 @@ function openSheet(id) {
   const dirBtn = document.getElementById("dirBtn");
   dirBtn.href = extMapsUrl(s);                 // fallback if in-app routing can't run
   dirBtn.onclick = (e) => { e.preventDefault(); routeToSpot(s); };
+  const saveBtn = document.getElementById("saveBtn");
+  if (saveBtn) { saveBtn.onclick = () => toggleSaved(s.id); syncSaveBtn(s.id); }
   // Share this spot (native share sheet on phones, copy-link fallback on desktop).
   const shareBtn = document.getElementById("shareBtn");
   if (shareBtn) {
@@ -1302,16 +1389,18 @@ function renderEmbeds(s) {
   const extra = (window.SPOT_EXTRAS && window.SPOT_EXTRAS[s.id]) || {};
   const embeds = extra.embeds || s.embeds || [];
   if (!embeds.length) { slot.innerHTML = ""; return; }
+  // We deliberately do NOT render the platform embed player any more. It very
+  // often resolved to a "video currently unavailable" box even when the post is
+  // fine, which looked broken. The preview frame plus a direct link does the
+  // same job and always works.
   const label = { tiktok: "Open on TikTok", instagram: "Open on Instagram", reddit: "Open on Reddit" };
+  const who = videoThumb(s);
   const directLinks = embeds.map(e =>
     `<a class="embed-open" href="${e.url}" target="_blank" rel="noopener">▶ ${label[e.type] || "Open post"} ↗</a>`).join("");
   slot.innerHTML =
     `<h3 class="embed-h">From explorers who've been</h3>
      <div class="embed-openrow">${directLinks}</div>
-     <div class="embed-list">${embeds.map(embedBlock).join("")}</div>
-     <p class="embed-note">Real posts, hosted on their original platform. Credit and the link go to whoever shared them.</p>`;
-  const types = [...new Set(embeds.map(e => e.type))];
-  setTimeout(() => processEmbeds(types), 60);
+     <p class="embed-note">${who && who.author ? `Shot by <b>@${who.author}</b>. ` : ""}Opens on their platform, where they posted it.</p>`;
 }
 
 function isCommunitySpot(s) { return s.cat === "abandoned" || s.cat === "tunnel"; }
@@ -1512,6 +1601,7 @@ function renderAll() {
   renderExplore();
   renderZipBoard();
   renderProfile();
+  renderSaved();
 }
 
 // ===== Pin sharing (deep links) =====

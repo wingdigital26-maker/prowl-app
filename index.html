@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#35bdf7">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
-<link rel="stylesheet" href="styles.css?v=70">
+<link rel="stylesheet" href="styles.css?v=71">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
@@ -133,8 +133,12 @@
     <div id="authCta"></div>
     <div class="profile-stats" id="profileStats"></div>
   </div>
+  <h2 class="view-sub">Saved spots <span class="sub-count" id="savedCount">0</span></h2>
+  <div class="saved-list" id="savedList"></div>
+
   <h2 class="view-sub">Your character</h2>
   <div class="avatar-card">
+    <div class="av-preview-wrap"><div class="av-preview" id="avPreview">🦊</div></div>
     <div class="avatar-grid" id="avatarGrid"></div>
     <div class="avatar-colors" id="avatarColors"></div>
     <small class="crew-hint">Your character is you on the map — pick a face and a color, Snap Map style.</small>
@@ -204,6 +208,7 @@
     <div class="sheet-actions">
       <a class="pill-btn primary" id="dirBtn" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Directions</a>
       <button class="pill-btn share-btn" id="shareBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 15V3.5"/><path d="M8 7l4-4 4 4"/></svg>Share</button>
+      <button class="pill-btn save-btn" id="saveBtn"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M6 3h12a1 1 0 0 1 1 1v16l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>Save</button>
     </div>
     <div id="sponsorBox"></div>
     <div class="sheet-meta" id="sheetMeta"></div>
@@ -385,19 +390,19 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-<script src="real-spots.js?v=70"></script>
-<script src="plano-spots.js?v=70"></script>
-<script src="plano-new-spots.js?v=70"></script>
-<script src="plano-more-spots.js?v=70"></script>
-<script src="plano-out-spots.js?v=70"></script>
-<script src="plano-food-spots.js?v=70"></script>
-<script src="hangout-nature-spots.js?v=70"></script>
-<script src="dallas-depth-spots.js?v=70"></script>
-<script src="abandoned-spots.js?v=70"></script>
-<script src="urbex-north-spots.js?v=70"></script>
-<script src="video-thumbs.js?v=70"></script>
-<script src="data.js?v=70"></script>
-<script src="app.js?v=70"></script>
-<script src="pb.js?v=70"></script>
+<script src="real-spots.js?v=71"></script>
+<script src="plano-spots.js?v=71"></script>
+<script src="plano-new-spots.js?v=71"></script>
+<script src="plano-more-spots.js?v=71"></script>
+<script src="plano-out-spots.js?v=71"></script>
+<script src="plano-food-spots.js?v=71"></script>
+<script src="hangout-nature-spots.js?v=71"></script>
+<script src="dallas-depth-spots.js?v=71"></script>
+<script src="abandoned-spots.js?v=71"></script>
+<script src="urbex-north-spots.js?v=71"></script>
+<script src="video-thumbs.js?v=71"></script>
+<script src="data.js?v=71"></script>
+<script src="app.js?v=71"></script>
+<script src="pb.js?v=71"></script>
 </body>
 </html>
