@@ -224,6 +224,14 @@ function reconcilePhotos() {
   const ex = window.SPOT_EXTRAS || {};
   const seedById = {};
   (typeof SEED_SPOTS !== "undefined" ? SEED_SPOTS : []).forEach(s => { seedById[s.id] = s; });
+
+  // Spots we deliberately removed from the data files used to linger forever,
+  // because the backend still had the old record. Curated spots use small ids;
+  // anything a user adds uses Date.now(), so this can never touch user content.
+  const CURATED_MAX_ID = 100000;
+  if (Object.keys(seedById).length) {
+    state.spots = state.spots.filter(s => s.id >= CURATED_MAX_ID || seedById[s.id]);
+  }
   const DEFINITIONAL = ["cat", "name", "desc", "lat", "lng", "zip", "tags", "danger", "rating"];
   for (const s of state.spots) {
     const seed = seedById[s.id];

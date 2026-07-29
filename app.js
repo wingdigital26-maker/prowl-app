@@ -1162,11 +1162,20 @@ function openSheet(id) {
     safety += `<div class="safety-banner danger">🤝 Extreme spot — never go alone. Bring a buddy and tell someone where you are.</div>`;
   document.getElementById("safetyBox").innerHTML = safety;
 
+  // Only ever show imagery we can prove is OF THIS PLACE: a licensed photo with
+  // a documented source, or a frame from a real video someone shot there.
+  // Generic stock (a random park standing in for this park) is worse than
+  // nothing, so it does not appear at all.
   const pg = document.getElementById("photoGrid");
-  if (s.photos && s.photos.length) {
-    pg.innerHTML = s.photos.map(p => `<div class="photo-cell" style="background-image:url('${p}')"></div>`).join("");
+  const frame = videoThumb(s);
+  const proven = (s.photoCredit && s.photos && s.photos.length) ? s.photos : [];
+  if (proven.length) {
+    pg.innerHTML = proven.map(p => `<div class="photo-cell" style="background-image:url('${p}')"></div>`).join("");
+  } else if (frame && frame.thumb) {
+    pg.innerHTML = `<div class="photo-cell wide" style="background-image:url('${frame.thumb}')"></div>`;
   } else {
-    pg.innerHTML = [0,1,2].map(() => `<div class="photo-cell" style="background:${CAT_META[s.cat].grad}">📷</div>`).join("");
+    pg.innerHTML = `<div class="photo-empty">${catLogo(s.cat)}<span>No verified photos of this spot yet</span>
+      <small>Been here? Add yours.</small></div>`;
   }
   const credEl = document.getElementById("photoCredit");
   const cred = (window.SPOT_EXTRAS && window.SPOT_EXTRAS[s.id] && window.SPOT_EXTRAS[s.id].photoCredit) || s.photoCredit;
@@ -1591,24 +1600,165 @@ function guideAddMsg(who, html) {
   document.getElementById("guideMsgs").appendChild(el);
   scrollGuide();
 }
-function guideAddRec(s) {
+function guideAddRec(s, mi) {
   const el = document.createElement("div");
   el.className = "g-rec";
-  el.innerHTML = `<div class="g-rec-thumb" ${faceStyle(s)}>${realPhoto(s) ? "" : catLogo(s.cat)}${playBadge(s)}</div>
-    <div class="g-rec-info"><b>${s.name}</b><small>${CAT_META[s.cat].label} · ${s.zip}</small><span class="g-stars">${starStr(rateOf(s))} ${rateOf(s).toFixed(1)}</span></div>`;
+  const far = (typeof mi === "number")
+    ? ` · ${mi < 1 ? mi.toFixed(1) : Math.round(mi)} mi` : "";
+  const rating = rateOf(s);
+  el.innerHTML = `<div class="g-rec-thumb" ${faceStyle(s)}>${previewImg(s) ? "" : catLogo(s.cat)}${playBadge(s)}</div>
+    <div class="g-rec-info"><b>${s.name}</b><small>${CAT_META[s.cat].label} · ${s.zip}${far}</small><span class="g-stars">${rating ? starStr(rating) + " " + rating.toFixed(1) : "★ new"}</span></div>`;
   el.onclick = () => { if (spotMode(s.cat) !== state.mode) setMode(spotMode(s.cat)); closeGuide(); showView("map"); openSheet(s.id); };
   document.getElementById("guideMsgs").appendChild(el);
   scrollGuide();
 }
 function scrollGuide() { const m = document.getElementById("guideMsgs"); m.scrollTop = m.scrollHeight; }
+// ===== Guide brain =====
+// Understands what you actually asked for: a category, a specific craving, a
+// mood, distance, price, and whether you are following up on the last answer.
+const CRAVINGS = {
+  taco: ["taco","tacos","al pastor","birria","taqueria"], bbq: ["bbq","barbecue","brisket","smoked","ribs"],
+  ramen: ["ramen","noodle","noodles","pho"], sushi: ["sushi","omakase","sashimi","japanese"],
+  pizza: ["pizza","slice","pie"], burger: ["burger","burgers","smash"],
+  mexican: ["mexican","enchilada","queso","salsa"], thai: ["thai","curry","pad"],
+  breakfast: ["breakfast","brunch","biscuit","pancake","migas","eggs"],
+  dessert: ["dessert","ice cream","sweet","pastry","donut","cake"],
+  vegan: ["vegan","vegetarian","plant based"],
+  cocktail: ["cocktail","cocktails","mixology","speakeasy","martini","mezcal","whiskey"],
+  beer: ["beer","brewery","brewpub","draft","taproom","cider"], wine: ["wine","winery","vino"],
+  matcha: ["matcha"], espresso: ["espresso","cortado","latte","flat white","pourover","pour over"],
+};
+const MOODS = {
+  date:    { words: ["date","romantic","impress","anniversary","cute"], say: "good date energy" },
+  work:    { words: ["work","study","laptop","wifi","focus","remote"], say: "somewhere you can actually work" },
+  chill:   { words: ["chill","lowkey","low key","relax","quiet","calm","unwind"], say: "low key" },
+  lively:  { words: ["fun","lively","busy","party","night out","loud","vibe","vibes"], say: "lively" },
+  cheap:   { words: ["cheap","broke","budget","affordable","under","inexpensive"], say: "easy on the wallet" },
+  fancy:   { words: ["fancy","upscale","nice","classy","special occasion"], say: "a nicer spot" },
+  photos:  { words: ["photo","photos","photogenic","instagram","shoot","aesthetic","pics"], say: "very photogenic" },
+  outside: { words: ["patio","outside","outdoor","rooftop","fresh air"], say: "outdoors" },
+  latenight:{words: ["late","late night","after","2am","midnight","open late"], say: "late night" },
+  group:   { words: ["group","friends","everyone","crew","party of"], say: "good for a group" },
+};
+const NEAR_WORDS = ["near me","nearby","close","closest","around me","near by","walking distance","right now"];
+
+function milesBetween(a, b) { return map.distance([a.lat, a.lng], [b.lat, b.lng]) / 1609.34; }
+function userPoint() {
+  if (state.meAt) return { lat: state.meAt[0], lng: state.meAt[1] };
+  const c = map.getCenter(); return { lat: c.lat, lng: c.lng };   // fall back to what they're looking at
+}
+function firstSentence(t) { const m = (t || "").split(/(?<=[.!?])\s/)[0]; return m || ""; }
+
+// Match on whole words only. Substring matching turned "shoot photos" into a
+// ramen craving, because "pho" lives inside "photos".
+function saysWord(haystack, phrase) {
+  const esc = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp("(^|[^a-z])" + esc + "([^a-z]|$)", "i").test(haystack);
+}
+function guideUnderstand(q) {
+  const s = " " + q.toLowerCase().trim() + " ";
+  const cat = guideDetectCat(q);
+  const craving = Object.entries(CRAVINGS).find(([, ws]) => ws.some(w => saysWord(s, w)));
+  const moods = Object.entries(MOODS).filter(([, m]) => m.words.some(w => saysWord(s, w))).map(([k, m]) => ({ key: k, ...m }));
+  const near = NEAR_WORDS.some(w => s.includes(w));
+  const followUp = /^(what about|how about|and |any |something else|other|more|instead|else)/.test(q.toLowerCase().trim());
+  return { cat, craving: craving ? craving[0] : null, cravingWords: craving ? craving[1] : [], moods, near, followUp, raw: q };
+}
+
+function guideSearch(intent) {
+  const me = userPoint();
+  let pool = matchingSpots().length ? state.spots.slice() : state.spots.slice();
+  if (intent.cat) pool = pool.filter(s => s.cat === intent.cat);
+
+  const words = intent.raw.toLowerCase().split(/[^a-z]+/).filter(w => w.length > 2);
+  const scored = pool.map(s => {
+    const hay = (s.name + " " + s.desc + " " + s.tags.join(" ") + " " + CAT_META[s.cat].label).toLowerCase();
+    let sc = (rateOf(s) || 3.8) * 1.1;
+    if (intent.craving) sc += intent.cravingWords.some(w => saysWord(hay, w)) ? 6 : -1.5;
+    intent.moods.forEach(m => { if (m.words.some(w => saysWord(hay, w))) sc += 2.2; });
+    sc += words.reduce((a, w) => a + (hay.includes(w) ? 0.8 : 0), 0);
+    if (hasVideo(s)) sc += 0.3;
+    const mi = milesBetween(me, s);
+    // Distance always matters. Even when they did not say "near me", nobody
+    // wants a 20 minute drive as the answer to "somewhere chill", so anything
+    // past a comfortable radius gets penalised hard.
+    const near5 = Math.min(mi, 5), beyond = Math.max(0, mi - 5);
+    sc -= intent.near ? (near5 * 1.1 + beyond * 1.6)
+                      : (near5 * 0.22 + beyond * 0.75);
+    if (intent.moods.some(m => m.key === "cheap") && /cheap|cash only|hole in the wall|window|cheap eats/.test(hay)) sc += 2;
+    if (intent.moods.some(m => m.key === "outside") && /patio|rooftop|outdoor|garden|park/.test(hay)) sc += 2;
+    return { s, sc, mi };
+  }).sort((a, b) => b.sc - a.sc);
+
+  // Do not hand back a taco question with a nature answer.
+  const strong = intent.craving ? scored.filter(x => intent.cravingWords.some(w =>
+    saysWord((x.s.name + " " + x.s.desc + " " + x.s.tags.join(" ")).toLowerCase(), w))) : scored;
+  return { hits: (strong.length ? strong : scored).slice(0, 3), me, fellBack: intent.craving && !strong.length };
+}
+
+function guideReply(intent, r) {
+  const n = r.hits.length;
+  if (!n) return null;
+  const top = r.hits[0];
+  const dist = m => m < 0.3 ? "right around the corner" : m < 1 ? `${(m).toFixed(1)} mi away` : `${Math.round(m)} mi away`;
+  const moodTxt = intent.moods.length ? intent.moods.map(m => m.say).slice(0, 2).join(" and ") : null;
+
+  let lead;
+  if (r.fellBack) {
+    lead = `I don't have a great ${intent.craving} spot saved yet, so here's the closest thing I'd actually send you to`;
+  } else if (intent.near) {
+    lead = `Closest to you${intent.craving ? ` for ${intent.craving}` : ""}: <b>${top.s.name}</b>, ${dist(top.mi)}`;
+  } else if (intent.craving) {
+    lead = `For ${intent.craving}, <b>${top.s.name}</b> is the one I'd send you to`;
+  } else if (moodTxt) {
+    lead = `If you want ${moodTxt}, start with <b>${top.s.name}</b>`;
+  } else if (intent.cat) {
+    lead = `${GUIDE_LEAD[intent.cat] || "Here's what I'd pick"}: <b>${top.s.name}</b>`;
+  } else {
+    lead = `Here's what stands out near you: <b>${top.s.name}</b>`;
+  }
+
+  const why = [];
+  if (rateOf(top.s)) why.push(`${rateOf(top.s).toFixed(1)}★`);
+  why.push(dist(top.mi));
+  if (hasVideo(top.s)) why.push("there's a video of it");
+  const tip = firstSentence(top.s.desc);
+  return `${lead} <span class="g-why">(${why.join(" · ")})</span>.<br>${tip}`
+       + (n > 1 ? `<br><br>${n - 1} more below if that's not it.` : "");
+}
+
 function guideAsk(q) {
   guideAddMsg("user", q);
-  const { cat, spots } = guideRecommend(q);
+  const intent = guideUnderstand(q);
+  // "what about coffee instead" keeps the mood from the previous question
+  if (intent.followUp && guideAsk._last) {
+    intent.moods = intent.moods.length ? intent.moods : guideAsk._last.moods;
+    intent.near = intent.near || guideAsk._last.near;
+  }
+  guideAsk._last = intent;
+
+  const r = guideSearch(intent);
+  guideTyping(true);
   setTimeout(() => {
-    if (!spots.length) { guideAddMsg("bot", "I couldn't find a match for that yet. Try tacos, coffee, rooftop drinks, or somewhere abandoned to shoot photos."); return; }
-    guideAddMsg("bot", GUIDE_LEAD[cat] + ":");
-    spots.forEach(guideAddRec);
-  }, 260);
+    guideTyping(false);
+    const reply = guideReply(intent, r);
+    if (!reply) {
+      guideAddMsg("bot", "I don't have anything saved for that yet. Try asking me about tacos, coffee to work from, rooftop drinks, somewhere chill, a trail, or an abandoned spot to shoot.");
+      return;
+    }
+    guideAddMsg("bot", reply);
+    r.hits.forEach(h => guideAddRec(h.s, h.mi));
+  }, 420);
+}
+function guideTyping(on) {
+  const box = document.getElementById("guideMsgs");
+  let t = document.getElementById("gTyping");
+  if (on && !t) {
+    t = document.createElement("div");
+    t.id = "gTyping"; t.className = "g-msg bot g-typing";
+    t.innerHTML = "<i></i><i></i><i></i>";
+    box.appendChild(t); scrollGuide();
+  } else if (!on && t) t.remove();
 }
 let guideGreeted = false;
 function openGuide() {
@@ -1632,7 +1782,8 @@ document.getElementById("guideForm").onsubmit = e => {
   t.value = "";
   guideAsk(q);
 };
-const GUIDE_QUICK = ["🌮 Tacos", "☕ Coffee to work", "🍸 Rooftop drinks", "😌 Somewhere chill", "🌲 Get outside", "🏚 Abandoned + photos"];
+const GUIDE_QUICK = ["What's good food near me?", "Best tacos nearby", "Coffee I can work from",
+  "Rooftop drinks", "Somewhere chill and cheap", "A trail near me", "Abandoned spot to shoot"];
 document.getElementById("guideQuick").innerHTML = GUIDE_QUICK.map(q => `<button class="g-quick">${q}</button>`).join("");
 document.querySelectorAll("#guideQuick .g-quick").forEach(b => b.onclick = () => guideAsk(b.textContent.replace(/^[^\w]+/, "").trim()));
 
