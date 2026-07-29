@@ -50,7 +50,12 @@ document.getElementById("themeBtn").onclick = () => {
 };
 
 // ===== Map =====
-const map = L.map("map", { zoomControl: false }).setView([32.79, -96.82], 12);
+const map = L.map("map", {
+  zoomControl: false,
+  zoomSnap: 0.5, zoomDelta: 0.5,            // finer zoom steps = find the detail you want
+  wheelPxPerZoomLevel: 90,                  // calmer wheel zoom on web
+  zoomAnimationThreshold: 8,
+}).setView([32.79, -96.82], 12);
 
 const TILE_URLS = {
   // Labeled tiles so streets + neighborhoods are readable (like Snap Map)
@@ -61,7 +66,8 @@ let tileLayer = null;
 function setBasemap(theme) {
   if (tileLayer) map.removeLayer(tileLayer);
   tileLayer = L.tileLayer(TILE_URLS[theme], {
-    attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19,
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 20, maxNativeZoom: 19,   // zoom past native tiles (upscaled) for close-in detail
   }).addTo(map);
 }
 setBasemap(savedTheme);

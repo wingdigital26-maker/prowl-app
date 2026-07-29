@@ -1231,6 +1231,38 @@ body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.04) saturate(1.02) 
   .tabbar { left: 50%; transform: translateX(-50%); width: min(520px, 94vw); border-radius: 22px 22px 0 0; border: 1px solid var(--border); border-bottom: none; }
 }
 
+/* ==================================================================
+   SIMPLICITY PASS — map screen carries only search, mode, filters.
+   Stories moved into the Feed. Streets readable. Smooth zoom.
+   ================================================================== */
+
+/* Stories now live at the top of the Feed as a normal row */
+.story-strip.in-feed {
+  position: static; transform: none; width: auto;
+  display: flex; gap: 12px; overflow-x: auto; padding: 2px 2px 14px;
+  justify-content: flex-start;
+}
+.story-strip.in-feed .story-ring { width: 56px; height: 56px; }
+.story-strip.in-feed .story-name { text-shadow: none; color: var(--text-dim); }
+
+/* Chips slide up into the space stories used to occupy */
+.chip-strip { top: 104px; }
+@media (max-width: 560px) { .chip-strip { top: 102px; } }
+@media (min-width: 900px) { .chip-strip { top: 116px; } }
+
+/* Map screen: fewer competing elements — hide the live-count badge on phones
+   (the pin count is visual noise; the map itself says it) */
+@media (max-width: 560px) {
+  .badge-live { display: none; }
+}
+
+/* Streets readable at night: stronger lift on the dark tiles */
+[data-theme="night"] .leaflet-tile { filter: brightness(1.22) contrast(1.08) saturate(1.05); }
+body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.18) contrast(1.06) saturate(1.0) hue-rotate(-8deg); }
+
+/* Sharper zoom feel */
+.leaflet-zoom-anim .leaflet-zoom-animated { transition-timing-function: cubic-bezier(.25,.9,.25,1); }
+
 /* "What people say" community-quote style (abandoned/urbex spots) */
 .review.say { position: relative; padding-left: 26px; background: var(--bg-3); border: 1px solid var(--border); border-radius: 14px; padding: 11px 14px 11px 26px; font-size: 13px; line-height: 1.5; font-style: italic; color: var(--text); }
 .review.say::before { content: "\201C"; position: absolute; left: 9px; top: 4px; font-size: 26px; font-style: normal; color: var(--accent); line-height: 1; }
@@ -1260,7 +1292,7 @@ body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.04) saturate(1.02) 
 .story-name { font-size: 9.5px; max-width: 52px; }
 
 /* Chip strip: pull up tight under the (now smaller) stories, no dead gap */
-.chip-strip { top: 172px; gap: 5px; padding: 2px 12px; }
+.chip-strip { top: 104px; gap: 5px; padding: 2px 12px; }  /* stories moved to Feed — chips sit right under the toggle */
 .chip { padding: 6px 12px; font-size: 11.5px; box-shadow: none; border-color: var(--border); }
 
 /* On phones, go even tighter and thin the always-on filter row */
@@ -1268,7 +1300,7 @@ body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.04) saturate(1.02) 
   .mode-toggle { top: 56px; }
   .story-strip { top: 94px; }
   .story-ring { width: 44px; height: 44px; }
-  .chip-strip { top: 166px; }
+  .chip-strip { top: 100px; }
   .chip { padding: 7px 12px; }        /* keep tap target but visually lighter */
   .badge-live { padding: 7px 12px; font-size: 11px; }
 }
