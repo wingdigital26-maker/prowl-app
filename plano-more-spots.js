@@ -35,17 +35,6 @@ const PLANO_MORE_SPOTS = [
     ]
   },
   {
-    id: 604, name: "Sushi Marquee", cat: "food",
-    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Sushi%20Marquee%20Plano%20TX",
-    lat: 33.0199, lng: -96.6963, zip: "75074",
-    desc: "Dark, loud, neon sushi room in downtown Plano that leans more party than purist. Specialty rolls and the sashimi platters are the draw, and happy hour is where the value is. Come early evening if you want to hear your friends talk.",
-    tags: ["sushi", "neon", "happyhour"], danger: 1, rating: 4.5,
-    reviews: [
-      { user: "lil.omakase", stars: 5, text: "Happy hour rolls are absurdly good for the price." },
-      { user: "rey.torres", stars: 4, text: "Vibe is a whole night out, not just dinner." }
-    ]
-  },
-  {
     id: 605, name: "The Fillmore Pub", cat: "bar",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=The%20Fillmore%20Pub%20Plano%20TX",
     lat: 33.0198, lng: -96.6976, zip: "75074",
