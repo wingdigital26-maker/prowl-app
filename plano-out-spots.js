@@ -48,6 +48,8 @@ const PLANO_OUT_SPOTS = [
   {
     id: 705, name: "Hoblitzelle Park", cat: "nature",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Hoblitzelle%20Park%20Plano%20TX",
+    photos: ["img/real/spot-705.jpg"],
+    photoCredit: "Photo: gurdonark, CC BY 2.0, via Wikimedia Commons",
     lat: 33.0225, lng: -96.687, zip: "75074",
     desc: "An underrated older park just east of downtown with mature shade trees, a pond and trails that link into the east side creek system. It is small and low key, which is the point. Walk over after wandering the Arts District and you will probably have a bench to yourself.",
     tags: ["pond", "shade", "chill"], danger: 1, rating: 4.5,
@@ -81,6 +83,8 @@ const PLANO_OUT_SPOTS = [
   {
     id: 708, name: "Interurban Railway Museum", cat: "hangout",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Interurban%20Railway%20Museum%20Plano%20TX",
+    photos: ["img/real/spot-708.jpg"],
+    photoCredit: "Photo: Michael Barera, CC BY-SA 4.0, via Wikimedia Commons",
     lat: 33.0195, lng: -96.6957, zip: "75074",
     desc: "Tiny free museum in the old Texas Electric Railway station in downtown Plano where you can climb into a restored interurban rail car and see the original ticket window. Takes maybe thirty minutes and it is a genuinely weird cool piece of North Texas history. Pair it with a walk around the brick streets outside.",
     tags: ["museum", "history", "free"], danger: 1, rating: 4.6,

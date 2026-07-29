@@ -5,7 +5,7 @@ const PLANO_NEW_SPOTS = [
   // ---------- FOOD ----------
   {
     id: 218,
-    reviewUrl: "https://www.yelp.com/biz/lima-taverna-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Lima%20Taverna%20Plano%20TX",
     name: "Lima Taverna",
     cat: "food",
     lat: 33.0110, lng: -96.7045, zip: "75075",
@@ -20,7 +20,7 @@ const PLANO_NEW_SPOTS = [
   },
   {
     id: 219,
-    reviewUrl: "https://www.yelp.com/biz/craftway-kitchen-plano-plano-2",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=CraftWay%20Kitchen%20Plano%20TX",
     name: "CraftWay Kitchen",
     cat: "food",
     lat: 33.0458, lng: -96.8024, zip: "75093",
@@ -35,7 +35,7 @@ const PLANO_NEW_SPOTS = [
   },
   {
     id: 220,
-    reviewUrl: "https://www.yelp.com/biz/taverna-rossa-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Taverna%20Rossa%20Plano%20TX",
     name: "Taverna Rossa",
     cat: "food",
     lat: 33.0410, lng: -96.8028, zip: "75093",
@@ -50,7 +50,7 @@ const PLANO_NEW_SPOTS = [
   },
   {
     id: 221,
-    reviewUrl: "https://www.yelp.com/biz/mama-vickys-pupusas-y-mas-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Mama%20Vicky's%20Pupusas%20Y%20Mas%20Plano%20TX",
     name: "Mama Vicky's Pupusas Y Mas",
     cat: "food",
     lat: 33.0207, lng: -96.6928, zip: "75074",
@@ -67,7 +67,7 @@ const PLANO_NEW_SPOTS = [
   // ---------- COFFEE ----------
   {
     id: 222,
-    reviewUrl: "https://www.yelp.com/biz/mudleaf-coffee-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Mudleaf%20Coffee%20Plano%20TX",
     name: "Mudleaf Coffee",
     cat: "coffee",
     lat: 33.0475, lng: -96.7568, zip: "75075",
@@ -82,7 +82,7 @@ const PLANO_NEW_SPOTS = [
   },
   {
     id: 223,
-    reviewUrl: "https://www.yelp.com/biz/dar-coffee-plano-2",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Dar%20Coffee%20Plano%20TX",
     name: "Dar Coffee",
     cat: "coffee",
     lat: 33.0290, lng: -96.6555, zip: "75074",
@@ -97,7 +97,7 @@ const PLANO_NEW_SPOTS = [
   },
   {
     id: 224,
-    reviewUrl: "https://www.yelp.com/biz/pax-and-beneficia-coffee-plano-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Pax%20%26%20Beneficia%20Coffee%20Plano%20TX",
     name: "Pax & Beneficia Coffee",
     cat: "coffee",
     lat: 33.0112, lng: -96.7095, zip: "75075",
@@ -114,7 +114,7 @@ const PLANO_NEW_SPOTS = [
   // ---------- BAR ----------
   {
     id: 225,
-    reviewUrl: "https://www.yelp.com/biz/urban-crust-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=32%20Degrees%20Rooftop%20Bar%20Plano%20TX",
     name: "32 Degrees Rooftop Bar",
     cat: "bar",
     lat: 33.0197, lng: -96.6972, zip: "75074",
@@ -129,7 +129,7 @@ const PLANO_NEW_SPOTS = [
   },
   {
     id: 226,
-    reviewUrl: "https://www.yelp.com/biz/seager-and-sons-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Seager%20%26%20Sons%20Plano%20TX",
     name: "Seager & Sons",
     cat: "bar",
     lat: 33.0932, lng: -96.8138, zip: "75024",
@@ -144,7 +144,7 @@ const PLANO_NEW_SPOTS = [
   },
   {
     id: 227,
-    reviewUrl: "https://www.yelp.com/biz/suburban-yacht-club-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Suburban%20Yacht%20Club%20Plano%20TX",
     name: "Suburban Yacht Club",
     cat: "bar",
     lat: 33.0930, lng: -96.8142, zip: "75024",
@@ -161,7 +161,7 @@ const PLANO_NEW_SPOTS = [
   // ---------- HANGOUT ----------
   {
     id: 228,
-    reviewUrl: "https://www.yelp.com/biz/haggard-park-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Haggard%20Park%20Plano%20TX",
     name: "Haggard Park",
     cat: "hangout",
     lat: 33.0192, lng: -96.6983, zip: "75074",
@@ -176,7 +176,7 @@ const PLANO_NEW_SPOTS = [
   },
   {
     id: 229,
-    reviewUrl: "https://www.yelp.com/biz/georgias-farmers-market-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Georgia's%20Farmers%20Market%20Plano%20TX",
     name: "Georgia's Farmers Market",
     cat: "hangout",
     lat: 33.0196, lng: -96.6978, zip: "75074",
@@ -193,7 +193,7 @@ const PLANO_NEW_SPOTS = [
   // ---------- NATURE ----------
   {
     id: 230,
-    reviewUrl: "https://www.google.com/maps/search/Bluebonnet+Trail+Greenbelt+Plano+TX",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Bluebonnet%20Trail%20Greenbelt%20Plano%20TX",
     name: "Bluebonnet Trail Greenbelt",
     cat: "nature",
     lat: 33.0455, lng: -96.6555, zip: "75074",
@@ -208,7 +208,7 @@ const PLANO_NEW_SPOTS = [
   },
   {
     id: 231,
-    reviewUrl: "https://www.google.com/maps/search/Legacy+Trail+Plano+TX",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Legacy%20Trail%20Plano%20TX",
     name: "Legacy Trail",
     cat: "nature",
     lat: 33.0728, lng: -96.8358, zip: "75093",

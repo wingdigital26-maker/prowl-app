@@ -7,7 +7,7 @@ const DALLAS_DEPTH_SPOTS = [
   // ---------- FOOD ----------
   {
     id: 401, name: "Ruins", cat: "food",
-    reviewUrl: "https://www.yelp.com/biz/ruins-dallas-3",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Ruins%20Dallas%20TX",
     lat: 32.7847, lng: -96.7803, zip: "75226",
     desc: "Oaxacan style Deep Ellum spot with agave cocktails, live music and a patio that spills onto Commerce Street. Get the birria and whatever mezcal drink the bartender is proud of.",
     tags: ["oaxacan", "deepellum", "livemusic"], danger: 1, rating: 4.5,
@@ -18,7 +18,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 402, name: "The Free Man Cajun Cafe and Lounge", cat: "food",
-    reviewUrl: "https://www.yelp.com/biz/the-free-man-dallas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=The%20Free%20Man%20Cajun%20Cafe%20and%20Lounge%20Dallas%20TX",
     lat: 32.7846, lng: -96.7808, zip: "75226",
     desc: "Deep Ellum Cajun joint with live jazz most nights and a genuinely soulful kitchen. Order the jambalaya and the beignets, grab a seat near the band and stay late.",
     tags: ["cajun", "livejazz", "deepellum"], danger: 1, rating: 4.5,
@@ -29,7 +29,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 403, name: "Lucia", cat: "food",
-    reviewUrl: "https://www.yelp.com/biz/lucia-dallas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Lucia%20Dallas%20TX",
     lat: 32.7490, lng: -96.8290, zip: "75208",
     desc: "Tiny Bishop Arts Italian anchor doing house cured meats and handmade pasta at the top of the city. Reservations open 30 days out at 9am and vanish in minutes, so plan ahead.",
     tags: ["italian", "bishoparts", "datenight"], danger: 1, rating: 4.7,
@@ -40,7 +40,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 404, name: "Stock and Barrel", cat: "food",
-    reviewUrl: "https://www.yelp.com/biz/stock-and-barrel-dallas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Stock%20and%20Barrel%20Dallas%20TX",
     lat: 32.7495, lng: -96.8285, zip: "75208",
     desc: "Michelin recognized Bishop Arts bistro built around a massive wood fired grill. Smoky, bold American plates in a warm room. Get the burger or whatever is on the grill and a cocktail.",
     tags: ["woodfired", "bishoparts", "burger"], danger: 1, rating: 4.5,
@@ -51,7 +51,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 405, name: "Gemma", cat: "food",
-    reviewUrl: "https://www.yelp.com/biz/gemma-dallas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Gemma%20Dallas%20TX",
     lat: 32.8120, lng: -96.7695, zip: "75206",
     desc: "Intimate Lower Greenville New American room that quietly turns out some of the best cooking in Dallas. Menu changes with the season, the pasta and the crispy chicken are staples. Book ahead.",
     tags: ["newamerican", "greenville", "seasonal"], danger: 1, rating: 4.6,
@@ -62,7 +62,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 406, name: "Beto and Son", cat: "food",
-    reviewUrl: "https://www.yelp.com/biz/beto-and-son-dallas-2",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Beto%20and%20Son%20Dallas%20TX",
     lat: 32.7775, lng: -96.8360, zip: "75212",
     desc: "Flashy Trinity Groves modern Mexican from a father and son team, with skyline views and tableside guacamole. Come for the churro tower and the sunset over the bridge.",
     tags: ["mexican", "trinitygroves", "skyline"], danger: 1, rating: 4.5,
@@ -74,7 +74,7 @@ const DALLAS_DEPTH_SPOTS = [
   // ---------- COFFEE ----------
   {
     id: 408, name: "Merit Coffee", cat: "coffee",
-    reviewUrl: "https://www.yelp.com/biz/merit-coffee-dallas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Merit%20Coffee%20Dallas%20TX",
     lat: 32.7842, lng: -96.7845, zip: "75226",
     desc: "San Antonio roaster whose bright Deep Ellum shop nails a clean espresso program and a light airy room. Grab a cortado and a seat by the window, good for a work session.",
     tags: ["thirdwave", "espresso", "deepellum"], danger: 1, rating: 4.6,
@@ -85,7 +85,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 409, name: "The Wild Detectives", cat: "coffee",
-    reviewUrl: "https://www.yelp.com/biz/the-wild-detectives-dallas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=The%20Wild%20Detectives%20Dallas%20TX",
     lat: 32.7490, lng: -96.8288, zip: "75208",
     desc: "Bishop Arts bookstore, cafe and bar in a converted house with a leafy back patio. Coffee by day, wine and events by night. Browse a book, take it to the yard, lose an afternoon.",
     tags: ["bookstore", "patio", "bishoparts"], danger: 1, rating: 4.6,
@@ -96,7 +96,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 410, name: "Cafe Duro", cat: "coffee",
-    reviewUrl: "https://www.yelp.com/biz/cafe-duro-dallas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Cafe%20Duro%20Dallas%20TX",
     lat: 32.8265, lng: -96.7695, zip: "75206",
     desc: "Small European style cafe on Lower Greenville pulling strong espresso and pastries. Tucked into a walkable stretch, good for a quick cortado before wandering the avenue.",
     tags: ["espresso", "greenville", "european"], danger: 1, rating: 4.6,
@@ -107,7 +107,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 411, name: "Wayward Coffee Co", cat: "coffee",
-    reviewUrl: "https://www.yelp.com/biz/wayward-coffee-dallas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Wayward%20Coffee%20Co%20Dallas%20TX",
     lat: 32.7495, lng: -96.834, zip: "75208",
     desc: "Neighborhood Bishop Arts coffee bar with a warm, unfussy feel and a solid pour over. Friendly, local and easy to linger in. Good for reading or a slow morning off Bishop Ave.",
     tags: ["pourover", "bishoparts", "cozy"], danger: 1, rating: 4.7,
@@ -120,7 +120,7 @@ const DALLAS_DEPTH_SPOTS = [
   // ---------- BAR ----------
   {
     id: 412, name: "Bar Colette", cat: "bar",
-    reviewUrl: "https://www.yelp.com/biz/bar-colette-dallas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Bar%20Colette%20Dallas%20TX",
     lat: 32.8020, lng: -96.7975, zip: "75204",
     desc: "Stylish West Village cocktail lounge with an intimate European feel, nominated for a James Beard best new bar award. Dress up a touch, sit at the bar, let them steer you.",
     tags: ["cocktails", "uptown", "intimate"], danger: 1, rating: 4.7,
@@ -131,7 +131,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 413, name: "Bowen House", cat: "bar",
-    reviewUrl: "https://www.yelp.com/biz/bowen-house-dallas-2",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Bowen%20House%20Dallas%20TX",
     lat: 32.7975, lng: -96.8010, zip: "75204",
     desc: "Cocktails inside a restored 1874 Uptown farmhouse, all candlelight and old wood, with a hidden bar within a bar in back for the real occasion. Order something imaginative and settle in.",
     tags: ["cocktails", "historic", "uptown"], danger: 1, rating: 4.6,
@@ -142,7 +142,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 414, name: "Upside West Village", cat: "bar",
-    reviewUrl: "https://www.yelp.com/biz/upside-west-village-dallas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Upside%20West%20Village%20Dallas%20TX",
     lat: 32.8010, lng: -96.7985, zip: "75204",
     desc: "Rooftop atop the Canopy hotel in Uptown with unobstructed skyline views, fire pits and string lights. Come at golden hour, grab a lounge seat, order a seasonal marg and watch the city glow.",
     tags: ["rooftop", "uptown", "skyline"], danger: 1, rating: 4.4,
@@ -153,7 +153,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 416, name: "Twilite Lounge", cat: "bar",
-    reviewUrl: "https://www.yelp.com/biz/twilite-lounge-dallas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Twilite%20Lounge%20Dallas%20TX",
     lat: 32.7844, lng: -96.7805, zip: "75226",
     desc: "New Orleans style Deep Ellum bar with free live jazz and blues, a back patio and zero pretense. Order a Sazerac, catch the band, and let the night unwind slow.",
     tags: ["livejazz", "deepellum", "patio"], danger: 1, rating: 4.6,
@@ -164,7 +164,7 @@ const DALLAS_DEPTH_SPOTS = [
   },
   {
     id: 417, name: "Parliament", cat: "bar",
-    reviewUrl: "https://www.yelp.com/biz/parliament-dallas-2",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Parliament%20Dallas%20TX",
     lat: 32.7968, lng: -96.8025, zip: "75204",
     desc: "Uptown cocktail bar with a famously enormous menu and a serious craft program. Overwhelmed by the list? Tell the bartender two spirits you like and a mood, and trust them.",
     tags: ["cocktails", "uptown", "craft"], danger: 1, rating: 4.6,

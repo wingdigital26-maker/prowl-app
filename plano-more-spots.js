@@ -70,6 +70,8 @@ const PLANO_MORE_SPOTS = [
   {
     id: 607, name: "Heritage Farmstead Museum", cat: "hangout",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Heritage%20Farmstead%20Museum%20Plano%20TX",
+    photos: ["img/real/spot-607.jpg"],
+    photoCredit: "Photo: Carol M. Highsmith, public domain, via Library of Congress",
     lat: 33.0245, lng: -96.716, zip: "75075",
     desc: "An actual 1891 Victorian farmstead sitting in the middle of Plano with goats, sheep, a windmill and the original house. Take the guided house tour, then wander the grounds and meet the animals. Cool mornings and their seasonal evening events are when it is at its best.",
     tags: ["historic", "animals", "weird"], danger: 1, rating: 4.6,

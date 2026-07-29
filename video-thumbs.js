@@ -56,6 +56,12 @@ window.VIDEO_THUMBS = {
   "video": "https://www.tiktok.com/@keith_lee125/video/7525606051496938783",
   "type": "tiktok"
  },
+ "111": {
+  "thumb": "img/video-thumbs/spot-111.jpg",
+  "author": "Ashlie Hill",
+  "video": "https://www.tiktok.com/@ashlie.hill/video/7295424566090861866",
+  "type": "tiktok"
+ },
  "112": {
   "thumb": "img/video-thumbs/spot-112.jpg",
   "author": "Stephanie Camillee",
@@ -63,9 +69,10 @@ window.VIDEO_THUMBS = {
   "type": "tiktok"
  },
  "113": {
-  "author": "HG Sply Co.",
-  "video": "https://www.instagram.com/hgsplyco/reel/C8F-Z6pxKZK/",
-  "type": "instagram"
+  "thumb": "img/video-thumbs/spot-113.jpg",
+  "author": "HG Sply Co",
+  "video": "https://www.tiktok.com/@hgsplyco/video/7502138762114370862",
+  "type": "tiktok"
  },
  "114": {
   "thumb": "img/video-thumbs/spot-114.jpg",
@@ -97,9 +104,10 @@ window.VIDEO_THUMBS = {
   "type": "tiktok"
  },
  "119": {
-  "author": "Truck Yard Dallas",
-  "video": "https://www.instagram.com/truckyarddallas/reel/DBO26Y8JvtG/",
-  "type": "instagram"
+  "thumb": "img/video-thumbs/spot-119.jpg",
+  "author": "Maddie | DFW Finds + Travel ✨",
+  "video": "https://www.tiktok.com/@maddiesenter3/video/7497489026002390318",
+  "type": "tiktok"
  },
  "120": {
   "thumb": "img/video-thumbs/spot-120.jpg",
@@ -135,10 +143,119 @@ window.VIDEO_THUMBS = {
   "video": "https://www.instagram.com/reel/DXXH1lgkaiN/",
   "type": "instagram"
  },
+ "201": {
+  "thumb": "img/video-thumbs/spot-201.jpg",
+  "author": "You Had Me @ Halal",
+  "video": "https://www.tiktok.com/@youhadmeathalal/video/7342688486337563947",
+  "type": "tiktok"
+ },
+ "203": {
+  "thumb": "img/video-thumbs/spot-203.jpg",
+  "author": "The Bavarian Grill",
+  "video": "https://www.tiktok.com/@thebavariangrill/video/7429120686217514271",
+  "type": "tiktok"
+ },
+ "205": {
+  "thumb": "img/video-thumbs/spot-205.jpg",
+  "author": "dallasites101",
+  "video": "https://www.tiktok.com/@dallasites101/video/7450292327668780334",
+  "type": "tiktok"
+ },
+ "208": {
+  "thumb": "img/video-thumbs/spot-208.jpg",
+  "author": "Dallas Love List",
+  "video": "https://www.tiktok.com/@dallaslovelist/video/7390087365420666142",
+  "type": "tiktok"
+ },
+ "210": {
+  "thumb": "img/video-thumbs/spot-210.jpg",
+  "author": "koffeedates",
+  "video": "https://www.tiktok.com/@koffeedates/video/7371853634688027946",
+  "type": "tiktok"
+ },
+ "212": {
+  "thumb": "img/video-thumbs/spot-212.jpg",
+  "author": "Haywire Restaurants",
+  "video": "https://www.tiktok.com/@haywirerestaurants/video/7417867011738357034",
+  "type": "tiktok"
+ },
+ "214": {
+  "thumb": "img/video-thumbs/spot-214.jpg",
+  "author": "Vina x Dallas ✿",
+  "video": "https://www.tiktok.com/@vinabobina/video/7141915170447854894",
+  "type": "tiktok"
+ },
+ "216": {
+  "thumb": "img/video-thumbs/spot-216.jpg",
+  "author": "Vanessa Martin",
+  "video": "https://www.tiktok.com/@vanessuhmartin/video/7243138410838396206",
+  "type": "tiktok"
+ },
+ "217": {
+  "thumb": "img/video-thumbs/spot-217.jpg",
+  "author": "lainey - life & more",
+  "video": "https://www.tiktok.com/@lifebylainey/video/7070339264470437166",
+  "type": "tiktok"
+ },
+ "218": {
+  "thumb": "img/video-thumbs/spot-218.jpg",
+  "author": "Lima Taverna",
+  "video": "https://www.tiktok.com/@limatavernaplanotx/video/6984248646044830981",
+  "type": "tiktok"
+ },
+ "219": {
+  "thumb": "img/video-thumbs/spot-219.jpg",
+  "author": "C.R.Lee-DFW Content Creator",
+  "video": "https://www.tiktok.com/@love_sumlotta/video/7354405818109791531",
+  "type": "tiktok"
+ },
+ "220": {
+  "thumb": "img/video-thumbs/spot-220.jpg",
+  "author": "DALLAS BURB FOODIES",
+  "video": "https://www.tiktok.com/@dallasburbfoodies/video/7194220703598611754",
+  "type": "tiktok"
+ },
+ "221": {
+  "thumb": "img/video-thumbs/spot-221.jpg",
+  "author": "Anil Shalwani",
+  "video": "https://www.tiktok.com/@anil.shalwani/video/7620597906369776927",
+  "type": "tiktok"
+ },
+ "222": {
+  "thumb": "img/video-thumbs/spot-222.jpg",
+  "author": "Andi",
+  "video": "https://www.tiktok.com/@alwaysupforanadventure/video/6926726485969587462",
+  "type": "tiktok"
+ },
+ "224": {
+  "thumb": "img/video-thumbs/spot-224.jpg",
+  "author": "Autumn",
+  "video": "https://www.tiktok.com/@autumnneriah/video/7204578401095748910",
+  "type": "tiktok"
+ },
+ "225": {
+  "thumb": "img/video-thumbs/spot-225.jpg",
+  "author": "Armani Valentino",
+  "video": "https://www.tiktok.com/@therealarmanivalentino/video/7177400904516111658",
+  "type": "tiktok"
+ },
+ "226": {
+  "thumb": "img/video-thumbs/spot-226.jpg",
+  "author": "PLANOMOMS",
+  "video": "https://www.tiktok.com/@planomoms/video/7457336337541254446",
+  "type": "tiktok"
+ },
+ "227": {
+  "thumb": "img/video-thumbs/spot-227.jpg",
+  "author": "C.R.Lee-DFW Content Creator",
+  "video": "https://www.tiktok.com/@love_sumlotta/video/7345655529823292714",
+  "type": "tiktok"
+ },
  "301": {
-  "author": "Cidercade Dallas",
-  "video": "https://www.instagram.com/cidercade_dallas/reel/DAHQAbbS3Vn/",
-  "type": "instagram"
+  "thumb": "img/video-thumbs/spot-301.jpg",
+  "author": "Oh Hey Dallas",
+  "video": "https://www.tiktok.com/@ohheydallas/video/7247332941645352235",
+  "type": "tiktok"
  },
  "302": {
   "thumb": "img/video-thumbs/spot-302.jpg",
@@ -355,6 +472,66 @@ window.VIDEO_THUMBS = {
   "thumb": "img/video-thumbs/spot-514.jpg",
   "author": "Mr. Meraki",
   "video": "https://www.tiktok.com/@_mr.meraki/video/7235991442525556010",
+  "type": "tiktok"
+ },
+ "602": {
+  "thumb": "img/video-thumbs/spot-602.jpg",
+  "author": "Shaunessy | Dallas Creator",
+  "video": "https://www.tiktok.com/@violinistbarbie/video/7492863937214434591",
+  "type": "tiktok"
+ },
+ "603": {
+  "thumb": "img/video-thumbs/spot-603.jpg",
+  "author": "cookingwithrashee",
+  "video": "https://www.tiktok.com/@cookingwithrashee/video/7197646431799233838",
+  "type": "tiktok"
+ },
+ "801": {
+  "thumb": "img/video-thumbs/spot-801.jpg",
+  "author": "@caeters",
+  "video": "https://www.tiktok.com/@caeters/video/7114786853043129646",
+  "type": "tiktok"
+ },
+ "802": {
+  "thumb": "img/video-thumbs/spot-802.jpg",
+  "author": "yoonjeaniee",
+  "video": "https://www.tiktok.com/@yoonjeanie/video/7510112830016949550",
+  "type": "tiktok"
+ },
+ "804": {
+  "thumb": "img/video-thumbs/spot-804.jpg",
+  "author": "brentandhannah",
+  "video": "https://www.tiktok.com/@brentandhannah/video/7471110579495669038",
+  "type": "tiktok"
+ },
+ "806": {
+  "thumb": "img/video-thumbs/spot-806.jpg",
+  "author": "Maurie 🎀",
+  "video": "https://www.tiktok.com/@mauriejean/video/7468353662406970667",
+  "type": "tiktok"
+ },
+ "808": {
+  "thumb": "img/video-thumbs/spot-808.jpg",
+  "author": "WhereToFind",
+  "video": "https://www.tiktok.com/@wheretofindjt/video/7270335498034351403",
+  "type": "tiktok"
+ },
+ "809": {
+  "thumb": "img/video-thumbs/spot-809.jpg",
+  "author": "DFW Checklist",
+  "video": "https://www.tiktok.com/@dfw.checklist/video/7548217177061526839",
+  "type": "tiktok"
+ },
+ "810": {
+  "thumb": "img/video-thumbs/spot-810.jpg",
+  "author": "Bishop & Kimbo",
+  "video": "https://www.tiktok.com/@bk.noms/video/7411335465120337194",
+  "type": "tiktok"
+ },
+ "811": {
+  "thumb": "img/video-thumbs/spot-811.jpg",
+  "author": "violet",
+  "video": "https://www.tiktok.com/@hangryviolet/video/7449918272754978078",
   "type": "tiktok"
  }
 };

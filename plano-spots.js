@@ -4,7 +4,7 @@ const PLANO_SPOTS = [
   // ---------- FOOD ----------
   {
     id: 201,
-    reviewUrl: "https://www.yelp.com/biz/turan-uyghur-kitchen-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Turan%20Uyghur%20Kitchen%20Plano%20TX",
     name: "Turan Uyghur Kitchen",
     cat: "food",
     lat: 33.0293, lng: -96.7690, zip: "75075",
@@ -19,7 +19,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 202,
-    reviewUrl: "https://www.yelp.com/biz/sugar-pine-creamery-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Sugar%20Pine%20Creamery%20Plano%20TX",
     name: "Sugar Pine Creamery",
     cat: "food",
     lat: 33.0455, lng: -96.7692, zip: "75023",
@@ -34,7 +34,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 203,
-    reviewUrl: "https://www.yelp.com/biz/bavarian-grill-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Bavarian%20Grill%20Plano%20TX",
     name: "Bavarian Grill",
     cat: "food",
     lat: 33.0455, lng: -96.7025, zip: "75023",
@@ -49,7 +49,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 204,
-    reviewUrl: "https://www.yelp.com/biz/oishii-sushi-and-pan-asian-cuisine-plano-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Oishii%20Sushi%20and%20Pan-Asian%20Plano%20TX",
     name: "Oishii Sushi and Pan-Asian",
     cat: "food",
     lat: 33.0895, lng: -96.8260, zip: "75024",
@@ -64,7 +64,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 205,
-    reviewUrl: "https://www.yelp.com/biz/legacy-hall-plano-3",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Legacy%20Hall%20Plano%20TX",
     name: "Legacy Hall",
     cat: "food",
     lat: 33.0793, lng: -96.8270, zip: "75024",
@@ -79,7 +79,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 206,
-    reviewUrl: "https://www.yelp.com/biz/jashan-indian-fine-dine-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Jashan%20Indian%20Fine%20Dining%20Plano%20TX",
     name: "Jashan Indian Fine Dining",
     cat: "food",
     lat: 33.0835, lng: -96.8240, zip: "75024",
@@ -96,7 +96,7 @@ const PLANO_SPOTS = [
   // ---------- COFFEE ----------
   {
     id: 207,
-    reviewUrl: "https://www.yelp.com/biz/coffee-del-rey-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Coffee%20Del%20Rey%20Plano%20TX",
     name: "Coffee Del Rey",
     cat: "coffee",
     lat: 33.0375, lng: -96.6985, zip: "75075",
@@ -111,7 +111,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 208,
-    reviewUrl: "https://www.yelp.com/biz/local-good-coffee-plano-4",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Local%20Good%20Coffee%20Co.%20Plano%20TX",
     name: "Local Good Coffee Co.",
     cat: "coffee",
     lat: 33.0603, lng: -96.7195, zip: "75023",
@@ -126,7 +126,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 209,
-    reviewUrl: "https://www.yelp.com/biz/lemma-coffee-co-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Lemma%20Coffee%20Co.%20Plano%20TX",
     name: "Lemma Coffee Co.",
     cat: "coffee",
     lat: 33.0205, lng: -96.6960, zip: "75074",
@@ -141,7 +141,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 210,
-    reviewUrl: "https://www.yelp.com/biz/1418-coffee-house-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=1418%20Coffeehouse%20Plano%20TX",
     name: "1418 Coffeehouse",
     cat: "coffee",
     lat: 33.0206, lng: -96.6962, zip: "75074",
@@ -156,7 +156,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 211,
-    reviewUrl: "https://www.yelp.com/biz/little-gus-cafe-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Little%20Gus%20Cafe%20Plano%20TX",
     name: "Little Gus Cafe",
     cat: "coffee",
     lat: 33.0468, lng: -96.7690, zip: "75023",
@@ -173,7 +173,7 @@ const PLANO_SPOTS = [
   // ---------- BAR ----------
   {
     id: 212,
-    reviewUrl: "https://www.yelp.com/biz/haywire-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Haywire%20Plano%20TX",
     name: "Haywire",
     cat: "bar",
     lat: 33.0770, lng: -96.8265, zip: "75024",
@@ -188,7 +188,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 213,
-    reviewUrl: "https://www.yelp.com/biz/the-holy-grail-pub-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=The%20Holy%20Grail%20Pub%20Plano%20TX",
     name: "The Holy Grail Pub",
     cat: "bar",
     lat: 33.0735, lng: -96.8030, zip: "75024",
@@ -203,7 +203,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 214,
-    reviewUrl: "https://www.yelp.com/biz/union-bear-brewing-company-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Union%20Bear%20Brewing%20Co.%20Plano%20TX",
     name: "Union Bear Brewing Co.",
     cat: "bar",
     lat: 33.088, lng: -96.803, zip: "75024",
@@ -218,7 +218,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 215,
-    reviewUrl: "https://www.yelp.com/biz/whiskey-moon-plano",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Whiskey%20Moon%20Plano%20TX",
     name: "Whiskey Moon",
     cat: "bar",
     lat: 33.0785, lng: -96.8310, zip: "75024",
@@ -233,7 +233,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 216,
-    reviewUrl: "https://www.yelp.com/biz/rare-books-bar-frisco",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Rare%20Books%20Bar%20Frisco%20TX",
     name: "Rare Books Bar",
     cat: "bar",
     lat: 33.1219, lng: -96.8252, zip: "75034",
@@ -248,7 +248,7 @@ const PLANO_SPOTS = [
   },
   {
     id: 217,
-    reviewUrl: "https://www.yelp.com/biz/ebb-and-flow-plano-2",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Ebb%20%26%20Flow%20Plano%20TX",
     name: "Ebb & Flow",
     cat: "bar",
     lat: 33.0800, lng: -96.8250, zip: "75024",

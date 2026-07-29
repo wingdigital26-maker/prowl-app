@@ -8,7 +8,7 @@
 const URBEX_NORTH_SPOTS = [
   {
     id: 515, name: "Fort Worth Power & Light Plant (Trinity Trails view)", cat: "abandoned",
-    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Fort%20Worth%20Power%20and%20Light%20Plant%20North%20Main",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Fort%20Worth%20Power%20%26%20Light%20Plant%20Fort%20Worth%20TX",
     lat: 32.7602, lng: -97.3352, zip: "76164",
     desc: "A hulking 1912 industrial power station with twin 265 foot smokestacks looming on the bluff over the Trinity River just north of downtown Fort Worth, decommissioned since 2004 and now city-protected as a historic landmark. This is a view-from-public-land spot only, so shoot it through the fence from the Trinity Trails or across the water at Panther Island, never an entry. Go in daylight, bring a friend, and stay on the public trail side of the fence.",
     tags: ["industrial", "view-only", "trinity"], danger: 3, rating: 4.5,
@@ -19,7 +19,7 @@ const URBEX_NORTH_SPOTS = [
   },
   {
     id: 516, name: "Mineral Wells Fossil Park", cat: "nature",
-    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Mineral%20Wells%20Fossil%20Park%20Indian%20Creek%20Road",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Mineral%20Wells%20Fossil%20Park%20Mineral%20Wells%20TX",
     lat: 32.8257, lng: -98.1904, zip: "76067",
     desc: "A free public fossil park carved out of an old borrow pit off Indian Creek Road, a barren eroded moonscape of gray shale where you can dig and keep 300 million year old sea fossils. Genuinely one of the few places in the US where collecting is legal and free, open daily 8am to dusk. Bring water, knee pads, and a bag, and go early in summer before the shale bakes.",
     tags: ["public", "fossils", "free"], danger: 1, rating: 4.6,
@@ -30,7 +30,9 @@ const URBEX_NORTH_SPOTS = [
   },
   {
     id: 517, name: "Famous Mineral Water Company Pavilion", cat: "hangout",
-    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Famous%20Mineral%20Water%20Company%20Mineral%20Wells",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Famous%20Mineral%20Water%20Company%20Pavilion%20Mineral%20Wells%20TX",
+    photos: ["img/real/spot-517.jpg"],
+    photoCredit: "Photo: Michael Barera, CC BY-SA 4.0, via Wikimedia Commons",
     lat: 32.8136, lng: -98.1142, zip: "76067",
     desc: "The last working mineral-water pavilion in downtown Mineral Wells, bottling the famous Crazy Water since 1904 in a room that feels frozen in the early 1900s. Fully public and free to walk into, the staff pour you samples of each water level and tell the town's boom-and-bust story. Pair it with a stroll past the empty historic storefronts and the towering Baker Hotel a few blocks away.",
     tags: ["public", "historic", "downtown"], danger: 1, rating: 4.5,
@@ -41,7 +43,9 @@ const URBEX_NORTH_SPOTS = [
   },
   {
     id: 518, name: "Fort Richardson State Park Ruins", cat: "abandoned",
-    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Fort%20Richardson%20State%20Park%20Jacksboro",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Fort%20Richardson%20State%20Park%20Ruins%20Thurber%20TX",
+    photos: ["img/real/spot-518.jpg"],
+    photoCredit: "Photo: Mark Fisher, CC BY-SA 3.0, via Wikimedia Commons",
     lat: 33.2221, lng: -98.1463, zip: "76458",
     desc: "An 1867 frontier army fort preserved inside a state historic park just south of Jacksboro, with seven restored original buildings plus the raw stone ruins of the ones the elements took. Legal, safe, and photogenic, you walk right up to the old morgue, powder magazine, and collapsed foundations. Small state park entry fee applies and the historic buildings open on weekends.",
     tags: ["public", "historic", "ruins"], danger: 1, rating: 4.6,
@@ -52,7 +56,9 @@ const URBEX_NORTH_SPOTS = [
   },
   {
     id: 519, name: "Spanish Fort Ghost Town", cat: "abandoned",
-    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Spanish%20Fort%20Texas%20Montague%20County",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Spanish%20Fort%20Ghost%20Town%20Nocona%20TX",
+    photos: ["img/real/spot-519.jpg"],
+    photoCredit: "Photo: Larry D. Moore, public domain, via Wikimedia Commons",
     lat: 33.9447, lng: -97.6187, zip: "76255",
     desc: "A near-vanished community at the dead end of FM 103 a mile south of the Red River, once a fortified Taovaya village and later a wild cattle-trail town that faded to almost nothing. Drive the public roads past the weathered old store, church, and scattered remnants for a true edge-of-nowhere ghost-town feel. The buried archaeological site itself is private, so keep to the public road and go in daylight with a friend.",
     tags: ["public", "ghost-town", "roadside"], danger: 2, rating: 4.2,
@@ -63,7 +69,7 @@ const URBEX_NORTH_SPOTS = [
   },
   {
     id: 520, name: "Belcherville Ghost Town", cat: "abandoned",
-    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Belcherville%20Texas%20ghost%20town",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Belcherville%20Ghost%20Town%20Nocona%20TX",
     lat: 33.8026, lng: -97.8323, zip: "76251",
     desc: "A collapsed 1880s rail and cotton town on US 82 that once had 1,200 people and 51 businesses, now down to the old post office, the cemetery, and crumbling storefronts glimpsed from the highway. Much of the old downtown is fenced and posted No Trespassing, so view and photograph it from the public road and visit the open cemetery only. Go in daylight, bring a friend, and do not cross any fence line.",
     tags: ["ghost-town", "roadside", "view-only"], danger: 2, rating: 4.1,
@@ -74,7 +80,9 @@ const URBEX_NORTH_SPOTS = [
   },
   {
     id: 521, name: "Fort Belknap Historic Site", cat: "abandoned",
-    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Fort%20Belknap%20Historic%20Site%20Newcastle%20Texas",
+    reviewUrl: "https://www.google.com/maps/search/?api=1&query=Fort%20Belknap%20Historic%20Site%20Newcastle%20TX",
+    photos: ["img/real/spot-521.jpg"],
+    photoCredit: "Photo: Pi3.124, CC BY-SA 3.0, via Wikimedia Commons",
     lat: 33.1508, lng: -98.7412, zip: "76372",
     desc: "An 1851 frontier fort near Newcastle, mostly dismantled over the years and then rebuilt on its original stone foundations, with the surviving powder magazine and corn house standing among reconstructed barracks. Free admission and open most days, you can wander the old stone buildings and grounds legally and at your own pace. It is a quiet, low-traffic site, so bring a friend and go during daytime hours.",
     tags: ["public", "historic", "free"], danger: 1, rating: 4.4,
