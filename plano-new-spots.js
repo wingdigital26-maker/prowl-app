@@ -162,6 +162,8 @@ const PLANO_NEW_SPOTS = [
   {
     id: 228,
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Haggard%20Park%20Plano%20TX",
+    photos: ["img/real/spot-228.jpg"],
+    photoCredit: { by: "Michael Barera", license: "CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Plano_October_2015_04_(Haggard_Park).jpg" },
     name: "Haggard Park",
     cat: "hangout",
     lat: 33.0192, lng: -96.6983, zip: "75074",

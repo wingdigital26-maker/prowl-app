@@ -1482,7 +1482,9 @@ function openSheet(id) {
   const cred = (window.SPOT_EXTRAS && window.SPOT_EXTRAS[s.id] && window.SPOT_EXTRAS[s.id].photoCredit) || s.photoCredit;
   const vt = !realPhoto(s) && videoThumb(s);
   credEl.innerHTML = cred
-    ? `Photo: <a href="${cred.url}" target="_blank" rel="noopener">${cred.by}</a> · ${cred.license}`
+    ? (typeof cred === "string"
+        ? cred                                                   // plain-text attribution
+        : `Photo: <a href="${cred.url}" target="_blank" rel="noopener">${cred.by}</a> · ${cred.license}`)
     : vt
       ? `Preview from <a href="${vt.video}" target="_blank" rel="noopener">@${vt.author}</a>'s video ↗`
       : "";

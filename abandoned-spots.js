@@ -108,6 +108,8 @@ const ABANDONED_SPOTS = [
   {
     id: 509, name: "Ed Young's Petrified Wood Store (Glen Rose)", cat: "abandoned",
     reviewUrl: "https://www.google.com/maps/search/?api=1&query=Ed%20Young's%20Petrified%20Wood%20Store%20Glen%20Rose%20TX",
+    photos: ["img/real/spot-509.jpg"],
+    photoCredit: { by: "Boondocking with Dennis", license: "YouTube", url: "https://www.youtube.com/watch?v=kMBM1iQLutY" },
     lat: 32.2320, lng: -97.7550, zip: "76043",
     desc: "A wild little abandoned building near Glen Rose built entirely from chunks of petrified wood, once a Prohibition era spot to buy moonshine. Weird, textural, and unlike anything else out there. It sits on private land, so view and shoot it from the roadside only. Go in daylight, bring a friend, and do not step onto the property.",
     tags: ["private", "roadside", "historic"], danger: 2, rating: 4.2,
