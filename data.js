@@ -56,6 +56,7 @@ function uniquePhotosForCat(cat) {
 const SEED_SPOTS = [
   ...(typeof REAL_SPOTS !== "undefined" ? REAL_SPOTS : []),            // Dallas core (101+)
   ...(typeof PLANO_SPOTS !== "undefined" ? PLANO_SPOTS : []),          // Plano 75025 area (201+)
+  ...(typeof PLANO_NEW_SPOTS !== "undefined" ? PLANO_NEW_SPOTS : []),  // Plano new batch (218+)
   ...(typeof HANGOUT_NATURE_SPOTS !== "undefined" ? HANGOUT_NATURE_SPOTS : []), // hangouts + nature (301+)
   ...(typeof DALLAS_DEPTH_SPOTS !== "undefined" ? DALLAS_DEPTH_SPOTS : []),      // Dallas neighborhoods depth (401+)
   ...(typeof ABANDONED_SPOTS !== "undefined" ? ABANDONED_SPOTS : []),            // DFW abandoned / urbex (501+)
