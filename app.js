@@ -48,9 +48,9 @@ const map = L.map("map", {
   zoomControl: false,
   // Continuous zoom: no snapping to whole levels, so pinch and wheel glide
   // instead of clunking between steps.
-  zoomSnap: 0, zoomDelta: 0.7,              // a tap/button moves a meaningful amount
-  wheelPxPerZoomLevel: 75,                  // responsive scroll: a flick covers real ground
-  wheelDebounceTime: 4,                     // react immediately, no stutter step
+  zoomSnap: 0, zoomDelta: 1,                // a tap/button moves a full level
+  wheelPxPerZoomLevel: 45,                  // one notch covers ~2 levels: fast, not sluggish
+  wheelDebounceTime: 0,                     // no waiting, every scroll registers instantly
   bounceAtZoomLimits: false,                // no rubber-band snap at the ends
   zoomAnimation: true, zoomAnimationThreshold: 12,
   fadeAnimation: true, markerZoomAnimation: true,
@@ -175,7 +175,14 @@ function renderMarkers() {
 function syncLabelZoom() {
   document.body.classList.toggle("show-pin-labels", map.getZoom() >= 14);
 }
-map.on("zoomend", syncLabelZoom);
+// Redraw only when the reveal tier actually changes, so zooming stays smooth
+// instead of rebuilding every pin on every tick.
+let lastShare = null;
+map.on("zoomend", () => {
+  syncLabelZoom();
+  const share = revealShare();
+  if (share !== lastShare) { lastShare = share; renderMarkers(); }
+});
 // Lift + ring the selected pin without a full re-render
 function highlightSelectedPin() {
   document.querySelectorAll(".bubble-pin").forEach(p => {
@@ -571,7 +578,9 @@ document.getElementById("svClose").onclick = closeStory;
 document.getElementById("svOpen").onclick = () => { const id = sv.spot.id; closeStory(); openSheet(id); };
 
 // ===== Filtering =====
-function visibleSpots() {
+// Everything that passes the user's own filters. Nothing is ever dropped from
+// the app - this is the full set the map may draw from.
+function matchingSpots() {
   return state.spots.filter(s => {
     if (spotMode(s.cat) !== state.mode) return false;   // Cool Stuff vs Abandoned world
     if (state.filter !== "all" && s.cat !== state.filter) return false;
@@ -584,6 +593,45 @@ function visibleSpots() {
     }
     return true;
   });
+}
+
+// How interesting a spot is, used only to decide what surfaces first.
+function spotScore(s) {
+  return (rateOf(s) || 3.8)
+       + (hasVideo(s) ? 0.45 : 0)
+       + (realPhoto(s) ? 0.25 : 0)
+       + (s.sponsored ? 0.6 : 0)
+       + Math.min(hereCount(s), 6) * 0.05;
+}
+
+// Progressive reveal: the best spots are on the map from the start, the rest
+// fill in as you zoom. Nothing is removed, it just arrives in waves instead of
+// dumping every pin on screen at once.
+const REVEAL_TIERS = [
+  { share: 0.35, zoom: 0 },      // always on the map
+  { share: 0.65, zoom: 13.2 },
+  { share: 0.85, zoom: 14.4 },
+  { share: 1.00, zoom: 15.4 },   // everything
+];
+function visibleSpots() {
+  const all = matchingSpots();
+  // Searching or filtering to one category means the user asked for those
+  // specifically, so show them all immediately.
+  if (state.search || state.filter !== "all") return all;
+
+  const z = map.getZoom();
+  let share = REVEAL_TIERS[0].share;
+  for (const t of REVEAL_TIERS) if (z >= t.zoom) share = t.share;
+  if (share >= 1) return all;
+
+  const ranked = all.slice().sort((a, b) => spotScore(b) - spotScore(a));
+  const keep = new Set(ranked.slice(0, Math.ceil(ranked.length * share)).map(s => s.id));
+  return all.filter(s => keep.has(s.id));
+}
+function revealShare() {
+  let share = REVEAL_TIERS[0].share;
+  for (const t of REVEAL_TIERS) if (map.getZoom() >= t.zoom) share = t.share;
+  return share;
 }
 
 // ===== Inline SVG UI icons (currentColor, matches tab-bar style) =====

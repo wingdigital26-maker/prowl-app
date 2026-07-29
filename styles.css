@@ -1260,9 +1260,10 @@ body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.04) saturate(1.02) 
 [data-theme="night"] .leaflet-tile { filter: brightness(1.22) contrast(1.08) saturate(1.05); }
 body[data-mode="urbex"] .leaflet-tile { filter: brightness(1.18) contrast(1.06) saturate(1.0) hue-rotate(-8deg); }
 
-/* Zoom animation: short and eased out, so it feels immediate but never jerky */
+/* Zoom animation: fast and eased out. Long enough to read as motion, short
+   enough that it never feels like you are waiting for the map to catch up. */
 .leaflet-zoom-anim .leaflet-zoom-animated {
-  transition: transform .2s cubic-bezier(.2,.85,.3,1) !important;
+  transition: transform .13s cubic-bezier(.2,.9,.3,1) !important;
 }
 /* Pins should not smear during the zoom */
 .leaflet-marker-icon { transition: none; }
