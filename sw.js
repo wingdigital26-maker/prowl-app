@@ -58,3 +58,25 @@ self.addEventListener("fetch", (e) => {
     return cached || (await net) || Response.error();
   })());
 });
+
+// ===== Web Push =====
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data ? e.data.text() : "" }; }
+  e.waitUntil(self.registration.showNotification(d.title || "Prowl", {
+    body: d.body || "",
+    icon: "./icon-192.png",
+    badge: "./icon-192.png",
+    data: { url: d.url || "./" },
+    vibrate: [60, 30, 60],
+  }));
+});
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || "./";
+  e.waitUntil((async () => {
+    const all = await clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const c of all) { if ("focus" in c) { c.navigate(url).catch(() => {}); return c.focus(); } }
+    if (clients.openWindow) return clients.openWindow(url);
+  })());
+});

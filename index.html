@@ -155,6 +155,19 @@
     <div id="authCta"></div>
     <div class="profile-stats" id="profileStats"></div>
   </div>
+  <h2 class="view-sub">Notifications</h2>
+  <div class="crew-card" id="notifCard">
+    <div class="crew-row">
+      <div>
+        <b>Get pinged</b>
+        <small id="notifState">When a friend goes live near you</small>
+      </div>
+      <button class="pill-btn primary" id="notifEnable">Turn on</button>
+    </div>
+    <button class="pill-btn" id="notifTest" hidden>Send me a test</button>
+    <small class="crew-hint">Notifications work best after you add Prowl to your home screen.</small>
+  </div>
+
   <h2 class="view-sub">Saved spots <span class="sub-count" id="savedCount">0</span></h2>
   <div class="saved-list" id="savedList"></div>
 
@@ -442,9 +455,9 @@
 <script src="video-thumbs.js?v=80"></script>
 <script src="data.js?v=80"></script>
 <script src="vid/clips.js?v=2"></script>
-<script src="app.js?v=87"></script>
+<script src="app.js?v=88"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supa.js?v=87"></script>
+<script src="supa.js?v=88"></script>
 <script>
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {

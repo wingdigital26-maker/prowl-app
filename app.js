@@ -2572,3 +2572,64 @@ function initOnboarding() {
   };
 }
 initOnboarding();
+
+// ===== Push notifications (opt-in) =====
+const VAPID_PUBLIC_KEY = "BP127RI2TonhyP2jLJfIbgai_zwty1tuduznu8nxa-6CVk6jzgE4rijw5knzT5QIZQEdAIjPgPvLCMxk4evrdvQ";
+function urlB64ToUint8(base64) {
+  const pad = "=".repeat((4 - (base64.length % 4)) % 4);
+  const b64 = (base64 + pad).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(b64), arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+async function notifState() {
+  if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) return "unsupported";
+  if (Notification.permission === "denied") return "denied";
+  try { const reg = await navigator.serviceWorker.ready; return (await reg.pushManager.getSubscription()) ? "on" : "off"; }
+  catch { return "off"; }
+}
+async function renderNotif() {
+  const btn = document.getElementById("notifEnable"), test = document.getElementById("notifTest"), label = document.getElementById("notifState");
+  if (!btn) return;
+  const st = await notifState();
+  if (st === "unsupported") { btn.hidden = true; if (test) test.hidden = true; if (label) label.textContent = "Not supported on this browser"; return; }
+  if (st === "denied") { btn.hidden = true; if (test) test.hidden = true; if (label) label.textContent = "Blocked. Enable notifications in your browser settings."; return; }
+  btn.hidden = false;
+  if (st === "on") { btn.textContent = "On"; btn.disabled = true; if (test) test.hidden = false; if (label) label.textContent = "You're set. We'll ping you when a friend goes live."; }
+  else { btn.textContent = "Turn on"; btn.disabled = false; if (test) test.hidden = true; if (label) label.textContent = "When a friend goes live near you"; }
+}
+async function enableNotifications() {
+  if (!window.currentUser || !currentUser()) { toast("Log in first to get notifications"); if (window.openAuth) openAuth("login"); return; }
+  const btn = document.getElementById("notifEnable"); btn.disabled = true; btn.textContent = "…";
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") { toast("Notifications not allowed"); return renderNotif(); }
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8(VAPID_PUBLIC_KEY) });
+    const j = sub.toJSON(), u = currentUser();
+    const { error } = await window.sb.from("push_subscriptions").upsert({
+      user_id: u.id, endpoint: sub.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth,
+      crew: (window.live && live.crew) || null,
+      lat: state.meAt ? state.meAt[0] : null, lng: state.meAt ? state.meAt[1] : null,
+    }, { onConflict: "endpoint" });
+    if (error) throw error;
+    toast("Notifications on 🔔");
+  } catch (e) { console.warn("notif enable", e); toast("Couldn't turn on notifications"); }
+  renderNotif();
+}
+async function sendTestNotif() {
+  if (!window.PROWL_PUSH_URL) return;
+  try {
+    const res = await fetch(window.PROWL_PUSH_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(window.authHeaders ? authHeaders() : {}), apikey: window.PROWL_AI_KEY },
+      body: JSON.stringify({ mode: "self", title: "Prowl", body: "Test ping. Notifications are working.", url: "./" }),
+    });
+    const j = await res.json().catch(() => ({}));
+    toast(j.sent ? "Sent. Check your notifications." : "No devices registered yet.");
+  } catch (e) { toast("Test failed"); }
+}
+document.getElementById("notifEnable")?.addEventListener("click", enableNotifications);
+document.getElementById("notifTest")?.addEventListener("click", sendTestNotif);
+renderNotif();
