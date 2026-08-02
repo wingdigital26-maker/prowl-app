@@ -277,16 +277,12 @@ function bearingDeg(a, b) {
 // Rotation is a CSS transform on the (oversized, while driving) #map container,
 // so it never touches Leaflet's own pane math. We unwrap the angle to a
 // continuous value so we always rotate the short way — no 360° spins at N.
+// North-up navigation (like Apple/Google Maps' north-up mode). We deliberately
+// do NOT rotate the map: the old CSS-transform "heading-up" camera flipped the
+// whole map on mobile and fought Leaflet's tile math. Heading is tracked only.
 function setNavBearing(deg) {
   if (deg == null || isNaN(deg)) return;
-  if (nav._cont == null) nav._cont = deg;
-  const d = ((deg - (nav._cont % 360)) + 540) % 360 - 180;   // shortest signed delta
-  nav._cont += d;
   nav.bearing = deg;
-  const mapEl = document.getElementById("map");
-  if (mapEl) mapEl.style.setProperty("--bearing", (-nav._cont).toFixed(1) + "deg");
-  // Keep upright glyphs (the turn arrow) readable by counter-rotating them.
-  document.body.style.setProperty("--nav-bearing", nav._cont.toFixed(1) + "deg");
 }
 
 function fmtFeet(m) {
@@ -301,8 +297,8 @@ function drawRoute(route) {
   const line = route.geometry.coordinates.map(c => [c[1], c[0]]);
   // Casing under the route so it reads on any street color.
   nav.line = L.layerGroup([
-    L.polyline(line, { color: "#0b0f16", weight: 11, opacity: .9, lineCap: "round", lineJoin: "round" }),
-    L.polyline(line, { color: accentColor(), weight: 6, opacity: 1, lineCap: "round", lineJoin: "round" }),
+    L.polyline(line, { color: "#0b0f16", weight: 14, opacity: .9, lineCap: "round", lineJoin: "round" }),
+    L.polyline(line, { color: accentColor(), weight: 9, opacity: 1, lineCap: "round", lineJoin: "round" }),
   ]).addTo(map);
   nav.steps = (route.legs && route.legs[0] && route.legs[0].steps) || [];
   // Progress tracking: cumulative meters along the polyline, and the cumulative
@@ -390,8 +386,9 @@ function renderNavHud(lat, lng) {
     after ? `then ${maneuverText(after, nav.dest.name)}` : "";
 
   setTurnMarker(p, arrow);
-  // Close in as the turn approaches, like a real guide talking you through it.
-  const wantZoom = toManeuver < 120 ? 19 : toManeuver < 400 ? 18 : 17;
+  // Stay zoomed in so streets are big and readable the whole drive; close in a
+  // notch more right before a turn.
+  const wantZoom = toManeuver < 150 ? 19 : 18;
   if (Math.abs(map.getZoom() - wantZoom) >= 0.5) map.setZoom(wantZoom, { animate: false });
 }
 
@@ -414,11 +411,11 @@ async function reroute(lat, lng) {
 function setNavCamera(on) {
   const mapEl = document.getElementById("map");
   if (!mapEl) return;
+  // Clean nav view: hide the spot cluster so it's just the route, you, and the
+  // next turn. North-up, no rotation (see setNavBearing).
   if (on) {
-    mapEl.classList.add("nav-rot");
-    if (map.hasLayer(cluster)) map.removeLayer(cluster);   // clean nav view: route + you + turn only
+    if (map.hasLayer(cluster)) map.removeLayer(cluster);
   } else {
-    mapEl.classList.remove("nav-rot");
     mapEl.style.removeProperty("--bearing");
     document.body.style.removeProperty("--nav-bearing");
     if (!map.hasLayer(cluster)) map.addLayer(cluster);
