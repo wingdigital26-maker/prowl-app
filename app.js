@@ -2427,6 +2427,10 @@ function guideAsk(q) {
 
   const r = guideSearch(intent);
   guideTyping(true);
+  // If the AI proxy is configured, let a real (free) LLM answer using our spots
+  // as grounding — this is the "answer anything" path. Falls back to the local
+  // brain on any error or timeout, so the guide always replies.
+  if (window.PROWL_AI_URL) { guideAskLLM(q, intent, r); return; }
   setTimeout(() => {
     guideTyping(false);
     const reply = guideReply(intent, r);
@@ -2437,6 +2441,47 @@ function guideAsk(q) {
     guideAddMsg("bot", reply);
     r.hits.forEach(h => guideAddRec(h.s, h.mi));
   }, 420);
+}
+
+function guideEscape(t) {
+  return String(t).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])).replace(/\n/g, "<br>");
+}
+function guideLocalFallback(intent, r) {
+  const reply = guideReply(intent, r);
+  if (reply) { guideAddMsg("bot", reply); r.hits.forEach(h => guideAddRec(h.s, h.mi)); }
+  else guideAddMsg("bot", "I don't have anything saved for that yet. Try tacos, coffee to work from, rooftop drinks, somewhere chill, a trail, or an abandoned spot.");
+}
+async function guideAskLLM(q, intent, r) {
+  const spots = (r.hits || []).slice(0, 12).map(h => ({
+    name: h.s.name, cat: CAT_META[h.s.cat] ? CAT_META[h.s.cat].label : h.s.cat,
+    city: cityOf(h.s.zip) || h.s.zip,
+    desc: firstSentence(h.s.desc) || h.s.desc,
+    rating: rateOf(h.s) || undefined,
+    dist: (typeof h.mi === "number") ? +h.mi.toFixed(1) : undefined,
+  }));
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 12000);
+  try {
+    const res = await fetch(window.PROWL_AI_URL, {
+      method: "POST", signal: ctrl.signal,
+      headers: { "Content-Type": "application/json",
+        ...(window.PROWL_AI_KEY ? { Authorization: "Bearer " + window.PROWL_AI_KEY, apikey: window.PROWL_AI_KEY } : {}) },
+      body: JSON.stringify({ question: q, place: intent.place || null, spots }),
+    });
+    clearTimeout(timer);
+    const j = await res.json().catch(() => null);
+    guideTyping(false);
+    if (res.ok && j && j.answer) {
+      guideAddMsg("bot", guideEscape(j.answer));
+      (r.hits || []).slice(0, 3).forEach(h => guideAddRec(h.s, h.mi));
+    } else {
+      guideLocalFallback(intent, r);
+    }
+  } catch (e) {
+    clearTimeout(timer);
+    guideTyping(false);
+    guideLocalFallback(intent, r);
+  }
 }
 function guideTyping(on) {
   const box = document.getElementById("guideMsgs");

@@ -24,6 +24,11 @@ if (SB_CONFIGURED && window.supabase) {
 }
 window.sb = sb;
 
+// Free AI guide proxy (Groq behind a Supabase Edge Function). The guide calls
+// this to "answer anything"; it falls back to the local brain if unreachable.
+window.PROWL_AI_URL = SB_CONFIGURED ? SB_URL + "/functions/v1/ask" : null;
+window.PROWL_AI_KEY = SB_CONFIGURED ? SB_ANON : null;
+
 // ---- row <-> spot mapping (DB columns <-> app fields) ----
 function recToSpot(r) {
   return {
