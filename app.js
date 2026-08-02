@@ -1428,17 +1428,16 @@ function renderReels() {
     const photoLayer = pv
       ? `<div class="rl-media kb" style="background-image:url('${pv}')"></div>`
       : `<div class="rl-media rl-solid" style="background:${catColor(s.cat)}">${catLogo(s.cat)}</div>`;
-    // Ambient category clip (license-clear Pexels loop) autoplays muted so the
-    // feed feels alive like TikTok. It's mood video for the category, not the
-    // spot's own footage (TikTok/IG block real autoplay); the spot photo is the
-    // poster so it stays coherent, and the real clip is still tap-to-watch.
-    // Several clips per category; pick one deterministically by spot id so
-    // neighbouring spots in the same category don't show the same loop.
+    // Video priority: 1) real cloud video of this specific place (from fetch-spot-videos)
+    // 2) ambient category loop (Pexels, mood-only). Real video wins when available.
+    const cloudVideo = s.photos?.video || null;
     const clipN = (window.AMBIENT_CLIPS && window.AMBIENT_CLIPS[s.cat]) || 0;
     const clipIdx = clipN ? (Math.abs(s.id) % clipN) + 1 : 0;
-    const ambient = clipN
-      ? `<video class="rl-vid" muted loop playsinline preload="none"${pv ? ` poster="${pv}"` : ""}><source src="vid/${s.cat}-${clipIdx}.mp4?v=2" type="video/mp4"></video>`
-      : "";
+    const ambient = cloudVideo
+      ? `<video class="rl-vid" muted loop playsinline preload="none"${pv ? ` poster="${pv}"` : ""}><source src="${cloudVideo}" type="video/mp4"></video>`
+      : clipN
+        ? `<video class="rl-vid" muted loop playsinline preload="none"${pv ? ` poster="${pv}"` : ""}><source src="vid/${s.cat}-${clipIdx}.mp4?v=2" type="video/mp4"></video>`
+        : "";
     const mediaBg = photoLayer + ambient;
     const playBtn = vurl
       ? `<button class="rl-play" data-vtype="${vtype ? vtype.type : ""}" data-vurl="${vurl}" aria-label="Play video">
