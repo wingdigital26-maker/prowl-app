@@ -1799,14 +1799,18 @@ body.driving .recenter-btn { opacity: 0; pointer-events: none; transition: opaci
   background: var(--me, var(--accent)); border: 3px solid #fff;
   box-shadow: 0 0 0 7px color-mix(in srgb, var(--me, #35bdf7) 26%, transparent), 0 3px 10px rgba(0,0,0,.5);
 }
-/* Forward chevron: the map is heading-up while driving, so screen-up = the way
-   you're going. A fixed up-pointing arrow reads as "you, facing forward". */
+/* Heading arrow that orbits the puck to point the TRUE way you're facing (the
+   map stays north-up). JS sets --heading from GPS/derived bearing each fix, so
+   the arrow always tells you which direction you're actually going. */
 body.driving .nav-me::before {
-  content: ""; position: absolute; left: 50%; top: 0;
-  transform: translate(-50%, -118%);
-  border-left: 8px solid transparent; border-right: 8px solid transparent;
-  border-bottom: 13px solid var(--me, #35bdf7);
-  filter: drop-shadow(0 -1px 1px rgba(0,0,0,.35));
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 0; height: 0;
+  border-left: 9px solid transparent; border-right: 9px solid transparent;
+  border-bottom: 15px solid var(--me, #35bdf7);
+  transform: translate(-50%, -50%) rotate(var(--heading, 0deg)) translateY(-24px);
+  transform-origin: 50% 50%;
+  transition: transform .3s ease-out;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,.55));
 }
 .nav-dest {
   color: var(--accent); font-size: 26px; font-weight: 900; line-height: 1;
@@ -1824,8 +1828,9 @@ body.driving .nav-me::before {
   transition: transform .5s ease-out;
   will-change: transform;
 }
-/* Keep the upcoming-turn arrow upright and readable as the map spins under it. */
-body.driving .turn-pin { animation: none; transform: rotate(var(--nav-bearing, 0deg)); }
+/* North-up map: the turn marker just pulses in place so the next turn is easy
+   to spot on the route line. */
+body.driving .turn-pin { animation: turnPop 1.6s ease-in-out infinite; }
 
 /* =====================================================================
    v82 upgrades: immersive reels feed, visual Explore, map layer toggle
@@ -2067,3 +2072,4 @@ body.driving .layer-ctrl { display: none; }
   color: rgba(255,255,255,.66); font-size: 14px; font-weight: 600; padding: 8px;
 }
 .ob-fine { color: rgba(255,255,255,.42); font-size: 11.5px; margin-top: 14px; line-height: 1.45; }
+

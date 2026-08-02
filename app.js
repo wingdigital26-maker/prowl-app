@@ -283,6 +283,11 @@ function bearingDeg(a, b) {
 function setNavBearing(deg) {
   if (deg == null || isNaN(deg)) return;
   nav.bearing = deg;
+  // North-up map (stable, no tile glitches). Instead of spinning the whole map,
+  // we spin the user puck's arrow so it always points the true way you're facing.
+  const el = nav.me && nav.me.getElement && nav.me.getElement();
+  const puck = el && el.querySelector(".nav-me");
+  if (puck) puck.style.setProperty("--heading", deg + "deg");
 }
 
 function fmtFeet(m) {
@@ -1381,9 +1386,23 @@ let reelObserver = null;
 function reelSpots() {
   let list = state.spots.filter(s => spotMode(s.cat) === state.mode && previewImg(s));
   if (state.reelCat !== "all") list = list.filter(s => s.cat === state.reelCat);
-  // Media-rich, highly-rated, buzzing spots lead.
-  list.sort((a, b) => (spotScore(b) + (hasVideo(b) ? 0.5 : 0)) - (spotScore(a) + (hasVideo(a) ? 0.5 : 0)));
-  return list.slice(0, 40);
+
+  // Real-feed behavior: never the same order twice. Quality still leads (score +
+  // real video), but a random jitter reshuffles near-equal spots on every open,
+  // and spots you've already scrolled past this session sink so fresh ones surface.
+  const seen = window._reelSeen || (window._reelSeen = new Set());
+  const ranked = list.map(s => {
+    const base = spotScore(s) + (hasVideo(s) ? 1.2 : 0);
+    const jitter = Math.random() * 3;        // enough to shuffle similar spots
+    const penalty = seen.has(s.id) ? 6 : 0;  // push seen down, not out
+    return { s, w: base + jitter - penalty };
+  }).sort((a, b) => b.w - a.w).map(x => x.s);
+
+  const top = ranked.slice(0, 40);
+  top.forEach(s => seen.add(s.id));
+  // Once everything's been shown, forget so the feed cycles fresh again.
+  if (seen.size >= list.length) seen.clear();
+  return top;
 }
 function renderReelFilters(cats) {
   const el = document.getElementById("reelFilters");
@@ -1439,16 +1458,10 @@ function renderReels() {
         ? `<video class="rl-vid" loop playsinline preload="metadata"${pv ? ` poster="${pv}"` : ""}><source src="vid/${s.cat}-${clipIdx}.mp4?v=2" type="video/mp4"></video>`
         : "";
     const mediaBg = photoLayer + ambient;
-    const playBtn = (!cloudVideo && vurl)
-      ? `<button class="rl-play" data-vtype="${vtype ? vtype.type : ""}" data-vurl="${vurl}" aria-label="Play video">
-           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-         </button>` : "";
     const city = cityOf(s.zip);
     return `<article class="reel" data-id="${s.id}">
       ${mediaBg}
       <div class="rl-shade"></div>
-      ${playBtn}
-      ${hasVideo ? `<button class="rl-mute" aria-label="Toggle sound">🔊</button>` : ""}
       <div class="rl-heart-burst" aria-hidden="true">❤️</div>
       <div class="rl-progress"><div class="rl-progress-bar"></div></div>
       <div class="rl-overlay">
@@ -1480,15 +1493,6 @@ function renderReels() {
     </article>`;
   }).join("");
 
-  // Shared mute state — default UNMUTED, fall back to muted if browser blocks
-  if (window._reelMuted === undefined) window._reelMuted = false;
-
-  function applyMuteToAll(muted) {
-    window._reelMuted = muted;
-    wrap.querySelectorAll(".reel video").forEach(v => { v.muted = muted; });
-    wrap.querySelectorAll(".rl-mute").forEach(b => { b.textContent = muted ? "🔇" : "🔊"; });
-  }
-
   // Progress bar animation using requestAnimationFrame
   let _progressRAF = null;
   function tickProgress() {
@@ -1505,17 +1509,10 @@ function renderReels() {
     const s = state.spots.find(x => x.id === +card.dataset.id);
     if (!s) return;
 
-    // Mute toggle button
-    const muteBtn = card.querySelector(".rl-mute");
-    if (muteBtn) muteBtn.addEventListener("click", e => {
-      e.stopPropagation();
-      applyMuteToAll(!window._reelMuted);
-    });
-
-    // Double-tap to save, single tap to unmute
+    // Double-tap to save, single tap to open details
     let _tapTimer = null, _tapCount = 0;
     card.addEventListener("click", e => {
-      if (e.target.closest(".rl-rail, .rl-play, .rl-mute")) return;
+      if (e.target.closest(".rl-rail")) return;
       _tapCount++;
       if (_tapTimer) clearTimeout(_tapTimer);
       _tapTimer = setTimeout(() => {
@@ -1531,9 +1528,8 @@ function renderReels() {
           const heart = card.querySelector(".rl-heart-burst");
           if (heart) { heart.classList.add("pop"); setTimeout(() => heart.classList.remove("pop"), 800); }
         } else {
-          // single tap: unmute if muted, else open info
-          if (window._reelMuted) { applyMuteToAll(false); }
-          else { showView("map"); openSheet(s.id); }
+          // single tap: open details
+          showView("map"); openSheet(s.id);
         }
         _tapCount = 0;
       }, 250);
@@ -1554,9 +1550,6 @@ function renderReels() {
         else navigator.clipboard.writeText(url).then(() => toast("Link copied 🔗")).catch(() => {});
       } else if (act === "open") { showView("map"); openSheet(s.id); }
     });
-
-    const play = card.querySelector(".rl-play");
-    if (play) play.onclick = () => expandReelEmbed(card, play.dataset.vtype, play.dataset.vurl);
   });
 
   // IntersectionObserver: play in-view unmuted, pause + reset progress off-screen
@@ -1565,16 +1558,9 @@ function renderReels() {
 
   async function playCard(v, card) {
     if (!v || PREFERS_REDUCED_MOTION) return;
-    v.muted = window._reelMuted;
-    try {
-      await v.play();
-    } catch {
-      // Browser blocked unmuted autoplay — fall back to muted silently
-      v.muted = true;
-      window._reelMuted = true;
-      wrap.querySelectorAll(".rl-mute").forEach(b => { b.textContent = "🔇"; });
-      await v.play().catch(() => {});
-    }
+    // Always muted — reels are visual, autoplay is never blocked when muted.
+    v.muted = true;
+    await v.play().catch(() => {});
     tickProgress();
   }
 
