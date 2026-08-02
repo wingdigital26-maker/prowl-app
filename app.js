@@ -1428,38 +1428,35 @@ function renderReels() {
     const photoLayer = pv
       ? `<div class="rl-media kb" style="background-image:url('${pv}')"></div>`
       : `<div class="rl-media rl-solid" style="background:${catColor(s.cat)}">${catLogo(s.cat)}</div>`;
-    // Video priority: 1) real cloud video of this specific place (from fetch-spot-videos)
-    // 2) ambient category loop (Pexels, mood-only). Real video wins when available.
     const cloudVideo = s.video_url || null;
     const clipN = (window.AMBIENT_CLIPS && window.AMBIENT_CLIPS[s.cat]) || 0;
     const clipIdx = clipN ? (Math.abs(s.id) % clipN) + 1 : 0;
+    // No `muted` attribute — we try to play with sound; JS falls back if blocked
+    const hasVideo = !!(cloudVideo || clipN);
     const ambient = cloudVideo
-      ? `<video class="rl-vid" muted loop playsinline preload="none"${pv ? ` poster="${pv}"` : ""}><source src="${cloudVideo}" type="video/mp4"></video>`
+      ? `<video class="rl-vid" loop playsinline preload="metadata"${pv ? ` poster="${pv}"` : ""}><source src="${cloudVideo}" type="video/mp4"></video>`
       : clipN
-        ? `<video class="rl-vid" muted loop playsinline preload="none"${pv ? ` poster="${pv}"` : ""}><source src="vid/${s.cat}-${clipIdx}.mp4?v=2" type="video/mp4"></video>`
+        ? `<video class="rl-vid" loop playsinline preload="metadata"${pv ? ` poster="${pv}"` : ""}><source src="vid/${s.cat}-${clipIdx}.mp4?v=2" type="video/mp4"></video>`
         : "";
     const mediaBg = photoLayer + ambient;
-    // Play button only for external embed links (TikTok/IG), never when we have our own video
     const playBtn = (!cloudVideo && vurl)
       ? `<button class="rl-play" data-vtype="${vtype ? vtype.type : ""}" data-vurl="${vurl}" aria-label="Play video">
            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
          </button>` : "";
-    // Mute toggle — only shown when we have an autoplaying video
-    const muteBtn = (cloudVideo || clipN)
-      ? `<button class="rl-mute" aria-label="Toggle sound">🔇</button>` : "";
-    const credit = vt && vt.author ? `<span class="rl-credit">▶ video by @${vt.author}</span>` : "";
+    const city = cityOf(s.zip);
     return `<article class="reel" data-id="${s.id}">
       ${mediaBg}
       <div class="rl-shade"></div>
       ${playBtn}
-      ${muteBtn}
+      ${hasVideo ? `<button class="rl-mute" aria-label="Toggle sound">🔊</button>` : ""}
+      <div class="rl-heart-burst" aria-hidden="true">❤️</div>
+      <div class="rl-progress"><div class="rl-progress-bar"></div></div>
       <div class="rl-overlay">
         <div class="rl-info">
-          <span class="rl-cat">${CAT_META[s.cat].emoji} ${CAT_META[s.cat].label}</span>
+          <span class="rl-cat">${CAT_META[s.cat].emoji} ${CAT_META[s.cat].label}${city ? ` · ${city}` : ""}</span>
           <h2 class="rl-name">${s.name}</h2>
-          <div class="rl-meta">${rating ? `<span class="rl-pill star">★ ${rating.toFixed(1)}</span>` : ""}${dist}${cityOf(s.zip) ? `<span class="rl-pill">${cityOf(s.zip)}</span>` : ""}</div>
+          <div class="rl-meta">${rating ? `<span class="rl-pill star">★ ${rating.toFixed(1)}</span>` : ""}${dist}</div>
           <p class="rl-desc">${firstSentence(s.desc) || s.desc}</p>
-          ${credit}
         </div>
       </div>
       <div class="rl-rail">
@@ -1483,14 +1480,66 @@ function renderReels() {
     </article>`;
   }).join("");
 
-  // Tapping the card (outside the rail / play button) opens the existing detail.
+  // Shared mute state — default UNMUTED, fall back to muted if browser blocks
+  if (window._reelMuted === undefined) window._reelMuted = false;
+
+  function applyMuteToAll(muted) {
+    window._reelMuted = muted;
+    wrap.querySelectorAll(".reel video").forEach(v => { v.muted = muted; });
+    wrap.querySelectorAll(".rl-mute").forEach(b => { b.textContent = muted ? "🔇" : "🔊"; });
+  }
+
+  // Progress bar animation using requestAnimationFrame
+  let _progressRAF = null;
+  function tickProgress() {
+    const card = wrap.querySelector(".reel.in-view");
+    if (!card) return;
+    const v = card.querySelector("video");
+    const bar = card.querySelector(".rl-progress-bar");
+    if (v && bar && v.duration) bar.style.width = (v.currentTime / v.duration * 100) + "%";
+    _progressRAF = requestAnimationFrame(tickProgress);
+  }
+
+  // Wire each card's interactions
   wrap.querySelectorAll(".reel").forEach(card => {
     const s = state.spots.find(x => x.id === +card.dataset.id);
     if (!s) return;
-    card.addEventListener("click", e => {
-      if (e.target.closest(".rl-rail") || e.target.closest(".rl-play")) return;
-      showView("map"); openSheet(s.id);
+
+    // Mute toggle button
+    const muteBtn = card.querySelector(".rl-mute");
+    if (muteBtn) muteBtn.addEventListener("click", e => {
+      e.stopPropagation();
+      applyMuteToAll(!window._reelMuted);
     });
+
+    // Double-tap to save, single tap to unmute
+    let _tapTimer = null, _tapCount = 0;
+    card.addEventListener("click", e => {
+      if (e.target.closest(".rl-rail, .rl-play, .rl-mute")) return;
+      _tapCount++;
+      if (_tapTimer) clearTimeout(_tapTimer);
+      _tapTimer = setTimeout(() => {
+        if (_tapCount >= 2) {
+          // double-tap: save + heart burst
+          const nowOn = toggleSaved(s.id);
+          const saveBtn = card.querySelector(".rl-act.rl-save");
+          if (saveBtn) {
+            saveBtn.classList.toggle("on", nowOn);
+            saveBtn.querySelector("svg").setAttribute("fill", nowOn ? "currentColor" : "none");
+            saveBtn.querySelector("span").textContent = nowOn ? "Saved" : "Save";
+          }
+          const heart = card.querySelector(".rl-heart-burst");
+          if (heart) { heart.classList.add("pop"); setTimeout(() => heart.classList.remove("pop"), 800); }
+        } else {
+          // single tap: unmute if muted, else open info
+          if (window._reelMuted) { applyMuteToAll(false); }
+          else { showView("map"); openSheet(s.id); }
+        }
+        _tapCount = 0;
+      }, 250);
+    });
+
+    // Action rail buttons
     card.querySelectorAll(".rl-act").forEach(b => b.onclick = () => {
       const act = b.dataset.act;
       if (act === "save") {
@@ -1501,75 +1550,56 @@ function renderReels() {
       } else if (act === "dir") { routeToSpot(s); }
       else if (act === "share") {
         const url = `${location.origin}${location.pathname}#spot=${s.id}`;
-        if (navigator.share) navigator.share({ title: s.name, text: `${s.name} — a spot on What's the Move?`, url }).catch(() => {});
+        if (navigator.share) navigator.share({ title: s.name, text: `${s.name} — What's the Move?`, url }).catch(() => {});
         else navigator.clipboard.writeText(url).then(() => toast("Link copied 🔗")).catch(() => {});
       } else if (act === "open") { showView("map"); openSheet(s.id); }
     });
-    // Play button: expand the official embed in place (honest about no autoplay).
+
     const play = card.querySelector(".rl-play");
     if (play) play.onclick = () => expandReelEmbed(card, play.dataset.vtype, play.dataset.vurl);
   });
 
-  // Shared mute state across all reel cards (persists while feed is open)
-  if (!window._reelMuted) window._reelMuted = true;
+  // IntersectionObserver: play in-view unmuted, pause + reset progress off-screen
+  if (reelObserver) reelObserver.disconnect();
+  if (_progressRAF) { cancelAnimationFrame(_progressRAF); _progressRAF = null; }
 
-  function applyMuteToAll(muted) {
-    window._reelMuted = muted;
-    wrap.querySelectorAll(".reel video").forEach(v => { v.muted = muted; });
-    wrap.querySelectorAll(".rl-mute").forEach(b => { b.textContent = muted ? "🔇" : "🔊"; });
+  async function playCard(v, card) {
+    if (!v || PREFERS_REDUCED_MOTION) return;
+    v.muted = window._reelMuted;
+    try {
+      await v.play();
+    } catch {
+      // Browser blocked unmuted autoplay — fall back to muted silently
+      v.muted = true;
+      window._reelMuted = true;
+      wrap.querySelectorAll(".rl-mute").forEach(b => { b.textContent = "🔇"; });
+      await v.play().catch(() => {});
+    }
+    tickProgress();
   }
 
-  // Wire mute-toggle buttons
-  wrap.querySelectorAll(".rl-mute").forEach(btn => {
-    btn.addEventListener("click", e => {
-      e.stopPropagation();
-      applyMuteToAll(!window._reelMuted);
-    });
-  });
-
-  // Tap anywhere on the reel (not on action buttons) → unmute
-  wrap.querySelectorAll(".reel").forEach(card => {
-    card.addEventListener("click", e => {
-      if (e.target.closest(".rl-act, .rl-play, .rl-mute")) return;
-      if (window._reelMuted) applyMuteToAll(false);
-    });
-  });
-
-  // IntersectionObserver: play in-view, pause off-screen, carry mute state
-  if (reelObserver) reelObserver.disconnect();
   reelObserver = new IntersectionObserver(entries => {
     entries.forEach(en => {
       const inView = en.isIntersecting && en.intersectionRatio > 0.5;
       en.target.classList.toggle("in-view", inView);
       const v = en.target.querySelector("video");
-      if (!v || PREFERS_REDUCED_MOTION) return;
       if (inView) {
-        v.muted = window._reelMuted;
-        v.play().catch(() => {});
-        // update mute icon on this card
-        const mb = en.target.querySelector(".rl-mute");
-        if (mb) mb.textContent = window._reelMuted ? "🔇" : "🔊";
+        playCard(v, en.target);
       } else {
-        v.pause();
+        if (v) v.pause();
+        const bar = en.target.querySelector(".rl-progress-bar");
+        if (bar) bar.style.width = "0%";
       }
     });
   }, { root: wrap, threshold: [0, 0.5, 1] });
   wrap.querySelectorAll(".reel").forEach(c => reelObserver.observe(c));
 
-  // Prime first card
+  // Prime first card immediately
   const first = wrap.querySelector(".reel");
   if (first) {
     first.classList.add("in-view");
-    const fv = first.querySelector("video");
-    if (fv && !PREFERS_REDUCED_MOTION) { fv.muted = window._reelMuted; fv.play().catch(() => {}); }
+    playCard(first.querySelector("video"), first);
   }
-  // Kick on first touch (iOS requires gesture before any media plays)
-  const kick = () => {
-    const v = wrap.querySelector(".reel.in-view video") || wrap.querySelector(".reel video");
-    if (v && !PREFERS_REDUCED_MOTION) { v.muted = window._reelMuted; v.play().catch(() => {}); }
-  };
-  ["touchstart", "pointerdown", "scroll"].forEach(ev =>
-    wrap.addEventListener(ev, kick, { once: true, passive: true }));
 }
 // Swap a reel's static frame for the platform's real embed player on tap.
 // TikTok/IG will not let us autoplay, so this is the honest "press play" path.
