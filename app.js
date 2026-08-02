@@ -618,7 +618,7 @@ function showStoryFrame() {
     media.style.backgroundImage = `url('${s.photos[sv.idx]}')`;
     media.classList.remove("fading");
   }, 160);
-  const caps = [s.desc, `"${(s.reviews[0] || {text:"be the first to review"}).text}" — @${(s.reviews[0]||{user:"prowl"}).user}`, `#${s.tags.join(" #")}`];
+  const caps = [s.desc, `"${(s.reviews[0] || {text:"be the first to review"}).text}" — @${(s.reviews[0]||{user:"themove"}).user}`, `#${s.tags.join(" #")}`];
   document.getElementById("svCaption").textContent = caps[sv.idx % caps.length];
   document.getElementById("svProgress").innerHTML = s.photos.map((_, i) =>
     `<span class="sv-bar ${i < sv.idx ? "done" : ""} ${i === sv.idx ? "now" : ""}"></span>`).join("");
@@ -1500,7 +1500,7 @@ function renderReels() {
       } else if (act === "dir") { routeToSpot(s); }
       else if (act === "share") {
         const url = `${location.origin}${location.pathname}#spot=${s.id}`;
-        if (navigator.share) navigator.share({ title: s.name, text: `${s.name} — a spot on Prowl`, url }).catch(() => {});
+        if (navigator.share) navigator.share({ title: s.name, text: `${s.name} — a spot on What's the Move?`, url }).catch(() => {});
         else navigator.clipboard.writeText(url).then(() => toast("Link copied 🔗")).catch(() => {});
       } else if (act === "open") { showView("map"); openSheet(s.id); }
     });
@@ -1714,7 +1714,7 @@ function openSheet(id) {
   if (shareBtn) {
     const shareUrl = `${location.origin}${location.pathname}#spot=${s.id}`;
     shareBtn.onclick = async () => {
-      const data = { title: s.name, text: `${s.name} — a spot on Prowl`, url: shareUrl };
+      const data = { title: s.name, text: `${s.name} — a spot on What's the Move?`, url: shareUrl };
       try {
         if (navigator.share) { await navigator.share(data); }
         else { await navigator.clipboard.writeText(shareUrl); toast("Link copied 🔗"); }
@@ -1896,7 +1896,7 @@ function renderReviews(s) {
   const gist = seeded.length
     ? `<div class="gist-label">The gist</div>` + seeded.map(r => `<div class="review say">${r.text}</div>`).join("")
     : "";
-  const fallback = `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>Be the first</b><small>Nobody has reviewed this one in Prowl yet.</small></div>`;
+  const fallback = `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>Be the first</b><small>Nobody has reviewed this one yet.</small></div>`;
   document.getElementById("reviews").innerHTML = head + mine + gist + (mine || gist ? "" : fallback);
 }
 
@@ -2498,7 +2498,7 @@ function openGuide() {
   document.getElementById("guidePanel").classList.add("open");
   if (!guideGreeted) {
     guideGreeted = true;
-    guideAddMsg("bot", "Hey, I'm your Prowl guide 🦉 Tell me what you're feeling and I'll point you at spots. Try something like \"spicy tacos\" or \"rooftop for drinks.\"");
+    guideAddMsg("bot", "Hey, I'm your guide 🦉 Tell me what you're feeling and I'll point you at spots. Try something like \"spicy tacos\" or \"rooftop for drinks.\"");
   }
 }
 function closeGuide() { document.getElementById("guidePanel").classList.remove("open"); }
@@ -2624,7 +2624,7 @@ async function sendTestNotif() {
     const res = await fetch(window.PROWL_PUSH_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...(window.authHeaders ? authHeaders() : {}), apikey: window.PROWL_AI_KEY },
-      body: JSON.stringify({ mode: "self", title: "Prowl", body: "Test ping. Notifications are working.", url: "./" }),
+      body: JSON.stringify({ mode: "self", title: "What's the Move?", body: "Test ping. Notifications are working.", url: "./" }),
     });
     const j = await res.json().catch(() => ({}));
     toast(j.sent ? "Sent. Check your notifications." : "No devices registered yet.");

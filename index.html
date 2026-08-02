@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Prowl — off the map</title>
+<title>What's the Move?</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a0e14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Prowl">
+<meta name="apple-mobile-web-app-title" content="What's the Move">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -165,7 +165,7 @@
       <button class="pill-btn primary" id="notifEnable">Turn on</button>
     </div>
     <button class="pill-btn" id="notifTest" hidden>Send me a test</button>
-    <small class="crew-hint">Notifications work best after you add Prowl to your home screen.</small>
+    <small class="crew-hint">Notifications work best after you add What's the Move? to your home screen.</small>
   </div>
 
   <h2 class="view-sub">Saved spots <span class="sub-count" id="savedCount">0</span></h2>
@@ -362,7 +362,7 @@
   <svg class="splash-logo" viewBox="0 0 64 64">
     <text x="32" y="48" text-anchor="middle" font-family="Outfit, system-ui, sans-serif" font-weight="900" font-size="48" fill="currentColor">?</text>
   </svg>
-  <h1>Prowl</h1>
+  <h1>What's the Move?</h1>
   <p>off the map</p>
   <button class="pill-btn primary splash-cta" id="splashGo">Tap in</button>
 </div>
@@ -404,13 +404,13 @@
 </div>
 
 <!-- ===== PROWL GUIDE (AI assistant, bottom-right) ===== -->
-<button class="guide-fab" id="guideFab" aria-label="Ask the Prowl guide">
+<button class="guide-fab" id="guideFab" aria-label="Ask the guide">
   <svg viewBox="0 0 24 24"><path d="M12 3l1.5 4.2L18 8.5l-4.5 1.3L12 14l-1.5-4.2L6 8.5l4.5-1.3z"/><circle cx="18.5" cy="16.5" r="1.5"/><circle cx="6.5" cy="15" r="1.1"/></svg>
 </button>
 <div class="sheet-backdrop" id="guideBackdrop"></div>
 <div class="guide-panel" id="guidePanel">
   <div class="guide-head">
-    <div><b>Prowl Guide</b><small>ask what you're feeling</small></div>
+    <div><b>What's the Move?</b><small>ask what you're feeling</small></div>
     <button class="guide-close" id="guideClose" aria-label="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   </div>
   <div class="guide-msgs" id="guideMsgs"></div>
@@ -426,8 +426,8 @@
 <!-- First-run onboarding (shown once) -->
 <div class="onboard" id="onboard" hidden>
   <div class="ob-card">
-    <div class="ob-logo">🐆</div>
-    <h1 class="ob-title">Prowl</h1>
+    <div class="ob-logo">📍</div>
+    <h1 class="ob-title">What's the Move?</h1>
     <p class="ob-tag">Find the spots worth your time.</p>
     <ul class="ob-points">
       <li><span>🗺️</span> Discover food, coffee, bars, nature, and abandoned places near you</li>
@@ -455,7 +455,7 @@
 <script src="video-thumbs.js?v=80"></script>
 <script src="data.js?v=80"></script>
 <script src="vid/clips.js?v=2"></script>
-<script src="app.js?v=88"></script>
+<script src="app.js?v=89"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supa.js?v=88"></script>
 <script>

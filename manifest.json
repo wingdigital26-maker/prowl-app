@@ -1,6 +1,6 @@
 {
-  "name": "Prowl — off the map",
-  "short_name": "Prowl",
+  "name": "What's the Move?",
+  "short_name": "What's the Move",
   "description": "Find the spots worth your time. Food, coffee, bars, nature, and abandoned places near you.",
   "start_url": ".",
   "scope": "./",
