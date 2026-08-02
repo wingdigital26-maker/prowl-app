@@ -1430,7 +1430,7 @@ function renderReels() {
       : `<div class="rl-media rl-solid" style="background:${catColor(s.cat)}">${catLogo(s.cat)}</div>`;
     // Video priority: 1) real cloud video of this specific place (from fetch-spot-videos)
     // 2) ambient category loop (Pexels, mood-only). Real video wins when available.
-    const cloudVideo = s.photos?.video || null;
+    const cloudVideo = s.video_url || null;
     const clipN = (window.AMBIENT_CLIPS && window.AMBIENT_CLIPS[s.cat]) || 0;
     const clipIdx = clipN ? (Math.abs(s.id) % clipN) + 1 : 0;
     const ambient = cloudVideo
