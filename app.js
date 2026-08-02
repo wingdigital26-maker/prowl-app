@@ -2499,3 +2499,31 @@ function openSpotFromHash() {
 }
 window.addEventListener("hashchange", openSpotFromHash);
 openSpotFromHash();
+
+// ===== First-run onboarding (shown once) =====
+function initOnboarding() {
+  const ob = document.getElementById("onboard");
+  if (!ob || localStorage.getItem("prowl.onboarded")) return;
+  ob.hidden = false;
+  const done = () => { localStorage.setItem("prowl.onboarded", "1"); ob.hidden = true; };
+  const skip = document.getElementById("obSkip");
+  const locate = document.getElementById("obLocate");
+  if (skip) skip.onclick = done;
+  if (locate) locate.onclick = () => {
+    if (navigator.geolocation && window.isSecureContext) {
+      locate.textContent = "Locating…"; locate.disabled = true;
+      navigator.geolocation.getCurrentPosition(
+        (p) => {
+          if (typeof showMe === "function") showMe(p.coords.latitude, p.coords.longitude);
+          if (typeof startMe === "function") startMe();
+          if (typeof map !== "undefined" && map) map.setView([p.coords.latitude, p.coords.longitude], 14);
+          done();
+          if (typeof toast === "function") toast("Showing spots near you 📍");
+        },
+        () => { done(); if (typeof toast === "function") toast("No location yet — showing DFW. Turn it on anytime."); },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+      );
+    } else { done(); if (typeof toast === "function") toast("Open the https link to use your location"); }
+  };
+}
+initOnboarding();

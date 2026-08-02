@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
-<link rel="stylesheet" href="styles.css?v=83">
+<link rel="stylesheet" href="styles.css?v=84">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
@@ -410,6 +410,23 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- First-run onboarding (shown once) -->
+<div class="onboard" id="onboard" hidden>
+  <div class="ob-card">
+    <div class="ob-logo">🐆</div>
+    <h1 class="ob-title">Prowl</h1>
+    <p class="ob-tag">Find the spots worth your time.</p>
+    <ul class="ob-points">
+      <li><span>🗺️</span> Discover food, coffee, bars, nature, and abandoned places near you</li>
+      <li><span>🎬</span> Swipe a feed of real spots, not ads</li>
+      <li><span>📍</span> See where your crew is with live map layers</li>
+    </ul>
+    <button class="ob-primary" id="obLocate">Use my location</button>
+    <button class="ob-skip" id="obSkip">Maybe later</button>
+    <p class="ob-fine">We use your location only to show what's nearby. Nothing is shared without you going live.</p>
+  </div>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="real-spots.js?v=80"></script>
@@ -425,7 +442,7 @@
 <script src="video-thumbs.js?v=80"></script>
 <script src="data.js?v=80"></script>
 <script src="vid/clips.js?v=2"></script>
-<script src="app.js?v=85"></script>
+<script src="app.js?v=86"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supa.js?v=84"></script>
 <script>
