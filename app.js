@@ -1439,15 +1439,20 @@ function renderReels() {
         ? `<video class="rl-vid" muted loop playsinline preload="none"${pv ? ` poster="${pv}"` : ""}><source src="vid/${s.cat}-${clipIdx}.mp4?v=2" type="video/mp4"></video>`
         : "";
     const mediaBg = photoLayer + ambient;
-    const playBtn = vurl
+    // Play button only for external embed links (TikTok/IG), never when we have our own video
+    const playBtn = (!cloudVideo && vurl)
       ? `<button class="rl-play" data-vtype="${vtype ? vtype.type : ""}" data-vurl="${vurl}" aria-label="Play video">
            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
          </button>` : "";
+    // Mute toggle — only shown when we have an autoplaying video
+    const muteBtn = (cloudVideo || clipN)
+      ? `<button class="rl-mute" aria-label="Toggle sound">🔇</button>` : "";
     const credit = vt && vt.author ? `<span class="rl-credit">▶ video by @${vt.author}</span>` : "";
     return `<article class="reel" data-id="${s.id}">
       ${mediaBg}
       <div class="rl-shade"></div>
       ${playBtn}
+      ${muteBtn}
       <div class="rl-overlay">
         <div class="rl-info">
           <span class="rl-cat">${CAT_META[s.cat].emoji} ${CAT_META[s.cat].label}</span>
@@ -1505,33 +1510,63 @@ function renderReels() {
     if (play) play.onclick = () => expandReelEmbed(card, play.dataset.vtype, play.dataset.vurl);
   });
 
-  // Only the card in view is "active": Ken Burns animates and any real video
-  // plays; off-screen cards are paused so scrolling stays cheap.
+  // Shared mute state across all reel cards (persists while feed is open)
+  if (!window._reelMuted) window._reelMuted = true;
+
+  function applyMuteToAll(muted) {
+    window._reelMuted = muted;
+    wrap.querySelectorAll(".reel video").forEach(v => { v.muted = muted; });
+    wrap.querySelectorAll(".rl-mute").forEach(b => { b.textContent = muted ? "🔇" : "🔊"; });
+  }
+
+  // Wire mute-toggle buttons
+  wrap.querySelectorAll(".rl-mute").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      applyMuteToAll(!window._reelMuted);
+    });
+  });
+
+  // Tap anywhere on the reel (not on action buttons) → unmute
+  wrap.querySelectorAll(".reel").forEach(card => {
+    card.addEventListener("click", e => {
+      if (e.target.closest(".rl-act, .rl-play, .rl-mute")) return;
+      if (window._reelMuted) applyMuteToAll(false);
+    });
+  });
+
+  // IntersectionObserver: play in-view, pause off-screen, carry mute state
   if (reelObserver) reelObserver.disconnect();
   reelObserver = new IntersectionObserver(entries => {
     entries.forEach(en => {
-      en.target.classList.toggle("in-view", en.isIntersecting && en.intersectionRatio > 0.6);
+      const inView = en.isIntersecting && en.intersectionRatio > 0.5;
+      en.target.classList.toggle("in-view", inView);
       const v = en.target.querySelector("video");
-      if (v) {
-        if (en.isIntersecting && en.intersectionRatio > 0.6 && !PREFERS_REDUCED_MOTION) v.play().catch(() => {});
-        else v.pause();
+      if (!v || PREFERS_REDUCED_MOTION) return;
+      if (inView) {
+        v.muted = window._reelMuted;
+        v.play().catch(() => {});
+        // update mute icon on this card
+        const mb = en.target.querySelector(".rl-mute");
+        if (mb) mb.textContent = window._reelMuted ? "🔇" : "🔊";
+      } else {
+        v.pause();
       }
     });
-  }, { root: wrap, threshold: [0, 0.6, 1] });
+  }, { root: wrap, threshold: [0, 0.5, 1] });
   wrap.querySelectorAll(".reel").forEach(c => reelObserver.observe(c));
-  // Prime the first card so it feels alive immediately (best-effort autoplay).
+
+  // Prime first card
   const first = wrap.querySelector(".reel");
   if (first) {
     first.classList.add("in-view");
     const fv = first.querySelector("video");
-    if (fv && !PREFERS_REDUCED_MOTION) fv.play().catch(() => {});
+    if (fv && !PREFERS_REDUCED_MOTION) { fv.muted = window._reelMuted; fv.play().catch(() => {}); }
   }
-  // A few mobile browsers won't start even a muted clip until the first user
-  // interaction. Kick the in-view card's video on the first touch/scroll so it
-  // never stays frozen after the user starts using the feed.
+  // Kick on first touch (iOS requires gesture before any media plays)
   const kick = () => {
     const v = wrap.querySelector(".reel.in-view video") || wrap.querySelector(".reel video");
-    if (v && !PREFERS_REDUCED_MOTION) v.play().catch(() => {});
+    if (v && !PREFERS_REDUCED_MOTION) { v.muted = window._reelMuted; v.play().catch(() => {}); }
   };
   ["touchstart", "pointerdown", "scroll"].forEach(ev =>
     wrap.addEventListener(ev, kick, { once: true, passive: true }));
