@@ -1397,6 +1397,10 @@ function renderReelFilters(cats) {
     renderReels();
   });
 }
+// Categories that have a license-clear ambient loop in vid/<cat>.mp4
+const AMBIENT_CATS = new Set(["food","coffee","bar","hangout","nature","abandoned","tunnel","rooftop"]);
+const PREFERS_REDUCED_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 function renderReels() {
   const wrap = document.getElementById("reels");
   if (!wrap) return;
@@ -1421,9 +1425,17 @@ function renderReels() {
     const mi = milesBetween(me, s);
     const dist = haveLoc ? `<span class="rl-pill">◎ ${mi < 10 ? mi.toFixed(1) : Math.round(mi)} mi</span>` : "";
     const vtype = (s.embeds || []).find(e => e.type === "tiktok" || e.type === "instagram");
-    const mediaBg = pv
+    const photoLayer = pv
       ? `<div class="rl-media kb" style="background-image:url('${pv}')"></div>`
       : `<div class="rl-media rl-solid" style="background:${catColor(s.cat)}">${catLogo(s.cat)}</div>`;
+    // Ambient category clip (license-clear Pexels loop) autoplays muted so the
+    // feed feels alive like TikTok. It's mood video for the category, not the
+    // spot's own footage (TikTok/IG block real autoplay); the spot photo is the
+    // poster so it stays coherent, and the real clip is still tap-to-watch.
+    const ambient = AMBIENT_CATS.has(s.cat)
+      ? `<video class="rl-vid" muted loop playsinline preload="none"${pv ? ` poster="${pv}"` : ""}><source src="vid/${s.cat}.mp4?v=1" type="video/mp4"></video>`
+      : "";
+    const mediaBg = photoLayer + ambient;
     const playBtn = vurl
       ? `<button class="rl-play" data-vtype="${vtype ? vtype.type : ""}" data-vurl="${vurl}" aria-label="Play video">
            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -1497,13 +1509,29 @@ function renderReels() {
     entries.forEach(en => {
       en.target.classList.toggle("in-view", en.isIntersecting && en.intersectionRatio > 0.6);
       const v = en.target.querySelector("video");
-      if (v) { if (en.isIntersecting && en.intersectionRatio > 0.6) v.play().catch(() => {}); else v.pause(); }
+      if (v) {
+        if (en.isIntersecting && en.intersectionRatio > 0.6 && !PREFERS_REDUCED_MOTION) v.play().catch(() => {});
+        else v.pause();
+      }
     });
   }, { root: wrap, threshold: [0, 0.6, 1] });
   wrap.querySelectorAll(".reel").forEach(c => reelObserver.observe(c));
-  // Prime the first card so it feels alive immediately.
+  // Prime the first card so it feels alive immediately (best-effort autoplay).
   const first = wrap.querySelector(".reel");
-  if (first) first.classList.add("in-view");
+  if (first) {
+    first.classList.add("in-view");
+    const fv = first.querySelector("video");
+    if (fv && !PREFERS_REDUCED_MOTION) fv.play().catch(() => {});
+  }
+  // A few mobile browsers won't start even a muted clip until the first user
+  // interaction. Kick the in-view card's video on the first touch/scroll so it
+  // never stays frozen after the user starts using the feed.
+  const kick = () => {
+    const v = wrap.querySelector(".reel.in-view video") || wrap.querySelector(".reel video");
+    if (v && !PREFERS_REDUCED_MOTION) v.play().catch(() => {});
+  };
+  ["touchstart", "pointerdown", "scroll"].forEach(ev =>
+    wrap.addEventListener(ev, kick, { once: true, passive: true }));
 }
 // Swap a reel's static frame for the platform's real embed player on tap.
 // TikTok/IG will not let us autoplay, so this is the honest "press play" path.
