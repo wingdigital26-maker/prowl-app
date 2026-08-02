@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#35bdf7">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
-<link rel="stylesheet" href="styles.css?v=80">
+<link rel="stylesheet" href="styles.css?v=82">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
@@ -98,32 +98,48 @@
   </svg>
 </button>
 
+<!-- Map layer toggle (Places / Friends) -->
+<div class="layer-ctrl" id="layerCtrl">
+  <button class="layer-btn active" data-layer="places" aria-pressed="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s6.5-5.8 6.5-10.5a6.5 6.5 0 1 0-13 0C5.5 15.2 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.4"/></svg>
+    <span>Places</span>
+  </button>
+  <button class="layer-btn" data-layer="friends" aria-pressed="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.2 2.7-5 6-5s6 1.8 6 5"/><circle cx="17.5" cy="9" r="2.6"/><path d="M16 15.2c2.9.2 5 2 5 4.8"/></svg>
+    <span>Friends</span>
+  </button>
+</div>
+
 <!-- ===== FULL-SCREEN VIEWS (over the map, Snapchat swipe-screens) ===== -->
 <section class="view" id="view-spots">
   <h1 class="view-title">Explore</h1>
-  <h2 class="view-sub" style="margin-top:0">Hot ZIPs <svg class="hot-ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.5s5.5 4.2 5.5 9.5a5.5 5.5 0 0 1-11 0c0-1.7.8-3.1 1.7-4C8.4 9.7 9.5 12 9.5 12s.3-4.6 2.5-9.5z"/></svg></h2>
-  <div class="zip-board" id="zipBoard"></div>
-  <h2 class="view-sub">All spots</h2>
-  <div class="seg" id="exploreSeg">
-    <button class="seg-btn active" data-sort="hot"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3s5 4 5 9a5 5 0 0 1-10 0c0-1.5.7-2.8 1.5-3.5C8 10 9 12 9 12s.5-4 3-9z"/></svg>Hot</button>
-    <button class="seg-btn" data-sort="new"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4l1.7 4 4.3.4-3.3 2.8 1 4.2L12 13.6 8.3 15.4l1-4.2L6 8.4 10.3 8z"/></svg>New</button>
-    <button class="seg-btn" data-sort="close"><svg class="ico" viewBox="0 0 24 24"><path d="M10.3 4l-8 14a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3l-8-14a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4M12 17h.01"/></svg>Sketchiest</button>
+  <div class="ex-searchbar">
+    <svg class="ex-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input id="exSearch" type="text" placeholder="Search barbecue, coffee, nature, a ZIP…" autocomplete="off">
+    <button class="ex-clear" id="exClear" aria-label="Clear search" hidden>✕</button>
+  </div>
+  <div class="ex-chips" id="exChips"></div>
+  <div class="ex-metabar">
+    <span class="ex-count" id="exCount"></span>
+    <button class="ex-near" id="exNear" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+      Near me
+    </button>
   </div>
   <div class="explore-grid" id="exploreGrid"></div>
 </section>
 
-<section class="view" id="view-feed">
-  <h1 class="view-title">Feed</h1>
-  <div class="story-strip in-feed" id="storyStrip"></div>
-  <form class="composer" id="composer">
-    <textarea id="composeText" placeholder="What's the move tonight?" rows="2"></textarea>
-    <div class="composer-row">
-      <select id="composeSpot"></select>
-      <button type="submit" class="pill-btn primary">Post</button>
-    </div>
+<section class="view view-reels" id="view-feed">
+  <div class="reels-top">
+    <h1 class="reels-title">Feed</h1>
+    <div class="reel-filters" id="reelFilters"></div>
+  </div>
+  <div class="reels" id="reels"></div>
+  <!-- Legacy composer kept (hidden) so older post-to-feed wiring never errors -->
+  <form class="composer" id="composer" hidden>
+    <textarea id="composeText" rows="2"></textarea>
+    <div class="composer-row"><select id="composeSpot"></select><button type="submit" class="pill-btn primary">Post</button></div>
   </form>
-  <div class="feed-filters" id="feedFilters"></div>
-  <div class="feed" id="feed"></div>
 </section>
 
 <section class="view" id="view-profile">
@@ -403,7 +419,7 @@
 <script src="urbex-north-spots.js?v=80"></script>
 <script src="video-thumbs.js?v=80"></script>
 <script src="data.js?v=80"></script>
-<script src="app.js?v=81"></script>
+<script src="app.js?v=82"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supa.js?v=81"></script>
 </body>

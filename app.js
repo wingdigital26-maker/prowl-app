@@ -568,13 +568,16 @@ document.getElementById("zoomOut").onclick = () => stepZoom(-1);
 
 // ===== Story strip =====
 function renderStories() {
+  // Stories were folded into the immersive reels feed; the strip may not exist.
+  const strip = document.getElementById("storyStrip");
+  if (!strip) return;
   // Cool mode leads with what's buzzing; Abandoned leads with the sketchiest.
   const inMode = state.spots.filter(s => spotMode(s.cat) === state.mode);
   inMode.sort((a, b) => state.mode === "urbex"
     ? (b.danger + avgStars(b)) - (a.danger + avgStars(a))
     : (hereCount(b) + avgStars(b)) - (hereCount(a) + avgStars(a)));
   const hot = inMode.slice(0, 8);
-  document.getElementById("storyStrip").innerHTML = hot.map(s => {
+  strip.innerHTML = hot.map(s => {
     const seen = (JSON.parse(localStorage.getItem("moth.seenStories") || "[]")).includes(s.id);
     return `<button class="story ${seen ? "seen" : ""}" data-id="${s.id}">
       <span class="story-ring"><span class="story-face" ${faceStyle(s)}>${faceInner(s)}${playBadge(s)}</span></span>
@@ -912,36 +915,119 @@ function showView(name) {
 document.querySelectorAll(".tab[data-view]").forEach(t => t.onclick = () => showView(t.dataset.view));
 document.getElementById("profileBtn").onclick = () => showView("profile");
 
-// ===== Explore grid =====
+// ===== Explore: visual, proximity-sorted search =====
+// A Pinterest-style image grid that always answers "what good spots are near
+// me right now?" Type anything (name, cuisine, tag, category, ZIP, city), tap a
+// category chip to filter, and results auto-sort nearest-first with a real
+// distance on every tile.
+state.exSearch = "";
+state.exCat = "all";
+state.exNear = false;   // "Near me": hard-sort + gently hide far ones
+
+// Chips are the current world's categories plus a couple of common cuisines
+// people actually search for, mapped onto the Food category.
+const EX_CUISINE = {
+  bbq:    { label: "🍖 BBQ",     match: ["bbq","barbecue","brisket","smoked","ribs"] },
+  tacos:  { label: "🌮 Tacos",   match: ["taco","tacos","taqueria","birria","al pastor"] },
+  sweets: { label: "🍰 Sweets",  match: ["dessert","ice cream","bakery","donut","boba","cake","gelato","pastry"] },
+};
+function exCatLabel(key) {
+  if (key === "all") return "All";
+  if (CHIP_LABEL[key]) return CHIP_LABEL[key];
+  return (EX_CUISINE[key] && EX_CUISINE[key].label) || key;
+}
+function renderExChips() {
+  const el = document.getElementById("exChips");
+  if (!el) return;
+  const cats = ["all", ...MODES[state.mode].cats];
+  // Cuisine shortcuts only make sense in the Cool world (they filter Food).
+  const extra = state.mode === "cool" ? Object.keys(EX_CUISINE) : [];
+  el.innerHTML = [...cats, ...extra].map(c =>
+    `<button class="chip ${state.exCat === c ? "active" : ""}" data-excat="${c}">${exCatLabel(c)}</button>`
+  ).join("");
+  el.querySelectorAll(".chip").forEach(c => c.onclick = () => {
+    state.exCat = state.exCat === c.dataset.excat ? "all" : c.dataset.excat; // toggle off
+    renderExChips();
+    renderExplore();
+  });
+}
+// Does this spot pass the active category / cuisine chip?
+function exMatchesCat(s) {
+  const c = state.exCat;
+  if (c === "all") return true;
+  if (EX_CUISINE[c]) {
+    const hay = (s.name + " " + s.desc + " " + s.tags.join(" ")).toLowerCase();
+    return EX_CUISINE[c].match.some(w => hay.includes(w));
+  }
+  return s.cat === c;
+}
 function renderExplore() {
   const el = document.getElementById("exploreGrid");
-  const list = visibleSpots().slice();
-  const sort = state.exploreSort || "hot";
-  if (sort === "hot") list.sort((a, b) => (avgStars(b) + hereCount(b)) - (avgStars(a) + hereCount(a)));
-  else if (sort === "new") list.sort((a, b) => b.id - a.id);
-  else if (sort === "close") list.sort((a, b) => b.danger - a.danger);
-  // Featured (sponsored) spots always rise to the top
-  list.sort((a, b) => (b.sponsored ? 1 : 0) - (a.sponsored ? 1 : 0));
-  el.innerHTML = list.map(s => {
+  if (!el) return;
+  renderExChips();
+  const q = (state.exSearch || "").toLowerCase().trim();
+  const me = userPoint();
+  const haveLoc = !!state.meAt;   // real GPS fix vs. map-center fallback
+  let list = state.spots.filter(s => spotMode(s.cat) === state.mode);
+  list = list.filter(exMatchesCat);
+  if (q) {
+    list = list.filter(s => {
+      const hay = `${s.name} ${s.desc} ${s.tags.join(" ")} ${CAT_META[s.cat].label} ${s.zip} ${placesFor(s.zip).join(" ")}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }
+  // Attach distance, then AUTO-SORT nearest-first (the whole point of Explore).
+  list = list.map(s => ({ s, mi: milesBetween(me, s) }));
+  list.sort((a, b) => a.mi - b.mi);
+  // "Near me" tightens the aperture: drop anything past a sane radius so the
+  // grid is only genuinely-close spots.
+  if (state.exNear && haveLoc) list = list.filter(x => x.mi <= 15);
+
+  const cnt = document.getElementById("exCount");
+  if (cnt) cnt.textContent = list.length
+    ? `${list.length} spot${list.length === 1 ? "" : "s"}${haveLoc ? " near you" : ""}`
+    : "";
+
+  el.innerHTML = list.map(({ s, mi }) => {
+    const rating = rateOf(s);
+    const dist = mi < 10 ? mi.toFixed(1) : Math.round(mi);
     return `<div class="explore-card ${s.sponsored ? "sponsored" : ""}" data-id="${s.id}" tabindex="0" ${faceStyle(s)}>
       ${realPhoto(s) ? "" : `<span class="ec-emoji">${catLogo(s.cat)}</span>`}
       ${playBadge(s)}
       ${s.sponsored ? `<span class="ec-featured">★ Featured</span>` : ""}
-      <span class="ec-label">${s.name}<small>${rateOf(s) ? `${starStr(rateOf(s))} ${rateOf(s).toFixed(1)}` : "★ new"} · ${cityOf(s.zip) || s.zip} · <span class="sketch-badge sketch-${s.danger}">${SKETCH_WORDS[s.danger]}</span></small></span>
+      <span class="ec-dist">◎ ${dist} mi</span>
+      <span class="ec-label">${s.name}<small>${CAT_META[s.cat].emoji} ${CAT_META[s.cat].label} · ${rating ? `★ ${rating.toFixed(1)}` : "new"}</small></span>
     </div>`;
-  }).join("") || `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>Nothing out here yet</b><small>No spots match that. Try another filter, or go drop one yourself.</small></div>`;
+  }).join("") || `<div class="empty-state"><span class="em-moth">${SVG.fox}</span><b>Nothing matches that</b><small>Try a different word or category, clear the filters, or drop a new spot yourself.</small></div>`;
   el.querySelectorAll(".explore-card").forEach(c => {
-    c.onclick = () => { showView("map"); openSheet(+c.dataset.id); };
+    c.onclick = () => { const s = state.spots.find(x => x.id === +c.dataset.id); showView("map"); openSheet(+c.dataset.id); };
     c.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); c.click(); } };
   });
 }
-// Explore segmented sort (Instagram-style)
-document.querySelectorAll("#exploreSeg .seg-btn").forEach(b => b.onclick = () => {
-  document.querySelectorAll("#exploreSeg .seg-btn").forEach(x => x.classList.remove("active"));
-  b.classList.add("active");
-  state.exploreSort = b.dataset.sort;
-  renderExplore();
-});
+// Wire the Explore search box, clear button, and Near-me toggle.
+(function wireExplore() {
+  const box = document.getElementById("exSearch");
+  const clear = document.getElementById("exClear");
+  const near = document.getElementById("exNear");
+  if (box) box.oninput = () => {
+    state.exSearch = box.value;
+    if (clear) clear.hidden = !box.value;
+    renderExplore();
+  };
+  if (clear) clear.onclick = () => { box.value = ""; state.exSearch = ""; clear.hidden = true; renderExplore(); box.focus(); };
+  if (near) near.onclick = () => {
+    state.exNear = !state.exNear;
+    near.classList.toggle("on", state.exNear);
+    near.setAttribute("aria-pressed", state.exNear ? "true" : "false");
+    if (state.exNear && !state.meAt && navigator.geolocation && window.isSecureContext) {
+      toast("Finding your location…");
+      navigator.geolocation.getCurrentPosition(
+        p => { showMe(p.coords.latitude, p.coords.longitude); renderExplore(); },
+        () => { toast("Using map center for distances"); renderExplore(); },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
+    } else renderExplore();
+  };
+})();
 
 // ===== Live 360: real crew presence on the map =====
 const crewLayer = L.layerGroup().addTo(map);
@@ -961,6 +1047,29 @@ function renderCrew() {
   });
 }
 renderCrew();
+
+// ===== Map layers: Places vs Friends (toggleable, so neither buries the other) =====
+// Places = all the spot pins (existing cluster). Friends = Live 360 crew presence
+// (reusing crewLayer / crewMembers, no new presence code). Your own marker
+// (meMarker) is always shown and is visually distinct. Default: Places only.
+const mapLayers = { places: true, friends: false };
+map.removeLayer(crewLayer);   // friends off by default so it isn't noise
+function applyLayers() {
+  if (mapLayers.places) { if (!map.hasLayer(cluster)) map.addLayer(cluster); }
+  else if (map.hasLayer(cluster)) map.removeLayer(cluster);
+  if (mapLayers.friends) { if (!map.hasLayer(crewLayer)) map.addLayer(crewLayer); if (typeof startCrewPoll === "function") startCrewPoll(); }
+  else if (map.hasLayer(crewLayer)) map.removeLayer(crewLayer);
+}
+document.querySelectorAll("#layerCtrl .layer-btn").forEach(b => b.onclick = () => {
+  const key = b.dataset.layer;
+  mapLayers[key] = !mapLayers[key];
+  b.classList.toggle("active", mapLayers[key]);
+  b.setAttribute("aria-pressed", mapLayers[key] ? "true" : "false");
+  applyLayers();
+  if (key === "friends") toast(mapLayers.friends
+    ? (live.crew ? "Showing your crew 👥" : "Make or join a crew to see friends here")
+    : "Crew hidden");
+});
 
 // ===== Recenter on DFW =====
 // ===== You on the map — custom character (Snap Map style) =====
@@ -1141,6 +1250,9 @@ if (live.crew) startCrewPoll();
 
 // ===== ZIP leaderboard (Explore) =====
 function renderZipBoard() {
+  // The ZIP leaderboard was replaced by the visual-search Explore; guard so
+  // renderAll() never trips when the board isn't in the DOM.
+  if (!document.getElementById("zipBoard")) return;
   const byZip = {};
   state.spots.forEach(s => (byZip[s.zip] = byZip[s.zip] || []).push(s));
   const rows = Object.entries(byZip)
@@ -1249,7 +1361,165 @@ function renderFeedChips() {
   });
 }
 
-function renderFeed() {
+// Feed is now the immersive reels experience (see renderReels below). The old
+// card feed is preserved as renderFeedLegacy in case we want it back.
+function renderFeed() { return renderReels(); }
+
+// ===== Immersive reels feed (TikTok / Reels style) =====
+// Full-viewport vertical cards, one spot per screen, CSS scroll-snap. Each card
+// fills the screen with the spot's media. IMPORTANT reality check on video:
+//   - youtube / mp4 CAN muted-autoplay, so those play inline when in view.
+//   - TikTok / Instagram iframes CANNOT be autoplayed by us (the platforms
+//     block it), so for those we show the real preview frame with a big play
+//     button; tapping expands the official embed in place (still their player,
+//     still credited, still linking back). We are honest about this limit.
+// Only the card in view loads/plays its media (IntersectionObserver); the rest
+// stay as cheap static frames so scrolling stays smooth.
+state.reelCat = "all";
+let reelObserver = null;
+
+function reelSpots() {
+  let list = state.spots.filter(s => spotMode(s.cat) === state.mode && previewImg(s));
+  if (state.reelCat !== "all") list = list.filter(s => s.cat === state.reelCat);
+  // Media-rich, highly-rated, buzzing spots lead.
+  list.sort((a, b) => (spotScore(b) + (hasVideo(b) ? 0.5 : 0)) - (spotScore(a) + (hasVideo(a) ? 0.5 : 0)));
+  return list.slice(0, 40);
+}
+function renderReelFilters(cats) {
+  const el = document.getElementById("reelFilters");
+  if (!el) return;
+  const present = cats;
+  el.innerHTML =
+    `<button class="reel-chip ${state.reelCat === "all" ? "active" : ""}" data-rcat="all">All</button>` +
+    present.map(c => `<button class="reel-chip ${state.reelCat === c ? "active" : ""}" data-rcat="${c}">${CHIP_LABEL[c] || c}</button>`).join("");
+  el.querySelectorAll(".reel-chip").forEach(b => b.onclick = () => {
+    state.reelCat = b.dataset.rcat;
+    renderReels();
+  });
+}
+function renderReels() {
+  const wrap = document.getElementById("reels");
+  if (!wrap) return;
+  // Category chips from the categories that actually have media in this mode.
+  const modeMedia = state.spots.filter(s => spotMode(s.cat) === state.mode && previewImg(s));
+  const catOrder = ["food","coffee","bar","hangout","nature","abandoned","tunnel","rooftop"];
+  const present = catOrder.filter(c => modeMedia.some(s => s.cat === c) && MODES[state.mode].cats.includes(c));
+  renderReelFilters(present);
+
+  const list = reelSpots();
+  const haveLoc = !!state.meAt;
+  const me = userPoint();
+  if (!list.length) {
+    wrap.innerHTML = `<div class="reel-empty"><span class="em-moth">${SVG.fox}</span><b>Nothing to show here</b><small>No spots with media in this filter. Try another category.</small></div>`;
+    return;
+  }
+  wrap.innerHTML = list.map(s => {
+    const pv = previewImg(s);
+    const vt = videoThumb(s);
+    const vurl = firstVideoUrl(s);
+    const rating = rateOf(s);
+    const mi = milesBetween(me, s);
+    const dist = haveLoc ? `<span class="rl-pill">◎ ${mi < 10 ? mi.toFixed(1) : Math.round(mi)} mi</span>` : "";
+    const vtype = (s.embeds || []).find(e => e.type === "tiktok" || e.type === "instagram");
+    const mediaBg = pv
+      ? `<div class="rl-media kb" style="background-image:url('${pv}')"></div>`
+      : `<div class="rl-media rl-solid" style="background:${catColor(s.cat)}">${catLogo(s.cat)}</div>`;
+    const playBtn = vurl
+      ? `<button class="rl-play" data-vtype="${vtype ? vtype.type : ""}" data-vurl="${vurl}" aria-label="Play video">
+           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+         </button>` : "";
+    const credit = vt && vt.author ? `<span class="rl-credit">▶ video by @${vt.author}</span>` : "";
+    return `<article class="reel" data-id="${s.id}">
+      ${mediaBg}
+      <div class="rl-shade"></div>
+      ${playBtn}
+      <div class="rl-overlay">
+        <div class="rl-info">
+          <span class="rl-cat">${CAT_META[s.cat].emoji} ${CAT_META[s.cat].label}</span>
+          <h2 class="rl-name">${s.name}</h2>
+          <div class="rl-meta">${rating ? `<span class="rl-pill star">★ ${rating.toFixed(1)}</span>` : ""}${dist}${cityOf(s.zip) ? `<span class="rl-pill">${cityOf(s.zip)}</span>` : ""}</div>
+          <p class="rl-desc">${firstSentence(s.desc) || s.desc}</p>
+          ${credit}
+        </div>
+      </div>
+      <div class="rl-rail">
+        <button class="rl-act rl-save ${isSaved(s.id) ? "on" : ""}" data-act="save" aria-label="Save">
+          <svg viewBox="0 0 24 24" fill="${isSaved(s.id) ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2"><path d="M6 3h12a1 1 0 0 1 1 1v16l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>
+          <span>${isSaved(s.id) ? "Saved" : "Save"}</span>
+        </button>
+        <button class="rl-act" data-act="dir" aria-label="Directions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          <span>Go</span>
+        </button>
+        <button class="rl-act" data-act="share" aria-label="Share">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 15V3.5"/><path d="M8 7l4-4 4 4"/></svg>
+          <span>Share</span>
+        </button>
+        <button class="rl-act" data-act="open" aria-label="Open details">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+          <span>Info</span>
+        </button>
+      </div>
+    </article>`;
+  }).join("");
+
+  // Tapping the card (outside the rail / play button) opens the existing detail.
+  wrap.querySelectorAll(".reel").forEach(card => {
+    const s = state.spots.find(x => x.id === +card.dataset.id);
+    if (!s) return;
+    card.addEventListener("click", e => {
+      if (e.target.closest(".rl-rail") || e.target.closest(".rl-play")) return;
+      showView("map"); openSheet(s.id);
+    });
+    card.querySelectorAll(".rl-act").forEach(b => b.onclick = () => {
+      const act = b.dataset.act;
+      if (act === "save") {
+        const nowOn = toggleSaved(s.id);
+        b.classList.toggle("on", nowOn);
+        b.querySelector("svg").setAttribute("fill", nowOn ? "currentColor" : "none");
+        b.querySelector("span").textContent = nowOn ? "Saved" : "Save";
+      } else if (act === "dir") { routeToSpot(s); }
+      else if (act === "share") {
+        const url = `${location.origin}${location.pathname}#spot=${s.id}`;
+        if (navigator.share) navigator.share({ title: s.name, text: `${s.name} — a spot on Prowl`, url }).catch(() => {});
+        else navigator.clipboard.writeText(url).then(() => toast("Link copied 🔗")).catch(() => {});
+      } else if (act === "open") { showView("map"); openSheet(s.id); }
+    });
+    // Play button: expand the official embed in place (honest about no autoplay).
+    const play = card.querySelector(".rl-play");
+    if (play) play.onclick = () => expandReelEmbed(card, play.dataset.vtype, play.dataset.vurl);
+  });
+
+  // Only the card in view is "active": Ken Burns animates and any real video
+  // plays; off-screen cards are paused so scrolling stays cheap.
+  if (reelObserver) reelObserver.disconnect();
+  reelObserver = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      en.target.classList.toggle("in-view", en.isIntersecting && en.intersectionRatio > 0.6);
+      const v = en.target.querySelector("video");
+      if (v) { if (en.isIntersecting && en.intersectionRatio > 0.6) v.play().catch(() => {}); else v.pause(); }
+    });
+  }, { root: wrap, threshold: [0, 0.6, 1] });
+  wrap.querySelectorAll(".reel").forEach(c => reelObserver.observe(c));
+  // Prime the first card so it feels alive immediately.
+  const first = wrap.querySelector(".reel");
+  if (first) first.classList.add("in-view");
+}
+// Swap a reel's static frame for the platform's real embed player on tap.
+// TikTok/IG will not let us autoplay, so this is the honest "press play" path.
+function expandReelEmbed(card, type, url) {
+  const media = card.querySelector(".rl-media");
+  const play = card.querySelector(".rl-play");
+  if (!media) return;
+  if (type === "youtube" || type === "mp4") return; // (handled inline elsewhere)
+  media.classList.remove("kb");
+  media.style.backgroundImage = "";
+  media.innerHTML = `<div class="rl-embed">${embedBlock({ type, url })}</div>`;
+  if (play) play.remove();
+  processEmbeds([type]);
+}
+
+function renderFeedLegacy() {
   renderFeedChips();
   const all = allFeedPosts().filter(f => {
     if (state.feedFilter === "all") return true;
@@ -1989,14 +2259,31 @@ function saysWord(haystack, phrase) {
   const esc = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp("(^|[^a-z])" + esc + "([^a-z]|$)", "i").test(haystack);
 }
+// Detect a place (city / neighborhood / ZIP) mentioned anywhere in the question,
+// so "any abandoned places in Plano" or "coffee in 75024" scope to that area.
+function detectPlaceInQuery(q) {
+  const s = " " + q.toLowerCase().trim() + " ";
+  const zip = (s.match(/\b\d{5}\b/) || [])[0];
+  if (zip) return zip;
+  let found = null;
+  ALL_PLACES.forEach(p => { if (!found && saysWord(s, p)) found = p; });
+  return found;
+}
+// Does a spot sit in the requested place (ZIP match, or city/neighborhood match)?
+function spotInPlace(s, place) {
+  if (!place) return true;
+  if (/^\d{5}$/.test(place)) return String(s.zip) === place;
+  return placesFor(s.zip).some(p => p.toLowerCase() === place);
+}
 function guideUnderstand(q) {
   const s = " " + q.toLowerCase().trim() + " ";
   const cat = guideDetectCat(q);
   const craving = Object.entries(CRAVINGS).find(([, ws]) => ws.some(w => saysWord(s, w)));
   const moods = Object.entries(MOODS).filter(([, m]) => m.words.some(w => saysWord(s, w))).map(([k, m]) => ({ key: k, ...m }));
   const near = NEAR_WORDS.some(w => s.includes(w));
+  const place = detectPlaceInQuery(q);
   const followUp = /^(what about|how about|and |any |something else|other|more|instead|else)/.test(q.toLowerCase().trim());
-  return { cat, craving: craving ? craving[0] : null, cravingWords: craving ? craving[1] : [], moods, near, followUp, raw: q };
+  return { cat, craving: craving ? craving[0] : null, cravingWords: craving ? craving[1] : [], moods, near, place, followUp, raw: q };
 }
 
 function guideSearch(intent) {
@@ -2017,6 +2304,9 @@ function guideSearch(intent) {
     sc += words.reduce((a, w) =>
       a + (saysWord(name, w) ? 7 : saysWord(tags, w) ? 3.5 : saysWord(hay, w) ? 1.2 : 0), 0);
     if (hasVideo(s)) sc += 0.3;
+    // A named place (city / neighborhood / ZIP) is a hard scope: reward spots in
+    // it, push everything else down.
+    if (intent.place) sc += spotInPlace(s, intent.place) ? 6 : -4;
     const mi = milesBetween(me, s);
     // Distance always matters. Even when they did not say "near me", nobody
     // wants a 20 minute drive as the answer to "somewhere chill", so anything
@@ -2029,10 +2319,18 @@ function guideSearch(intent) {
     return { s, sc, mi };
   }).sort((a, b) => b.sc - a.sc);
 
+  // If they named a place and we have spots there, restrict to it.
+  let ranked = scored;
+  let placeEmpty = false;
+  if (intent.place) {
+    const inPlace = scored.filter(x => spotInPlace(x.s, intent.place));
+    if (inPlace.length) ranked = inPlace; else placeEmpty = true;
+  }
   // Do not hand back a taco question with a nature answer.
-  const strong = intent.craving ? scored.filter(x => intent.cravingWords.some(w =>
-    saysWord((x.s.name + " " + x.s.desc + " " + x.s.tags.join(" ")).toLowerCase(), w))) : scored;
-  return { hits: (strong.length ? strong : scored).slice(0, 3), me, fellBack: intent.craving && !strong.length };
+  const strong = intent.craving ? ranked.filter(x => intent.cravingWords.some(w =>
+    saysWord((x.s.name + " " + x.s.desc + " " + x.s.tags.join(" ")).toLowerCase(), w))) : ranked;
+  return { hits: (strong.length ? strong : ranked).slice(0, 3), me,
+    fellBack: intent.craving && !strong.length, place: intent.place, placeEmpty };
 }
 
 function guideReply(intent, r) {
@@ -2057,6 +2355,14 @@ function guideReply(intent, r) {
     lead = `Here's what stands out near you: <b>${top.s.name}</b>`;
   }
 
+  // Scope the answer to a named place when one was asked for.
+  if (intent.place) {
+    const nice = /^\d{5}$/.test(intent.place) ? intent.place : intent.place.replace(/\b\w/g, c => c.toUpperCase());
+    lead = (r.placeEmpty
+      ? `I don't have much saved right in ${nice} yet, but the closest I'd send you: ${lead}`
+      : `Around ${nice}: ${lead}`);
+  }
+
   const why = [];
   if (rateOf(top.s)) why.push(`${rateOf(top.s).toFixed(1)}★`);
   why.push(dist(top.mi));
@@ -2066,13 +2372,21 @@ function guideReply(intent, r) {
        + (n > 1 ? `<br><br>${n - 1} more below if that's not it.` : "");
 }
 
+// TODO (LLM): general "answer anything" questions (e.g. "what's the history of
+// Deep Ellum?", trip planning, multi-constraint reasoning) will later route to a
+// real LLM via a Supabase Edge Function that holds the API key server-side
+// (keep the key OUT of this client). The plan: if the local intent parser finds
+// no strong spot match, POST the question + a compact list of nearby spots to
+// that function and render its reply here. For now we are deliberately excellent
+// at spot-data questions (category, craving, mood, distance, and place/ZIP).
 function guideAsk(q) {
   guideAddMsg("user", q);
   const intent = guideUnderstand(q);
-  // "what about coffee instead" keeps the mood from the previous question
+  // "what about coffee instead" keeps the mood/place from the previous question
   if (intent.followUp && guideAsk._last) {
     intent.moods = intent.moods.length ? intent.moods : guideAsk._last.moods;
     intent.near = intent.near || guideAsk._last.near;
+    intent.place = intent.place || guideAsk._last.place;
   }
   guideAsk._last = intent;
 

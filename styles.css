@@ -1826,3 +1826,165 @@ body.driving .nav-me::before {
 }
 /* Keep the upcoming-turn arrow upright and readable as the map spins under it. */
 body.driving .turn-pin { animation: none; transform: rotate(var(--nav-bearing, 0deg)); }
+
+/* =====================================================================
+   v82 upgrades: immersive reels feed, visual Explore, map layer toggle
+   ===================================================================== */
+
+/* ---- Map layer toggle (Places / Friends) ---- */
+.layer-ctrl {
+  position: fixed; bottom: calc(var(--tabbar-h) + 14px); left: 50%; transform: translateX(-50%);
+  z-index: 480; display: flex; gap: 4px; padding: 4px;
+  background: var(--glass); backdrop-filter: blur(16px);
+  border: 1px solid var(--border); border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.28);
+}
+.layer-btn {
+  display: flex; align-items: center; gap: 6px;
+  border: none; background: none; cursor: pointer;
+  color: var(--text-dim); font-family: var(--font); font-weight: 700; font-size: 12.5px;
+  padding: 7px 14px; border-radius: 999px; transition: background .15s, color .15s;
+}
+.layer-btn svg { width: 16px; height: 16px; }
+.layer-btn.active { background: var(--accent); color: #fff; }
+.layer-btn:not(.active):hover { color: var(--accent); }
+body.driving .layer-ctrl { display: none; }
+
+/* ---- Explore: visual search ---- */
+.ex-searchbar {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 11px 16px; margin-bottom: 12px;
+}
+.ex-search-ico { width: 18px; height: 18px; color: var(--text-dim); flex: none; }
+.ex-searchbar input {
+  flex: 1; min-width: 0; border: none; background: none; outline: none;
+  color: var(--text); font-family: var(--font); font-size: 15px;
+}
+.ex-clear {
+  border: none; background: var(--bg-3); color: var(--text-dim);
+  width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 12px; flex: none;
+}
+.ex-chips {
+  display: flex; gap: 7px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 10px;
+  scrollbar-width: none;
+}
+.ex-chips::-webkit-scrollbar { display: none; }
+.ex-chips .chip { position: static; flex: none; white-space: nowrap; }
+.ex-metabar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.ex-count { font-size: 12.5px; color: var(--text-dim); font-weight: 700; }
+.ex-near {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--border); background: var(--bg-2); color: var(--text-dim);
+  font-family: var(--font); font-weight: 700; font-size: 12.5px;
+  padding: 7px 13px; border-radius: 999px; cursor: pointer; transition: all .15s;
+}
+.ex-near svg { width: 15px; height: 15px; }
+.ex-near.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+/* Distance badge on each Explore tile */
+.explore-card .ec-dist {
+  position: absolute; top: 8px; left: 8px; z-index: 3;
+  background: rgba(0,0,0,.55); color: #fff; font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 999px; backdrop-filter: blur(4px);
+}
+
+/* ---- Immersive reels feed ---- */
+.view-reels { padding: 0 !important; overflow: hidden; }
+.reels-top {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+  padding: 14px 16px 10px;
+  background: linear-gradient(to bottom, rgba(0,0,0,.45), transparent);
+  pointer-events: none;
+}
+.reels-title { color: #fff; font-size: 24px; font-weight: 900; letter-spacing: -.5px; text-shadow: 0 2px 10px rgba(0,0,0,.5); margin-bottom: 8px; }
+.reel-filters { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; pointer-events: auto; }
+.reel-filters::-webkit-scrollbar { display: none; }
+.reel-chip {
+  flex: none; white-space: nowrap; border: none; cursor: pointer;
+  background: rgba(255,255,255,.16); color: #fff; backdrop-filter: blur(8px);
+  font-family: var(--font); font-weight: 700; font-size: 12px; padding: 6px 13px; border-radius: 999px;
+  transition: background .15s;
+}
+.reel-chip.active { background: var(--accent); }
+.reels {
+  height: 100%; overflow-y: auto; scroll-snap-type: y mandatory;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch; background: #000;
+}
+.reels::-webkit-scrollbar { display: none; }
+.reel {
+  position: relative; height: 100%; width: 100%;
+  scroll-snap-align: start; scroll-snap-stop: always;
+  overflow: hidden; cursor: pointer; background: #000;
+  display: flex; align-items: flex-end;
+}
+.rl-media {
+  position: absolute; inset: 0; background-size: cover; background-position: center;
+  display: grid; place-items: center;
+}
+.rl-media.rl-solid .cat-logo svg { width: 90px; height: 90px; color: rgba(255,255,255,.85); }
+/* Ken Burns: only the in-view card animates (perf + respects reduced motion). */
+.reel.in-view .rl-media.kb { animation: kenBurns 18s ease-in-out infinite alternate; }
+@keyframes kenBurns {
+  from { transform: scale(1.02) translate(0, 0); }
+  to   { transform: scale(1.14) translate(-2%, -2%); }
+}
+.rl-shade {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.25) 42%, rgba(0,0,0,.10) 68%, rgba(0,0,0,.35) 100%);
+}
+.rl-play {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 6;
+  width: 74px; height: 74px; border-radius: 50%;
+  background: rgba(0,0,0,.42); border: 2px solid rgba(255,255,255,.85); color: #fff;
+  cursor: pointer; display: grid; place-items: center; backdrop-filter: blur(4px);
+  transition: transform .15s, background .15s;
+}
+.rl-play:hover { transform: translate(-50%, -50%) scale(1.08); background: rgba(0,0,0,.6); }
+.rl-play svg { width: 30px; height: 30px; margin-left: 3px; }
+.rl-embed { position: absolute; inset: 0; overflow: auto; background: #000; display: grid; place-items: center; padding: 10px; }
+.rl-overlay { position: relative; z-index: 4; padding: 0 78px 30px 20px; width: 100%; }
+.rl-info { color: #fff; }
+.rl-cat { display: inline-block; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; opacity: .92; margin-bottom: 6px; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+.rl-name { font-size: 27px; font-weight: 900; line-height: 1.08; letter-spacing: -.5px; text-shadow: 0 2px 12px rgba(0,0,0,.6); margin-bottom: 8px; }
+.rl-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.rl-pill { background: rgba(255,255,255,.18); backdrop-filter: blur(6px); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; }
+.rl-pill.star { background: rgba(255,207,90,.24); color: #ffe6a3; }
+.rl-desc { font-size: 14px; line-height: 1.45; opacity: .95; text-shadow: 0 1px 8px rgba(0,0,0,.6); max-width: 90%; }
+.rl-credit { display: inline-block; margin-top: 10px; font-size: 11.5px; opacity: .75; }
+.rl-rail {
+  position: absolute; right: 12px; bottom: 34px; z-index: 5;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.rl-act {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  border: none; background: none; cursor: pointer; color: #fff;
+  font-family: var(--font); font-size: 10.5px; font-weight: 700;
+  text-shadow: 0 1px 6px rgba(0,0,0,.55); transition: transform .12s;
+}
+.rl-act svg { width: 30px; height: 30px; filter: drop-shadow(0 2px 5px rgba(0,0,0,.5)); }
+.rl-act:active { transform: scale(.88); }
+.rl-act.on { color: var(--accent-2); }
+.reel-empty, .reel-empty * { color: var(--text); }
+.reel-empty {
+  height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 6px; padding: 30px; background: var(--bg);
+}
+.reel-empty .em-moth { width: 60px; height: 60px; opacity: .5; margin-bottom: 6px; }
+.reel-empty b { font-size: 17px; }
+.reel-empty small { color: var(--text-dim); font-size: 13px; max-width: 240px; }
+
+/* ---- Directions: cleaner route line + panel polish ---- */
+.route-banner { box-shadow: 0 10px 34px rgba(0,0,0,.34); }
+.rb-step:hover { background: var(--accent-soft); border-radius: 10px; }
+.nav-hud .nh-card { box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+
+@media (prefers-reduced-motion: reduce) {
+  .reel.in-view .rl-media.kb { animation: none; }
+}
+
+/* Phones: tuck the rail in a touch and keep the layer pill clear of the toggle */
+@media (max-width: 560px) {
+  .rl-name { font-size: 24px; }
+  .rl-overlay { padding-right: 70px; }
+  .layer-ctrl { bottom: calc(var(--tabbar-h) + 12px + env(safe-area-inset-bottom, 0px)); }
+}
