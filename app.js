@@ -1062,27 +1062,19 @@ const live = {
 function myUid() { return (window.currentUser && currentUser()) ? currentUser().id : ("guest-" + (localStorage.moth_guest || (localStorage.moth_guest = Math.random().toString(36).slice(2, 9)))); }
 
 async function pushPresence(lat, lng) {
-  const body = { uid: myUid(), crew: live.crew, name: (window.myName ? myName() : "you"),
-    lat, lng, live: live.on, emoji: ((window.currentUser && currentUser()) ? (currentUser().name || "?")[0] : "?") };
-  try {
-    if (live.presenceId) {
-      const r = await fetch(PB_PRESENCE + "/" + live.presenceId, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      if (r.status === 404) live.presenceId = null;  // record gone, recreate
-    }
-    if (!live.presenceId) {
-      const r = await fetch(PB_PRESENCE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      if (r.ok) { const rec = await r.json(); live.presenceId = rec.id; localStorage.setItem("moth.presenceId", rec.id); }
-    }
-  } catch (e) {}
+  if (!window.sb) return;  // offline / not configured
+  const row = { uid: myUid(), crew: live.crew, name: (window.myName ? myName() : "you"),
+    lat, lng, live: live.on, emoji: ((window.currentUser && currentUser()) ? (currentUser().name || "?")[0] : "?"),
+    updated_at: new Date().toISOString() };
+  try { await window.sb.from("presence").upsert(row, { onConflict: "uid" }); } catch (e) {}
 }
 async function pollCrew() {
-  if (!live.crew || !state.online) { crewMembers = []; renderCrew(); return; }
+  if (!live.crew || !state.online || !window.sb) { crewMembers = []; renderCrew(); return; }
   try {
-    const filter = encodeURIComponent(`crew='${live.crew}' && live=true`);
-    const r = await fetch(PB_PRESENCE + "?perPage=50&filter=" + filter);
-    if (!r.ok) return;
-    const j = await r.json();
-    crewMembers = j.items.filter(m => m.uid !== myUid());
+    const { data, error } = await window.sb.from("presence").select("*")
+      .eq("crew", live.crew).eq("live", true);
+    if (error) return;
+    crewMembers = (data || []).filter(m => m.uid !== myUid());
     renderCrew();
     const cnt = document.getElementById("crewCount");
     if (cnt) cnt.textContent = crewMembers.length;
