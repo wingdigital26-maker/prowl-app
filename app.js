@@ -112,7 +112,10 @@ window.addEventListener("orientationchange", () => setTimeout(fixMapSize, 300));
 if (window.visualViewport) window.visualViewport.addEventListener("resize", fixMapSize);
 
 // Presence: who's here right now (demo data)
-const HERE = { 3: 4, 4: 3, 8: 6, 9: 2, 12: 1 };
+// "Here now" must reflect REAL presence, never invented numbers. Until it is
+// wired to live presence counts near each spot, it stays empty so the app never
+// shows a fake crowd. (Was a hardcoded demo map; removed as a fake signal.)
+const HERE = {};
 function hereCount(s) { return HERE[s.id] || 0; }
 
 // ===== Visual identity: real photo, else a clean category logo =====

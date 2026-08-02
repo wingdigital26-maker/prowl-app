@@ -153,6 +153,14 @@ function renderAuthUI() {
   if (pAv) pAv.textContent = initial;
   const pName = document.getElementById("profileName");
   if (pName) pName.textContent = u ? (u.name || u.email.split("@")[0]) : "Guest";
+  // Profile level from REAL activity (saved spots), not an invented number.
+  const pLevel = document.getElementById("profileLevel");
+  if (pLevel) {
+    const saved = (typeof savedIds === "function") ? savedIds().length : 0;
+    pLevel.textContent = saved > 0
+      ? `Explorer · ${saved} spot${saved === 1 ? "" : "s"} saved`
+      : "Explorer";
+  }
   const cta = document.getElementById("authCta");
   if (cta) {
     cta.innerHTML = u
