@@ -144,13 +144,13 @@ const CAT_COLOR = {
 };
 function catColor(cat) { return CAT_COLOR[cat] || "#5c6b7a"; }
 function catLogo(cat) { return `<span class="cat-logo">${CAT_ICON[cat] || CAT_ICON.abandoned}</span>`; }
-function realPhoto(s) { return (s.photoCredit && s.photos && s.photos.length) ? s.photos[0] : null; }
+function realPhoto(s) { return (s.photos && s.photos.length) ? s.photos[0] : null; }
 // Video preview thumbnail (TikTok oEmbed frame) shown as a credited link-preview.
 function videoThumb(s) { return (window.VIDEO_THUMBS && window.VIDEO_THUMBS[s.id]) || null; }
 // The image to show as a spot's face: a real licensed photo wins, else a video
 // preview frame, else nothing (falls back to the category logo).
 function previewImg(s) { return realPhoto(s) || (videoThumb(s) ? videoThumb(s).thumb : null); }
-function hasVideo(s) { return (s.embeds || []).some(e => e.type === "tiktok" || e.type === "instagram"); }
+function hasVideo(s) { return !!s.video_url || (s.embeds || []).some(e => e.type === "tiktok" || e.type === "instagram"); }
 function firstVideoUrl(s) { const e = (s.embeds || []).find(e => e.type === "tiktok" || e.type === "instagram"); return e ? e.url : null; }
 function faceStyle(s) {
   const p = previewImg(s);

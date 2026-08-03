@@ -36,7 +36,7 @@ function recToSpot(r) {
     id: r.sid, _pb: r.id,
     name: r.name, cat: r.cat, lat: r.lat, lng: r.lng, zip: r.zip,
     desc: r.descr, tags: r.tags || [], danger: r.danger,
-    photos: r.photos || [], reviews: r.reviews || [],
+    photos: r.photos || [], reviews: r.reviews || [], video_url: r.video_url || null,
     sponsored: !!r.sponsored, sponsorName: r.sponsor_name || "",
     sponsorBlurb: r.sponsor_blurb || "", sponsorCta: r.sponsor_cta || "",
   };
